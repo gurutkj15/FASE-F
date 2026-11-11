@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 330" font-family="Inter, 'Segoe UI', sans-serif">
+  <rect width="720" height="330" rx="22" fill="#f8fafc"/>
+  <text x="360" y="34" text-anchor="middle" font-size="16" font-weight="800" fill="#c2410c">DHCP (DORA) &amp; DNS — Dua Layanan Wajib Server</text>
+
+  <!-- DORA -->
+  <text x="40" y="62" font-size="12.5" font-weight="800" fill="#1e40af">1. DHCP — IP otomatis (DORA)</text>
+  <rect x="40" y="76" width="140" height="40" rx="12" fill="#3b82f6"/>
+  <text x="110" y="101" text-anchor="middle" font-size="11.5" font-weight="800" fill="#fff">PC (Client)</text>
+  <rect x="540" y="76" width="140" height="40" rx="12" fill="#f59e0b"/>
+  <text x="610" y="101" text-anchor="middle" font-size="11.5" font-weight="800" fill="#fff">DHCP Server</text>
+
+  <g font-size="9.5" font-weight="800">
+    <path d="M190 84 h330" stroke="#22c55e" stroke-width="2.5"/><path d="M524 84 l-9 -5 v10 z" fill="#22c55e"/>
+    <rect x="288" y="66" width="86" height="20" rx="7" fill="#dcfce7"/><text x="331" y="80" text-anchor="middle" fill="#15803d">1 DISCOVER</text>
+
+    <path d="M520 106 h-320" stroke="#3b82f6" stroke-width="2.5"/><path d="M200 106 l9 -5 v10 z" fill="#3b82f6"/>
+    <rect x="330" y="98" width="60" height="20" rx="7" fill="#dbeafe"/><text x="360" y="112" text-anchor="middle" fill="#1d4ed8">2 OFFER</text>
+
+    <path d="M190 130 h330" stroke="#8b5cf6" stroke-width="2.5"/><path d="M524 130 l-9 -5 v10 z" fill="#8b5cf6"/>
+    <rect x="316" y="122" width="86" height="20" rx="7" fill="#ede9fe"/><text x="359" y="136" text-anchor="middle" fill="#6d28d9">3 REQUEST</text>
+
+    <path d="M520 152 h-320" stroke="#f59e0b" stroke-width="2.5"/><path d="M200 152 l9 -5 v10 z" fill="#f59e0b"/>
+    <rect x="330" y="144" width="60" height="20" rx="7" fill="#fef3c7"/><text x="360" y="158" text-anchor="middle" fill="#b45309">4 ACK</text>
+  </g>
+  <text x="40" y="182" font-size="10" fill="#64748b">Hasil: IP + mask + gateway + DNS + lease time</text>
+
+  <line x1="40" y1="196" x2="680" y2="196" stroke="#e2e8f0" stroke-width="2"/>
+
+  <!-- DNS -->
+  <text x="40" y="222" font-size="12.5" font-weight="800" fill="#7c3aed">2. DNS — nama domain ke IP</text>
+  <g font-size="10" font-weight="700">
+    <rect x="40" y="236" width="130" height="36" rx="10" fill="#ede9fe"/><text x="105" y="258" text-anchor="middle" fill="#6d28d9">Browser: buka</text>
+    <text x="105" y="271" text-anchor="middle" font-size="9" fill="#6d28d9" font-family="'Fira Code', monospace">www.smkn1.sch.id</text>
+
+    <rect x="212" y="236" width="118" height="36" rx="10" fill="#dbeafe"/><text x="271" y="258" text-anchor="middle" fill="#1d4ed8">Recursive DNS</text>
+    <text x="271" y="271" text-anchor="middle" font-size="9" fill="#64748b">(ISP/8.8.8.8)</text>
+
+    <rect x="372" y="236" width="118" height="36" rx="10" fill="#fef3c7"/><text x="431" y="258" text-anchor="middle" fill="#b45309">Root → TLD</text>
+    <text x="431" y="271" text-anchor="middle" font-size="9" fill="#64748b">.id / .com</text>
+
+    <rect x="532" y="236" width="148" height="36" rx="10" fill="#dcfce7"/><text x="606" y="258" text-anchor="middle" fill="#15803d">Authoritative NS</text>
+    <text x="606" y="271" text-anchor="middle" font-size="9" fill="#166534">→ 192.168.1.20</text>
+  </g>
+  <g fill="#94a3b8">
+    <path d="M176 254 l12 -5 v10 z"/><path d="M336 254 l12 -5 v10 z"/><path d="M496 254 l12 -5 v10 z"/>
+  </g>
+  <rect x="40" y="292" width="640" height="26" rx="9" fill="#f5f3ff"/>
+  <text x="360" y="309" text-anchor="middle" font-size="10.5" font-weight="700" fill="#6d28d9">Port: DHCP 67/68 • DNS 53 • HTTP 80/443 • FTP 21 • SSH 22 • NTP 123</text>
+</svg>

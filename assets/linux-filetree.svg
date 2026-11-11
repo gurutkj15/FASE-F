@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 310" font-family="Inter, 'Segoe UI', sans-serif">
+  <rect width="720" height="310" rx="22" fill="#f8fafc"/>
+  <text x="360" y="34" text-anchor="middle" font-size="16" font-weight="800" fill="#c2410c">Struktur Filesystem Linux (FHS) &amp; Terminal</text>
+
+  <!-- file tree -->
+  <g font-family="'Fira Code', monospace" font-size="11">
+    <rect x="30" y="56" width="330" height="228" rx="14" fill="#0f172a"/>
+    <text x="50" y="82" fill="#4ade80" font-weight="700">/</text>
+    <text x="66" y="102" fill="#93c5fd">├── home/</text><text x="140" y="102" fill="#64748b"># data user</text>
+    <text x="66" y="122" fill="#93c5fd">├── etc/</text><text x="140" y="122" fill="#64748b"># semua konfigurasi</text>
+    <text x="66" y="142" fill="#93c5fd">├── var/</text><text x="140" y="142" fill="#64748b"># log &amp; data dinamis</text>
+    <text x="86" y="162" fill="#7dd3fc">└── log/ apache2/ dhcp/</text>
+    <text x="66" y="182" fill="#93c5fd">├── usr/</text><text x="140" y="182" fill="#64748b"># program &amp; library</text>
+    <text x="66" y="202" fill="#93c5fd">├── bin/ sbin/</text><text x="170" y="202" fill="#64748b"># perintah sistem</text>
+    <text x="66" y="222" fill="#93c5fd">├── tmp/</text><text x="140" y="222" fill="#64748b"># file sementara</text>
+    <text x="66" y="242" fill="#93c5fd">└── root/</text><text x="140" y="242" fill="#64748b"># home admin</text>
+    <text x="50" y="270" fill="#fbbf24" font-size="10">HAFAL: /etc /var/log /home /usr/bin</text>
+  </g>
+
+  <!-- terminal -->
+  <g font-family="'Fira Code', monospace" font-size="10.5">
+    <rect x="380" y="56" width="310" height="228" rx="14" fill="#1e293b"/>
+    <rect x="380" y="56" width="310" height="26" rx="14" fill="#334155"/>
+    <circle cx="398" cy="69" r="5" fill="#ef4444"/><circle cx="416" cy="69" r="5" fill="#f59e0b"/><circle cx="434" cy="69" r="5" fill="#22c55e"/>
+    <text x="448" y="73" fill="#94a3b8" font-size="9">ubuntu@server: ~</text>
+    <text x="398" y="106" fill="#4ade80">$ <tspan fill="#e2e8f0">sudo apt update</tspan></text>
+    <text x="398" y="128" fill="#4ade80">$ <tspan fill="#e2e8f0">ip addr show</tspan></text>
+    <text x="398" y="150" fill="#4ade80">$ <tspan fill="#e2e8f0">systemctl status apache2</tspan></text>
+    <text x="398" y="172" fill="#64748b">  ● active (running)</text>
+    <text x="398" y="196" fill="#4ade80">$ <tspan fill="#e2e8f0">journalctl -u apache2 -f</tspan></text>
+    <text x="398" y="220" fill="#4ade80">$ <tspan fill="#e2e8f0">ping -c 4 8.8.8.8</tspan></text>
+    <text x="398" y="244" fill="#fbbf24">64 bytes from 8.8.8.8: ...</text>
+    <text x="398" y="268" fill="#4ade80">$ <tspan fill="#93c5fd">_</tspan></text>
+  </g>
+</svg>

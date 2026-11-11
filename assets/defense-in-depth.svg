@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 330" font-family="Inter, 'Segoe UI', sans-serif">
+  <rect width="720" height="330" rx="22" fill="#f8fafc"/>
+  <text x="360" y="34" text-anchor="middle" font-size="16" font-weight="800" fill="#b91c1c">Defense in Depth — Lapisan Keamanan Berlapis</text>
+
+  <rect x="60" y="56" width="600" height="240" rx="26" fill="#fee2e2" stroke="#ef4444" stroke-width="2"/>
+  <text x="360" y="80" text-anchor="middle" font-size="11.5" font-weight="800" fill="#b91c1c">INTERNET — ancaman datang dari luar</text>
+
+  <rect x="110" y="96" width="500" height="176" rx="22" fill="#ffedd5" stroke="#f97316" stroke-width="2"/>
+  <text x="360" y="120" text-anchor="middle" font-size="11.5" font-weight="800" fill="#c2410c">Perimeter — Firewall / ACL / IDS-IPS</text>
+
+  <rect x="160" y="136" width="400" height="120" rx="18" fill="#fef9c3" stroke="#eab308" stroke-width="2"/>
+  <text x="360" y="160" text-anchor="middle" font-size="11.5" font-weight="800" fill="#a16207">Jaringan Internal — VLAN / VPN / 802.1X</text>
+
+  <rect x="210" y="176" width="300" height="76" rx="16" fill="#dcfce7" stroke="#22c55e" stroke-width="2"/>
+  <text x="360" y="200" text-anchor="middle" font-size="11.5" font-weight="800" fill="#15803d">Endpoint — Host firewall, EDR, patch</text>
+
+  <rect x="255" y="206" width="210" height="44" rx="14" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+  <text x="360" y="226" text-anchor="middle" font-size="11" font-weight="800" fill="#1d4ed8">DATA — Enkripsi (AES) &amp;</text>
+  <text x="360" y="242" text-anchor="middle" font-size="11" font-weight="800" fill="#1d4ed8">MFA / Least Privilege</text>
+
+  <g font-size="10.5" fill="#475569">
+    <text x="60" y="318">Prinsip: <tspan font-weight="800" fill="#b91c1c">jangan hanya satu lapis</tspan> — bila satu pertahanan jebak, lapisan berikutnya masih melindungi</text>
+  </g>
+</svg>

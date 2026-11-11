@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 330" font-family="Inter, 'Segoe UI', sans-serif">
+  <rect width="720" height="330" rx="22" fill="#f8fafc"/>
+  <text x="360" y="34" text-anchor="middle" font-size="16" font-weight="800" fill="#0f766e">Kabel UTP: Straight-through vs Crossover</text>
+
+  <defs>
+    <g id="pin">
+      <rect width="34" height="76" rx="6" fill="#fff" stroke="#cbd5e1" stroke-width="2"/>
+    </g>
+  </defs>
+
+  <!-- STRAIGHT -->
+  <rect x="30" y="56" width="320" height="146" rx="16" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+  <text x="190" y="80" text-anchor="middle" font-size="13" font-weight="800" fill="#1e40af">STRAIGHT-THROUGH (T568B – T568B)</text>
+  <g>
+    <g transform="translate(56,94)">
+      <rect width="128" height="76" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="2"/>
+      <g font-size="7.5" font-weight="700" text-anchor="middle" font-family="'Fira Code', monospace">
+        <rect x="6"  y="8" width="12" height="46" rx="3" fill="#f97316"/><text x="12" y="68" fill="#c2410c">WO</text>
+        <rect x="22" y="8" width="12" height="46" rx="3" fill="#ea580c"/><text x="28" y="68" fill="#c2410c">O</text>
+        <rect x="38" y="8" width="12" height="46" rx="3" fill="#86efac"/><text x="44" y="68" fill="#15803d">WG</text>
+        <rect x="54" y="8" width="12" height="46" rx="3" fill="#2563eb"/><text x="60" y="68" fill="#1d4ed8">B</text>
+        <rect x="70" y="8" width="12" height="46" rx="3" fill="#bae6fd"/><text x="76" y="68" fill="#0369a1">WB</text>
+        <rect x="86" y="8" width="12" height="46" rx="3" fill="#16a34a"/><text x="92" y="68" fill="#15803d">G</text>
+        <rect x="102" y="8" width="12" height="46" rx="3" fill="#d6b370"/><text x="108" y="68" fill="#a16207">WB</text>
+        <rect x="118" y="8" width="8" height="46" rx="3" fill="#92400e"/><text x="122" y="68" fill="#78350f">BR</text>
+      </g>
+    </g>
+    <path d="M190 132 h40" stroke="#3b82f6" stroke-width="3"/><path d="M234 132 l-9 -5 v10 z" fill="#3b82f6"/>
+    <g transform="translate(244,94)">
+      <rect width="128" height="76" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="2"/>
+      <g font-size="7.5" font-weight="700" text-anchor="middle" font-family="'Fira Code', monospace">
+        <rect x="6"  y="8" width="12" height="46" rx="3" fill="#f97316"/><text x="12" y="68" fill="#c2410c">WO</text>
+        <rect x="22" y="8" width="12" height="46" rx="3" fill="#ea580c"/><text x="28" y="68" fill="#c2410c">O</text>
+        <rect x="38" y="8" width="12" height="46" rx="3" fill="#86efac"/><text x="44" y="68" fill="#15803d">WG</text>
+        <rect x="54" y="8" width="12" height="46" rx="3" fill="#2563eb"/><text x="60" y="68" fill="#1d4ed8">B</text>
+        <rect x="70" y="8" width="12" height="46" rx="3" fill="#bae6fd"/><text x="76" y="68" fill="#0369a1">WB</text>
+        <rect x="86" y="8" width="12" height="46" rx="3" fill="#16a34a"/><text x="92" y="68" fill="#15803d">G</text>
+        <rect x="102" y="8" width="12" height="46" rx="3" fill="#d6b370"/><text x="108" y="68" fill="#a16207">WB</text>
+        <rect x="118" y="8" width="8" height="46" rx="3" fill="#92400e"/><text x="122" y="68" fill="#78350f">BR</text>
+      </g>
+    </g>
+    <text x="190" y="192" text-anchor="middle" font-size="10.5" fill="#1d4ed8" font-weight="700">Ujung A = Ujung B  →  PC ↔ Switch, Switch ↔ Router</text>
+  </g>
+
+  <!-- CROSSOVER -->
+  <rect x="370" y="56" width="320" height="146" rx="16" fill="#f0fdf4" stroke="#22c55e" stroke-width="2"/>
+  <text x="530" y="80" text-anchor="middle" font-size="13" font-weight="800" fill="#15803d">CROSSOVER (T568B – T568A)</text>
+  <g>
+    <g transform="translate(396,94)">
+      <rect width="128" height="76" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="2"/>
+      <g font-size="7.5" font-weight="700" text-anchor="middle" font-family="'Fira Code', monospace">
+        <rect x="6"  y="8" width="12" height="46" rx="3" fill="#f97316"/><text x="12" y="68" fill="#c2410c">WO</text>
+        <rect x="22" y="8" width="12" height="46" rx="3" fill="#ea580c"/><text x="28" y="68" fill="#c2410c">O</text>
+        <rect x="38" y="8" width="12" height="46" rx="3" fill="#86efac"/><text x="44" y="68" fill="#15803d">WG</text>
+        <rect x="54" y="8" width="12" height="46" rx="3" fill="#2563eb"/><text x="60" y="68" fill="#1d4ed8">B</text>
+        <rect x="70" y="8" width="12" height="46" rx="3" fill="#bae6fd"/><text x="76" y="68" fill="#0369a1">WB</text>
+        <rect x="86" y="8" width="12" height="46" rx="3" fill="#16a34a"/><text x="92" y="68" fill="#15803d">G</text>
+        <rect x="102" y="8" width="12" height="46" rx="3" fill="#d6b370"/><text x="108" y="68" fill="#a16207">WB</text>
+        <rect x="118" y="8" width="8" height="46" rx="3" fill="#92400e"/><text x="122" y="68" fill="#78350f">BR</text>
+      </g>
+    </g>
+    <path d="M530 110 l0 44" stroke="#22c55e" stroke-width="3"/>
+    <path d="M530 158 l-5 -9 h10 z" fill="#22c55e"/>
+    <g transform="translate(540,94)">
+      <rect width="128" height="76" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="2"/>
+      <g font-size="7.5" font-weight="700" text-anchor="middle" font-family="'Fira Code', monospace">
+        <rect x="6"  y="8" width="12" height="46" rx="3" fill="#86efac"/><text x="12" y="68" fill="#15803d">WG</text>
+        <rect x="22" y="8" width="12" height="46" rx="3" fill="#16a34a"/><text x="28" y="68" fill="#15803d">G</text>
+        <rect x="38" y="8" width="12" height="46" rx="3" fill="#f97316"/><text x="44" y="68" fill="#c2410c">WO</text>
+        <rect x="54" y="8" width="12" height="46" rx="3" fill="#2563eb"/><text x="60" y="68" fill="#1d4ed8">B</text>
+        <rect x="70" y="8" width="12" height="46" rx="3" fill="#bae6fd"/><text x="76" y="68" fill="#0369a1">WB</text>
+        <rect x="86" y="8" width="12" height="46" rx="3" fill="#ea580c"/><text x="92" y="68" fill="#c2410c">O</text>
+        <rect x="102" y="8" width="12" height="46" rx="3" fill="#d6b370"/><text x="108" y="68" fill="#a16207">WB</text>
+        <rect x="118" y="8" width="8" height="46" rx="3" fill="#92400e"/><text x="122" y="68" fill="#78350f">BR</text>
+      </g>
+    </g>
+    <text x="530" y="192" text-anchor="middle" font-size="10.5" fill="#15803d" font-weight="700">Pasang Orange &amp; Green ditukar → PC ↔ PC, Switch ↔ Switch</text>
+  </g>
+
+  <rect x="30" y="220" width="660" height="86" rx="16" fill="#fff" stroke="#e2e8f0" stroke-width="2"/>
+  <text x="50" y="246" font-size="12" font-weight="800" fill="#0f172a">Jangan hafal rumus — hafal URUTAN WARNA T568B:</text>
+  <text x="50" y="272" font-size="12.5" font-weight="800" font-family="'Fira Code', monospace" fill="#1d4ed8">Putih-Oranye, Oranye, Putih-Hijau, Biru, Putih-Biru, Hijau, Putih-Coklat, Coklat</text>
+  <text x="50" y="294" font-size="10.5" fill="#64748b">Rollover/console = ujung B dibalik arah (pin 1 ↔ 8) — untuk akses CLI router/switch</text>
+</svg>

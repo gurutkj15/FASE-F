@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" font-family="Inter, 'Segoe UI', sans-serif">
+  <rect width="720" height="300" rx="22" fill="#f8fafc"/>
+  <text x="360" y="34" text-anchor="middle" font-size="16" font-weight="800" fill="#b91c1c">3 Pilar Kriptografi: Simetris, Asimetris, Hash</text>
+
+  <!-- SIMETRIS -->
+  <rect x="24" y="54" width="220" height="212" rx="18" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+  <text x="134" y="80" text-anchor="middle" font-size="13" font-weight="800" fill="#1e40af">SIMETRIS</text>
+  <text x="134" y="98" text-anchor="middle" font-size="10" fill="#64748b">1 kunci sama • cepat</text>
+  <g font-size="10.5" text-anchor="middle">
+    <rect x="44" y="112" width="180" height="28" rx="8" fill="#dcfce7"/><text x="134" y="130" fill="#15803d" font-weight="700">Plaintext "RAHASIA"</text>
+    <rect x="44" y="156" width="180" height="34" rx="8" fill="#1e40af"/><text x="134" y="172" fill="#fff" font-weight="800">🔑 KUNCI</text>
+    <text x="134" y="186" fill="#bfdbfe" font-size="9">enkripsi = dekripsi</text>
+    <rect x="44" y="206" width="180" height="28" rx="8" fill="#fee2e2"/><text x="134" y="224" fill="#b91c1c" font-family="'Fira Code', monospace" font-weight="700">X7#mK9@p</text>
+  </g>
+  <text x="134" y="254" text-anchor="middle" font-size="10" font-weight="700" fill="#1d4ed8">AES-256, ChaCha20</text>
+
+  <!-- ASIMETRIS -->
+  <rect x="250" y="54" width="220" height="212" rx="18" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="2"/>
+  <text x="360" y="80" text-anchor="middle" font-size="13" font-weight="800" fill="#6d28d9">ASIMETRIS</text>
+  <text x="360" y="98" text-anchor="middle" font-size="10" fill="#64748b">2 kunci: publik + privat</text>
+  <g font-size="10.5" text-anchor="middle">
+    <rect x="270" y="112" width="86" height="30" rx="8" fill="#dcfce7"/><text x="313" y="131" fill="#15803d" font-weight="700">Plain</text>
+    <rect x="364" y="112" width="86" height="30" rx="8" fill="#fee2e2"/><text x="407" y="131" fill="#b91c1c" font-family="'Fira Code', monospace" font-weight="700">Cipher</text>
+    <rect x="270" y="158" width="86" height="46" rx="10" fill="#22c55e"/><text x="313" y="178" fill="#fff" font-weight="800">🔓 PUBLIC</text>
+    <text x="313" y="196" fill="#dcfce7" font-size="9">enkripsi</text>
+    <rect x="364" y="158" width="86" height="46" rx="10" fill="#7c3aed"/><text x="407" y="178" fill="#fff" font-weight="800">🔐 PRIVATE</text>
+    <text x="407" y="196" fill="#ede9fe" font-size="9">dekripsi</text>
+  </g>
+  <text x="360" y="234" text-anchor="middle" font-size="10" font-weight="700" fill="#6d28d9">RSA, ECDSA, Diffie-Hellman</text>
+  <text x="360" y="254" text-anchor="middle" font-size="9.5" fill="#64748b">untuk key exchange &amp; tanda tangan digital</text>
+
+  <!-- HASH -->
+  <rect x="476" y="54" width="220" height="212" rx="18" fill="#f0fdf4" stroke="#22c55e" stroke-width="2"/>
+  <text x="586" y="80" text-anchor="middle" font-size="13" font-weight="800" fill="#15803d">HASH (ONE-WAY)</text>
+  <text x="586" y="98" text-anchor="middle" font-size="10" fill="#64748b">tidak bisa dibalik</text>
+  <g font-size="10.5" text-anchor="middle">
+    <rect x="496" y="112" width="180" height="28" rx="8" fill="#dcfce7"/><text x="586" y="130" fill="#15803d" font-weight="700">Data / Password</text>
+    <path d="M586 146 v18" stroke="#22c55e" stroke-width="2.5"/><path d="M586 170 l-5 -9 h10 z" fill="#22c55e"/>
+    <rect x="496" y="174" width="180" height="28" rx="8" fill="#0f172a"/>
+    <text x="586" y="192" fill="#4ade80" font-family="'Fira Code', monospace" font-size="9.5" font-weight="700">5e884898da28047151d0</text>
+    <rect x="496" y="210" width="180" height="24" rx="8" fill="#fee2e2"/>
+    <text x="586" y="226" fill="#b91c1c" font-size="9.5" font-weight="700">❌ Tidak bisa dikembalikan</text>
+  </g>
+  <text x="586" y="254" text-anchor="middle" font-size="10" font-weight="700" fill="#047857">SHA-256, SHA-3, bcrypt</text>
+
+  <text x="360" y="290" text-anchor="middle" font-size="10.5" fill="#64748b">HTTPS memakai keduanya: asimetris untuk kunci, simetris untuk data, hash untuk integritas</text>
+</svg>

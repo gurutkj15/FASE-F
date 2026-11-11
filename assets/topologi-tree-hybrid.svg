@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 330" font-family="Inter, 'Segoe UI', sans-serif">
+  <rect width="720" height="330" rx="22" fill="#f8fafc"/>
+  <text x="185" y="34" text-anchor="middle" font-size="16" font-weight="800" fill="#1e40af">Topologi Tree (Hierarki)</text>
+  <text x="540" y="34" text-anchor="middle" font-size="16" font-weight="800" fill="#7c3aed">Topologi Hybrid</text>
+  <line x1="360" y1="52" x2="360" y2="300" stroke="#e2e8f0" stroke-width="2" stroke-dasharray="6,6"/>
+
+  <!-- TREE -->
+  <rect x="120" y="56" width="130" height="36" rx="10" fill="#1e40af"/>
+  <text x="185" y="79" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Core (Backbone)</text>
+  <rect x="55" y="140" width="110" height="32" rx="10" fill="#3b82f6"/>
+  <text x="110" y="161" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">Switch Lantai 1</text>
+  <rect x="205" y="140" width="110" height="32" rx="10" fill="#3b82f6"/>
+  <text x="260" y="161" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">Switch Lantai 2</text>
+  <line x1="165" y1="92" x2="115" y2="140" stroke="#94a3b8" stroke-width="2.5"/>
+  <line x1="205" y1="92" x2="255" y2="140" stroke="#94a3b8" stroke-width="2.5"/>
+  <g fill="#22c55e">
+    <rect x="55" y="236" width="48" height="30" rx="9"/><rect x="117" y="236" width="48" height="30" rx="9"/>
+    <rect x="205" y="236" width="48" height="30" rx="9"/><rect x="267" y="236" width="48" height="30" rx="9"/>
+  </g>
+  <g font-size="10" font-weight="700" fill="#fff" text-anchor="middle">
+    <text x="79" y="255">PC1</text><text x="141" y="255">PC2</text><text x="229" y="255">PC3</text><text x="291" y="255">PC4</text>
+  </g>
+  <g stroke="#94a3b8" stroke-width="2">
+    <line x1="110" y1="172" x2="79" y2="236"/><line x1="110" y1="172" x2="141" y2="236"/>
+    <line x1="260" y1="172" x2="229" y2="236"/><line x1="260" y1="172" x2="291" y2="236"/>
+  </g>
+  <text x="185" y="300" text-anchor="middle" font-size="11" fill="#64748b">Satu kegagalan segment tidak mengganggu segmen lain</text>
+
+  <!-- HYBRID -->
+  <rect x="510" y="56" width="130" height="34" rx="10" fill="#7c3aed"/>
+  <text x="575" y="78" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Switch Utama</text>
+  <g fill="#3b82f6">
+    <circle cx="470" cy="140" r="20"/><circle cx="575" cy="140" r="20"/><circle cx="680" cy="140" r="20"/>
+  </g>
+  <g font-size="10" font-weight="700" fill="#fff" text-anchor="middle">
+    <text x="470" y="144">PC A</text><text x="575" y="144">PC B</text><text x="680" y="144">PC C</text>
+  </g>
+  <g stroke="#a78bfa" stroke-width="2.5">
+    <line x1="520" y1="90" x2="475" y2="122"/><line x1="575" y1="90" x2="575" y2="120"/><line x1="630" y1="90" x2="675" y2="122"/>
+  </g>
+  <rect x="440" y="212" width="270" height="8" rx="4" fill="#f59e0b"/>
+  <text x="575" y="240" text-anchor="middle" font-size="11" font-weight="700" fill="#b45309">Backbone Bus</text>
+  <g stroke="#94a3b8" stroke-width="2">
+    <line x1="470" y1="160" x2="470" y2="212"/><line x1="575" y1="160" x2="575" y2="212"/><line x1="680" y1="160" x2="680" y2="212"/>
+  </g>
+  <g fill="#a855f7">
+    <rect x="446" y="256" width="48" height="30" rx="9"/><rect x="551" y="256" width="48" height="30" rx="9"/><rect x="656" y="256" width="48" height="30" rx="9"/>
+  </g>
+  <g font-size="10" font-weight="700" fill="#fff" text-anchor="middle">
+    <text x="470" y="275">Hub1</text><text x="575" y="275">Hub2</text><text x="680" y="275">Server</text>
+  </g>
+  <text x="575" y="308" text-anchor="middle" font-size="11" fill="#64748b">Kombinasi Star + Bus — fleksibel &amp; skalabel</text>
+</svg>

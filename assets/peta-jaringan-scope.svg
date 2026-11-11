@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" font-family="Inter, 'Segoe UI', sans-serif">
+  <rect width="720" height="300" rx="22" fill="#f8fafc"/>
+  <text x="360" y="34" text-anchor="middle" font-size="16" font-weight="800" fill="#475569">Peta Jaringan Berdasarkan Jangkauan</text>
+
+  <g>
+    <rect x="24" y="60" width="160" height="180" rx="16" fill="#f5f3ff" stroke="#a855f7" stroke-width="2"/>
+    <text x="104" y="88" text-anchor="middle" font-size="14" font-weight="800" fill="#7c3aed">PAN</text>
+    <text x="104" y="108" text-anchor="middle" font-size="10" fill="#64748b">Personal Area Net</text>
+    <g font-size="10" fill="#475569" text-anchor="middle">
+      <text x="104" y="140">📱 Bluetooth</text>
+      <text x="104" y="164">⌚ Wearable</text>
+      <text x="104" y="188">Radius ±10 m</text>
+      <text x="104" y="216" font-weight="700" fill="#7c3aed">1 – 10 m</text>
+    </g>
+
+    <rect x="200" y="60" width="160" height="180" rx="16" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+    <text x="280" y="88" text-anchor="middle" font-size="14" font-weight="800" fill="#1d4ed8">LAN</text>
+    <text x="280" y="108" text-anchor="middle" font-size="10" fill="#64748b">Local Area Network</text>
+    <g font-size="10" fill="#475569" text-anchor="middle">
+      <text x="280" y="140">🏫 Sekolah / Rumah</text>
+      <text x="280" y="164">Switch • Kabel UTP</text>
+      <text x="280" y="188">Ethernet 802.3</text>
+      <text x="280" y="216" font-weight="700" fill="#1d4ed8">± 1 km</text>
+    </g>
+
+    <rect x="376" y="60" width="160" height="180" rx="16" fill="#f0fdf4" stroke="#22c55e" stroke-width="2"/>
+    <text x="456" y="88" text-anchor="middle" font-size="14" font-weight="800" fill="#15803d">MAN</text>
+    <text x="456" y="108" text-anchor="middle" font-size="10" fill="#64748b">Metropolitan Area</text>
+    <g font-size="10" fill="#475569" text-anchor="middle">
+      <text x="456" y="140">🏙️ Satu kota</text>
+      <text x="456" y="164">Fiber antar gedung</text>
+      <text x="456" y="188">WiMAX / Metro Ethernet</text>
+      <text x="456" y="216" font-weight="700" fill="#15803d">5 – 50 km</text>
+    </g>
+
+    <rect x="552" y="60" width="144" height="180" rx="16" fill="#fff7ed" stroke="#f97316" stroke-width="2"/>
+    <text x="624" y="88" text-anchor="middle" font-size="14" font-weight="800" fill="#c2410c">WAN</text>
+    <text x="624" y="108" text-anchor="middle" font-size="10" fill="#64748b">Wide Area Network</text>
+    <g font-size="10" fill="#475569" text-anchor="middle">
+      <text x="624" y="140">🌏 Antar kota/negara</text>
+      <text x="624" y="164">Fiber bawah laut</text>
+      <text x="624" y="188">Satelit • MPLS</text>
+      <text x="624" y="216" font-weight="700" fill="#c2410c">1.000+ km</text>
+    </g>
+  </g>
+
+  <rect x="24" y="254" width="672" height="34" rx="11" fill="#0f172a"/>
+  <text x="360" y="276" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fbbf24">Internet = WAN terbesar di dunia • Intranet = LAN privat perusahaan • Extranet = bagian internet yang diizinkan untuk mitra</text>
+</svg>

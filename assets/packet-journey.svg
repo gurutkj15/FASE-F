@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 330" font-family="Inter, 'Segoe UI', sans-serif">
+  <rect width="720" height="330" rx="22" fill="#f8fafc"/>
+  <text x="360" y="34" text-anchor="middle" font-size="16" font-weight="800" fill="#1e40af">Perjalanan Data &amp; Encapsulation (Model OSI)</text>
+
+  <g font-size="11" font-weight="700">
+    <rect x="26" y="56" width="176" height="44" rx="12" fill="#1e40af"/><text x="114" y="83" text-anchor="middle" fill="#fff">L7-5  Application / Presentation / Session</text>
+    <rect x="26" y="112" width="176" height="44" rx="12" fill="#2563eb"/><text x="114" y="139" text-anchor="middle" fill="#fff">L4  Transport</text>
+    <rect x="26" y="168" width="176" height="44" rx="12" fill="#3b82f6"/><text x="114" y="195" text-anchor="middle" fill="#fff">L3  Network</text>
+    <rect x="26" y="224" width="176" height="44" rx="12" fill="#60a5fa"/><text x="114" y="251" text-anchor="middle" fill="#0f172a">L2  Data Link</text>
+    <rect x="26" y="280" width="176" height="40" rx="12" fill="#93c5fd"/><text x="114" y="305" text-anchor="middle" fill="#0f172a">L1  Physical</text>
+  </g>
+
+  <g stroke="#cbd5e1" stroke-width="2" stroke-dasharray="5,5">
+    <line x1="212" y1="78" x2="270" y2="78"/><line x1="212" y1="134" x2="270" y2="134"/>
+    <line x1="212" y1="190" x2="270" y2="190"/><line x1="212" y1="246" x2="270" y2="246"/><line x1="212" y1="300" x2="270" y2="300"/>
+  </g>
+
+  <g font-family="'Fira Code', monospace" font-size="11" font-weight="700">
+    <rect x="278" y="58" width="416" height="40" rx="10" fill="#e0e7ff" stroke="#6366f1" stroke-width="2"/>
+    <text x="486" y="83" text-anchor="middle" fill="#4338ca">DATA  (pesan dari aplikasi)</text>
+
+    <rect x="300" y="114" width="394" height="40" rx="10" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+    <text x="497" y="139" text-anchor="middle" fill="#1d4ed8">+ Header TCP/UDP  =  SEGMENT</text>
+
+    <rect x="322" y="170" width="372" height="40" rx="10" fill="#cffafe" stroke="#06b6d4" stroke-width="2"/>
+    <text x="508" y="195" text-anchor="middle" fill="#0e7490">+ Header IP  =  PACKET</text>
+
+    <rect x="344" y="226" width="350" height="40" rx="10" fill="#d1fae5" stroke="#10b981" stroke-width="2"/>
+    <text x="519" y="251" text-anchor="middle" fill="#047857">+ Header &amp; Trailer Ethernet  =  FRAME</text>
+
+    <rect x="366" y="280" width="328" height="40" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+    <text x="530" y="305" text-anchor="middle" fill="#b45309">=  BITS  (0 &amp; 1 di kabel/radio)</text>
+  </g>
+
+  <g fill="#94a3b8">
+    <path d="M252 100 l8 12 h-16 z"/><path d="M252 156 l8 12 h-16 z"/><path d="M252 212 l8 12 h-16 z"/><path d="M252 266 l8 12 h-16 z"/>
+  </g>
+  <text x="486" y="16" text-anchor="middle" font-size="10.5" fill="#94a3b8">Setiap turun 1 layer, data dibungkus header baru (encapsulation) — saat naik, header dibuka kembali</text>
+</svg>
