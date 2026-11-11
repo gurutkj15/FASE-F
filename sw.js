@@ -6,7 +6,7 @@
    - Navigasi halaman                          -> network-first, fallback cache
    - Resource CDN (font/icon)                  -> stale-while-revalidate
    ============================================================ */
-const VERSION = 'v12-clay-content';
+const VERSION = 'v17-tag-blue';
 const CACHE_APP = `tjkt-app-${VERSION}`;
 const CACHE_ASSET = `tjkt-assets-${VERSION}`;
 const CACHE_CDN = `tjkt-cdn-${VERSION}`;

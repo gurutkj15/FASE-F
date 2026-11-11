@@ -20,6 +20,66 @@ function startApp(target) {
     }, 500);
 }
 
+// ============================================================
+// KEMBALI KE AWAL — 30 menit tanpa aktivitas ATAU aplikasi di-minimize
+// ============================================================
+const IDLE_LIMIT = 30 * 60 * 1000;   // 30 menit
+let idleTimer = null;
+
+function restartToBeginning() {
+    clearTimeout(idleTimer);
+    // tutup overlay / sidebar yang mungkin masih terbuka
+    const ov = document.querySelector('.overlay');
+    if (ov) ov.style.display = 'none';
+    const sb = document.querySelector('.sidebar');
+    if (sb) sb.classList.remove('open');
+    // tampilkan lagi layar pembuka (splash)
+    const splash = document.getElementById('splash');
+    const app = document.getElementById('app');
+    if (splash) {
+        splash.style.transition = 'opacity .4s ease';
+        splash.style.display = 'flex';
+        splash.style.opacity = '1';
+    }
+    if (app) app.classList.add('hidden');
+    window.scrollTo(0, 0);
+    idleTimer = setTimeout(restartToBeginning, IDLE_LIMIT);
+}
+
+function resetIdleTimer() {
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(restartToBeginning, IDLE_LIMIT);
+}
+
+['pointerdown', 'pointermove', 'keydown', 'wheel', 'touchstart', 'scroll', 'mousemove', 'click']
+    .forEach(ev => window.addEventListener(ev, resetIdleTimer, { passive: true }));
+
+// Jendela di-minimize / tab berpindah -> buka ulang dari awal
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) restartToBeginning();
+});
+resetIdleTimer();
+
+// ============================================================
+// TOMBOL KEMBALI KE ATAS
+// ============================================================
+function initTopButton() {
+    if (document.getElementById('to-top')) return;
+    const b = document.createElement('button');
+    b.id = 'to-top';
+    b.type = 'button';
+    b.className = 'to-top';
+    b.setAttribute('aria-label', 'Kembali ke atas');
+    b.title = 'Kembali ke atas';
+    b.innerHTML = '<i class="fas fa-arrow-up"></i><span>Atas</span>';
+    b.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    document.body.appendChild(b);
+    window.addEventListener('scroll', () => {
+        b.classList.toggle('show', window.scrollY > 420);
+    }, { passive: true });
+}
+initTopButton();
+
 // ── NAVIGATION ────────────────────────────────────────────
 const pages = {
     home, intro, glosarium, topologi, kebutuhan, peralatan, ip,
@@ -71,8 +131,9 @@ function showPage(id) {
     closeSidebar();
     updateBottomNav(id);
 
-    // Scroll to top
-    el.parentElement.scrollTo ? el.parentElement.scrollTo(0, 0) : window.scrollTo(0, 0);
+    // Scroll ke atas (window adalah scroller utama)
+    window.scrollTo(0, 0);
+    if (document.scrollingElement) document.scrollingElement.scrollTop = 0;
 
     setTimeout(() => {
         if (pages[id]) {
@@ -646,7 +707,8 @@ function home() {
         ${Object.entries(progress).slice(0,3).map(([k,v])=>{
             const nm={topologi:'Topologi',ip:'IP & Subnetting',vlan:'VLAN',routing:'Routing',keamanan:'Keamanan',fiber:'Fiber Optic'};
             const c = v>=75?'var(--green-500)':v>=60?'var(--orange-500)':'var(--red-500)';
-            return `<div class="prog-item" style="margin-bottom:10px"><div class="prog-row"><span class="prog-name">${nm[k]||k}</span><span class="prog-score" style="color:${c}">${v}%</span></div><div class="prog-bar"><div class="prog-fill" style="width:${v}%;background:${c}"></div></div></div>`;
+            const tc = v>=75?'var(--green-600)':v>=60?'var(--orange-600)':'var(--red-600)';
+            return `<div class="prog-item" style="margin-bottom:10px"><div class="prog-row"><span class="prog-name">${nm[k]||k}</span><span class="prog-score" style="color:${tc}">${v}%</span></div><div class="prog-bar"><div class="prog-fill" style="width:${v}%;background:${c}"></div></div></div>`;
         }).join('')}
         <button class="btn-ghost" style="margin-top:8px;width:100%" onclick="showPage('progress')"><i class="fas fa-chart-bar"></i> Lihat Semua Progress</button>
     </div>` : ''}`;
@@ -1472,7 +1534,7 @@ function routing() {
     return `<div class="card">
         ${sectionHead('fa-route','Routing Statis & Dinamis','sh-purple')}
         ${callout('tip','fa-lightbulb','Analogi Routing','Router seperti petugas pos di persimpangan jalan. Setiap paket data yang datang dibaca alamat tujuannya, kemudian diteruskan ke jalur yang paling efisien menuju tujuan tersebut.')}
-        <figure class="img-showcase"><img src="assets/imgs/img75.png" alt="Diagram Routing Jaringan" loading="lazy"><figcaption>Diagram routing — paket menemukan jalur terbaik melalui beberapa router</figcaption></figure>
+        ${pptIllo('routing-flow.jpg', 'Alur paket pada routing - router membaca IP tujuan lalu meneruskan paket ke jalur terbaik menuju tujuan')}
 
         <h3 class="sub-head">Cara Kerja Routing</h3>
         <div class="illus-wrap">
@@ -2848,8 +2910,9 @@ function progressPage() {
         </div>
         ${topics.map(t=>{
             const s=progress[t.k];
-            const c=s>=75?'#22c55e':s>=60?'#f97316':s>0?'#ef4444':'#e2e8f0';
-            return `<div class="prog-item"><div class="prog-row"><span class="prog-name">${t.n}</span><span class="prog-score" style="color:${c}">${s!==undefined?s+'%':'—'}</span></div><div class="prog-bar"><div class="prog-fill" style="width:${s||0}%;background:${c}"></div></div>${s!==undefined?`<div style="font-size:0.75rem;color:var(--slate-400);margin-top:4px">${s>=75?'✅ Lulus':s>=60?'⚠️ Perlu ditingkatkan':'❌ Perlu belajar ulang'}</div>`:''}</div>`;
+            const c=s>=75?'var(--green-500)':s>=60?'var(--orange-500)':s>0?'var(--red-500)':'transparent';
+            const tc=s>=75?'var(--green-600)':s>=60?'var(--orange-600)':s>0?'var(--red-600)':'var(--text-4)';
+            return `<div class="prog-item"><div class="prog-row"><span class="prog-name">${t.n}</span><span class="prog-score" style="color:${tc}">${s!==undefined?s+'%':'—'}</span></div><div class="prog-bar"><div class="prog-fill" style="width:${s||0}%;background:${c}"></div></div>${s!==undefined?`<div style="font-size:0.75rem;color:var(--slate-400);margin-top:4px">${s>=75?'✅ Lulus':s>=60?'⚠️ Perlu ditingkatkan':'❌ Perlu belajar ulang'}</div>`:''}</div>`;
         }).join('')}
         <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap">
             <button class="btn-primary" onclick="showPage('home')"><i class="fas fa-home"></i> Beranda</button>
@@ -3088,7 +3151,7 @@ function renderQuestion() {
     </div>
     <div class="quiz-nav">
         <button class="btn-ghost" onclick="if(confirm('Yakin keluar? Progress asesmen akan hilang.')){showPage('home')}"><i class="fas fa-times"></i> Keluar</button>
-        <span style="color:var(--slate-400);font-size:0.85rem">✅ ${quizState.score} benar</span>
+        <span style="color:var(--slate-500);font-size:0.85rem">✅ ${quizState.score} benar</span>
         <button class="btn-primary" id="btn-next" onclick="nextQuestion()" style="display:none"><i class="fas fa-arrow-right"></i> ${quizState.current+1 < n ? 'Lanjut' : 'Lihat Hasil'}</button>
     </div>`;
     window.scrollTo(0,0);
@@ -3189,7 +3252,7 @@ function showResult() {
         </div>
         <div class="score-grade" style="color:${color}">Nilai ${grade}</div>
         <div class="score-msg">${msg}</div>
-        <p style="color:var(--slate-400);font-size:0.85rem;margin-bottom:4px">Asesmen: <strong>${labels[quizState.topic]}</strong></p>
+        <p style="color:var(--slate-500);font-size:0.85rem;margin-bottom:4px">Asesmen: <strong>${labels[quizState.topic]}</strong></p>
         <div class="score-stats">
             <div class="score-stat c"><div class="sn">${correct}</div><div class="sl">Benar</div></div>
             <div class="score-stat w"><div class="sn">${wrong}</div><div class="sl">Salah</div></div>

@@ -177,11 +177,9 @@
             <span class="tb-logo">TJKT</span><span class="tb-fase">Fase F</span>
         </div>
         <div class="topbar-actions">
-            <span id="offline-pill" class="offline-pill hidden" title="Koneksi terputus — materi tetap bisa dibuka"><i class="fas fa-wifi-slash"></i> Offline</span>
+            <span id="offline-pill" class="offline-pill hidden" title="Koneksi terputus - materi tetap bisa dibuka"><i class="fas fa-wifi-slash"></i> Offline</span>
             <button class="topbar-btn install-btn hidden" id="install-btn" title="Pasang aplikasi di perangkat"><i class="fas fa-download"></i></button>
             <button class="topbar-btn" id="theme-btn" onclick="toggleTheme()" title="Ganti tema terang/gelap" aria-label="Ganti tema"><i class="fas fa-moon"></i></button>
-            <button class="topbar-btn" onclick="showPage('progress')" title="Progress saya"><i class="fas fa-chart-line"></i></button>
-            <button class="topbar-btn" onclick="showPage('home')" title="Beranda"><i class="fas fa-home"></i></button>
         </div>
     </header>
 
@@ -192,11 +190,11 @@
     <main id="content" class="main-content"></main>
 
     <!-- BOTTOM NAV -->
-    <nav class="bottom-nav">
-        <button onclick="showPage('home')" class="bnav-btn" id="bn-home"><i class="fas fa-home"></i><span>Beranda</span></button>
-        <button onclick="showPage('intro')" class="bnav-btn" id="bn-materi"><i class="fas fa-book-open"></i><span>Materi</span></button>
-        <button onclick="showPage('progress')" class="bnav-btn" id="bn-progress"><i class="fas fa-chart-bar"></i><span>Progress</span></button>
-        <button onclick="toggleSidebar()" class="bnav-btn" id="bn-menu"><i class="fas fa-th"></i><span>Menu</span></button>
+    <nav class="bottom-nav" aria-label="Navigasi utama">
+        <button onclick="showPage('home')" class="bnav-btn" id="bn-home" title="Beranda"><i class="fas fa-home"></i><span>Beranda</span></button>
+        <button onclick="showPage('intro')" class="bnav-btn" id="bn-materi" title="Mulai membaca materi"><i class="fas fa-book-open"></i><span>Materi</span></button>
+        <button onclick="toggleSidebar()" class="bnav-btn" id="bn-menu" title="Daftar 15 topik materi"><i class="fas fa-list"></i><span>Topik</span></button>
+        <button onclick="showPage('progress')" class="bnav-btn" id="bn-progress" title="Progres dan nilai saya"><i class="fas fa-chart-bar"></i><span>Progress</span></button>
     </nav>
 </div>
 
