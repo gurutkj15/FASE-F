@@ -3,14 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Buku Ajar TJKT Fase F</title>
+    <title>Buku Ajar TJKT Fase F — SMKN 1 Kuantan Mudik</title>
+    <meta name="description" content="Buku ajar digital Teknik Jaringan Komputer dan Telekomunikasi (TJKT) Fase F: 14 materi padat berilustrasi, kalkulator subnetting, dan 120+ soal asesmen. SMKN 1 Kuantan Mudik.">
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <meta name="theme-color" content="#0f172a">
+    <!-- ICON APLIKASI (dihasilkan dari logo sekolah + badge TJKT) -->
+    <link rel="icon" href="assets/icons/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/icons/favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
+    <meta name="theme-color" id="theme-color-meta" content="#1e40af">
+    <meta name="color-scheme" content="light dark">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="TJKT Fase F">
+    <meta name="format-detection" content="telephone=no">
+    <meta property="og:title" content="Buku Ajar TJKT Fase F">
+    <meta property="og:description" content="Materi TJKT Fase F berilustrasi + asesmen 20 soal per topik.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="assets/icons/icon-512.png">
+    <!-- Terapkan tema (terang/gelap) sebelum paint agar tidak berkedip -->
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem('tjkt_theme');
+                if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-theme', t);
+            } catch (e) { document.documentElement.setAttribute('data-theme', 'light'); }
+        })();
+    </script>
 </head>
 <body>
 
@@ -21,14 +45,7 @@
     <div class="splash-orb splash-orb-3"></div>
     <div class="splash-content">
         <div class="splash-logo">
-            <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-                <circle cx="32" cy="12" r="8" fill="white" opacity="0.9"/>
-                <circle cx="12" cy="44" r="8" fill="white" opacity="0.9"/>
-                <circle cx="52" cy="44" r="8" fill="white" opacity="0.9"/>
-                <line x1="32" y1="20" x2="12" y2="36" stroke="white" stroke-width="2.5" opacity="0.7"/>
-                <line x1="32" y1="20" x2="52" y2="36" stroke="white" stroke-width="2.5" opacity="0.7"/>
-                <line x1="20" y1="44" x2="44" y2="44" stroke="white" stroke-width="2.5" opacity="0.7"/>
-            </svg>
+            <img src="assets/icons/icon-192.png" alt="Logo SMKN 1 Kuantan Mudik" width="64" height="64" decoding="async">
         </div>
         <div class="splash-tag">BUKU AJAR DIGITAL</div>
         <h1>TJKT <span>Fase F</span></h1>
@@ -38,9 +55,9 @@
             <i class="fas fa-play"></i> Mulai Belajar
         </button>
         <div class="splash-stats">
-            <div class="ss-item"><span class="ss-num">14</span><span class="ss-lbl">Topik</span></div>
+            <div class="ss-item"><span class="ss-num">15</span><span class="ss-lbl">Topik</span></div>
             <div class="ss-div"></div>
-            <div class="ss-item"><span class="ss-num">120+</span><span class="ss-lbl">Soal</span></div>
+            <div class="ss-item"><span class="ss-num">150+</span><span class="ss-lbl">Soal</span></div>
             <div class="ss-div"></div>
             <div class="ss-item"><span class="ss-num">5</span><span class="ss-lbl">Elemen</span></div>
         </div>
@@ -66,67 +83,87 @@
         <nav class="sidebar-nav">
             <div class="snav-item" onclick="showPage('home')"><i class="fas fa-home"></i><span>Beranda</span></div>
             <div class="snav-item" onclick="showPage('intro')"><i class="fas fa-graduation-cap"></i><span>Capaian Pembelajaran</span></div>
+            <div class="snav-item" onclick="showPage('glosarium')"><i class="fas fa-book-open"></i><span>Glosarium</span></div>
 
-            <div class="snav-section">
-                <div class="snav-section-label">
+            <div class="snav-section open" data-group="e1">
+                <div class="snav-section-label" onclick="toggleSnavSection(this)" role="button" tabindex="0">
                     <span class="snav-badge e1">E1</span>
-                    Perencanaan &amp; Pengalamatan Jaringan
+                    <span class="snav-title">Perencanaan &amp; Pengalamatan Jaringan</span>
+                    <i class="fas fa-chevron-down snav-chevron"></i>
                 </div>
-                <div class="snav-item sub" onclick="showPage('topologi')"><i class="fas fa-sitemap"></i><span>Topologi Jaringan</span></div>
-                <div class="snav-item sub" onclick="showPage('kebutuhan')"><i class="fas fa-clipboard-list"></i><span>Kebutuhan Teknis</span></div>
-                <div class="snav-item sub" onclick="showPage('peralatan')"><i class="fas fa-tools"></i><span>Peralatan Jaringan</span></div>
-                <div class="snav-item sub" onclick="showPage('ip')"><i class="fas fa-hashtag"></i><span>IP Address, CIDR &amp; VLSM</span></div>
+                <div class="snav-sub">
+                    <div class="snav-item sub" onclick="showPage('topologi')"><i class="fas fa-sitemap"></i><span>Topologi Jaringan</span></div>
+                    <div class="snav-item sub" onclick="showPage('kebutuhan')"><i class="fas fa-clipboard-list"></i><span>Kebutuhan Teknis</span></div>
+                    <div class="snav-item sub" onclick="showPage('peralatan')"><i class="fas fa-tools"></i><span>Peralatan Jaringan</span></div>
+                    <div class="snav-item sub" onclick="showPage('ip')"><i class="fas fa-hashtag"></i><span>IP Address, CIDR &amp; VLSM</span></div>
+                </div>
             </div>
 
-            <div class="snav-section">
-                <div class="snav-section-label">
+            <div class="snav-section" data-group="e2">
+                <div class="snav-section-label" onclick="toggleSnavSection(this)" role="button" tabindex="0">
                     <span class="snav-badge e2">E2</span>
-                    Konfigurasi Perangkat Jaringan
+                    <span class="snav-title">Jaringan Kabel &amp; Nirkabel</span>
+                    <i class="fas fa-chevron-down snav-chevron"></i>
                 </div>
-                <div class="snav-item sub" onclick="showPage('vlan')"><i class="fas fa-layer-group"></i><span>VLAN</span></div>
-                <div class="snav-item sub" onclick="showPage('routing')"><i class="fas fa-route"></i><span>Routing</span></div>
-                <div class="snav-item sub" onclick="showPage('nat')"><i class="fas fa-exchange-alt"></i><span>NAT &amp; Internet Gateway</span></div>
+                <div class="snav-sub">
+                    <div class="snav-item sub" onclick="showPage('kabel')"><i class="fas fa-ethernet"></i><span>Jaringan Kabel</span></div>
+                    <div class="snav-item sub" onclick="showPage('nirkabel')"><i class="fas fa-wifi"></i><span>Jaringan Nirkabel</span></div>
+                    <div class="snav-item sub" onclick="showPage('fiber')"><i class="fas fa-wave-square"></i><span>Fiber Optic</span></div>
+                </div>
             </div>
 
-            <div class="snav-section">
-                <div class="snav-section-label">
+            <div class="snav-section" data-group="e3">
+                <div class="snav-section-label" onclick="toggleSnavSection(this)" role="button" tabindex="0">
                     <span class="snav-badge e3">E3</span>
-                    Jaringan Kabel &amp; Nirkabel
+                    <span class="snav-title">Keamanan Jaringan</span>
+                    <i class="fas fa-chevron-down snav-chevron"></i>
                 </div>
-                <div class="snav-item sub" onclick="showPage('kabel')"><i class="fas fa-ethernet"></i><span>Jaringan Kabel</span></div>
-                <div class="snav-item sub" onclick="showPage('nirkabel')"><i class="fas fa-wifi"></i><span>Jaringan Nirkabel</span></div>
-                <div class="snav-item sub" onclick="showPage('fiber')"><i class="fas fa-wave-square"></i><span>Fiber Optic</span></div>
+                <div class="snav-sub">
+                    <div class="snav-item sub" onclick="showPage('keamanan')"><i class="fas fa-shield-alt"></i><span>Keamanan Jaringan</span></div>
+                    <div class="snav-item sub" onclick="showPage('firewall')"><i class="fas fa-fire-alt"></i><span>Firewall &amp; ACL</span></div>
+                    <div class="snav-item sub" onclick="showPage('kriptografi')"><i class="fas fa-key"></i><span>Kriptografi</span></div>
+                </div>
             </div>
 
-            <div class="snav-section">
-                <div class="snav-section-label">
+            <div class="snav-section" data-group="e4">
+                <div class="snav-section-label" onclick="toggleSnavSection(this)" role="button" tabindex="0">
                     <span class="snav-badge e4">E4</span>
-                    Keamanan Jaringan
+                    <span class="snav-title">Konfigurasi Perangkat Jaringan</span>
+                    <i class="fas fa-chevron-down snav-chevron"></i>
                 </div>
-                <div class="snav-item sub" onclick="showPage('keamanan')"><i class="fas fa-shield-alt"></i><span>Keamanan Jaringan</span></div>
-                <div class="snav-item sub" onclick="showPage('firewall')"><i class="fas fa-fire-alt"></i><span>Firewall &amp; ACL</span></div>
-                <div class="snav-item sub" onclick="showPage('kriptografi')"><i class="fas fa-key"></i><span>Kriptografi</span></div>
+                <div class="snav-sub">
+                    <div class="snav-item sub" onclick="showPage('vlan')"><i class="fas fa-layer-group"></i><span>VLAN</span></div>
+                    <div class="snav-item sub" onclick="showPage('routing')"><i class="fas fa-route"></i><span>Routing</span></div>
+                    <div class="snav-item sub" onclick="showPage('nat')"><i class="fas fa-exchange-alt"></i><span>NAT &amp; Internet Gateway</span></div>
+                </div>
             </div>
 
-            <div class="snav-section">
-                <div class="snav-section-label">
+            <div class="snav-section" data-group="e5">
+                <div class="snav-section-label" onclick="toggleSnavSection(this)" role="button" tabindex="0">
                     <span class="snav-badge e5">E5</span>
-                    Sistem Operasi &amp; Server
+                    <span class="snav-title">Sistem Operasi &amp; Server</span>
+                    <i class="fas fa-chevron-down snav-chevron"></i>
                 </div>
-                <div class="snav-item sub" onclick="showPage('linux')"><i class="fab fa-linux"></i><span>Sistem Operasi Jaringan</span></div>
-                <div class="snav-item sub" onclick="showPage('server')"><i class="fas fa-server"></i><span>Konfigurasi Server</span></div>
+                <div class="snav-sub">
+                    <div class="snav-item sub" onclick="showPage('linux')"><i class="fab fa-linux"></i><span>Sistem Operasi Jaringan</span></div>
+                    <div class="snav-item sub" onclick="showPage('server')"><i class="fas fa-server"></i><span>Konfigurasi Server</span></div>
+                </div>
             </div>
 
-            <div class="snav-section">
-                <div class="snav-section-label snav-assess-label">
-                    <i class="fas fa-tasks"></i> Asesmen
+            <div class="snav-section" data-group="asesmen">
+                <div class="snav-section-label snav-assess-label" onclick="toggleSnavSection(this)" role="button" tabindex="0">
+                    <i class="fas fa-tasks"></i>
+                    <span class="snav-title">Asesmen</span>
+                    <i class="fas fa-chevron-down snav-chevron"></i>
                 </div>
-                <div class="snav-item sub assess" onclick="showAssessment('topologi')"><i class="fas fa-question-circle"></i><span>Topologi Jaringan</span><span class="badge-soal">20</span></div>
-                <div class="snav-item sub assess" onclick="showAssessment('ip')"><i class="fas fa-question-circle"></i><span>IP &amp; Subnetting</span><span class="badge-soal">20</span></div>
-                <div class="snav-item sub assess" onclick="showAssessment('vlan')"><i class="fas fa-question-circle"></i><span>VLAN</span><span class="badge-soal">20</span></div>
-                <div class="snav-item sub assess" onclick="showAssessment('routing')"><i class="fas fa-question-circle"></i><span>Routing</span><span class="badge-soal">20</span></div>
-                <div class="snav-item sub assess" onclick="showAssessment('keamanan')"><i class="fas fa-question-circle"></i><span>Keamanan Jaringan</span><span class="badge-soal">20</span></div>
-                <div class="snav-item sub assess" onclick="showAssessment('fiber')"><i class="fas fa-question-circle"></i><span>Fiber Optic</span><span class="badge-soal">20</span></div>
+                <div class="snav-sub">
+                    <div class="snav-item sub assess" onclick="showAssessment('topologi')"><i class="fas fa-question-circle"></i><span>Topologi Jaringan</span><span class="badge-soal">20</span></div>
+                    <div class="snav-item sub assess" onclick="showAssessment('ip')"><i class="fas fa-question-circle"></i><span>IP &amp; Subnetting</span><span class="badge-soal">20</span></div>
+                    <div class="snav-item sub assess" onclick="showAssessment('vlan')"><i class="fas fa-question-circle"></i><span>VLAN</span><span class="badge-soal">20</span></div>
+                    <div class="snav-item sub assess" onclick="showAssessment('routing')"><i class="fas fa-question-circle"></i><span>Routing</span><span class="badge-soal">20</span></div>
+                    <div class="snav-item sub assess" onclick="showAssessment('keamanan')"><i class="fas fa-question-circle"></i><span>Keamanan Jaringan</span><span class="badge-soal">20</span></div>
+                    <div class="snav-item sub assess" onclick="showAssessment('fiber')"><i class="fas fa-question-circle"></i><span>Fiber Optic</span><span class="badge-soal">20</span></div>
+                </div>
             </div>
         </nav>
     </aside>
@@ -140,6 +177,9 @@
             <span class="tb-logo">TJKT</span><span class="tb-fase">Fase F</span>
         </div>
         <div class="topbar-actions">
+            <span id="offline-pill" class="offline-pill hidden" title="Koneksi terputus — materi tetap bisa dibuka"><i class="fas fa-wifi-slash"></i> Offline</span>
+            <button class="topbar-btn install-btn hidden" id="install-btn" title="Pasang aplikasi di perangkat"><i class="fas fa-download"></i></button>
+            <button class="topbar-btn" id="theme-btn" onclick="toggleTheme()" title="Ganti tema terang/gelap" aria-label="Ganti tema"><i class="fas fa-moon"></i></button>
             <button class="topbar-btn" onclick="showPage('progress')" title="Progress saya"><i class="fas fa-chart-line"></i></button>
             <button class="topbar-btn" onclick="showPage('home')" title="Beranda"><i class="fas fa-home"></i></button>
         </div>

@@ -1,0 +1,47 @@
+PWA-TJKT — CLAY EDITION & BUKU AJAR PENGAYAAN
+SMK Negeri 1 Kuantan Mudik
+
+ISI PAKET
+- index.html       : halaman utama aplikasi
+- style.css        : desain Claymorphism, tema terang/gelap, responsif, mode cetak
+- app.js           : navigasi, materi, kalkulator, asesmen, progres, dan interaksi
+- sw.js            : service worker offline-first (cache v10-clay-book)
+- manifest.json    : metadata instalasi PWA
+- assets/          : ilustrasi, foto perangkat, ikon, dan media pembelajaran
+
+PENGEMBANGAN UTAMA
+1. Materi pengayaan bergaya buku ajar ditambahkan untuk 15 bahasan:
+   topologi, analisis kebutuhan, peralatan jaringan, IP/CIDR/VLSM/subnetting,
+   VLAN, routing, NAT/internet gateway, kabel, nirkabel, fiber optic,
+   keamanan jaringan, firewall/ACL, kriptografi, sistem operasi Linux,
+   dan layanan server.
+2. Setiap materi pengayaan memuat penjelasan konsep, tabel/komparasi,
+   contoh penerapan, prosedur kerja, troubleshooting, catatan teknisi,
+   dan latihan/evaluasi.
+3. Ditambahkan alat bantu belajar: ukuran teks A-/A+, penanda materi selesai,
+   penyimpanan progres lokal, dan cetak materi.
+4. Desain diperbarui ke Claymorphism dengan permukaan lembut, bayangan timbul,
+   kartu tactile, warna lembut, state hover/focus, serta penyesuaian dark mode.
+5. Bagian Linux yang pada paket sumber terpotong/tidak valid telah direkonstruksi
+   agar halaman Sistem Operasi Jaringan dapat dibuka.
+6. Cache Service Worker diperbarui agar versi baru tidak tertahan cache lama.
+7. Metadata PWA diperbarui.
+
+CARA MENJALANKAN
+- Ekstrak ZIP.
+- Untuk pengujian lokal, jalankan melalui web server (bukan membuka file HTML
+  langsung), misalnya ekstensi Live Server di VS Code.
+- Untuk publikasi, unggah seluruh isi folder PWA-TJKT ke hosting yang mendukung
+  HTTPS. Service Worker dan instalasi PWA membutuhkan secure context (HTTPS),
+  kecuali localhost.
+- Setelah pembaruan, buka ulang aplikasi. Jika masih menampilkan versi lama,
+  tutup aplikasi PWA lalu lakukan refresh/reload; cache lama memakai versi v9
+  dan versi baru memakai v10-clay-book.
+
+CATATAN
+- Data progres dan status materi disimpan pada localStorage browser/perangkat.
+  Data tersebut tidak otomatis tersinkron ke perangkat lain.
+- Aplikasi tetap menggunakan aset dan struktur proyek yang ada. Perubahan
+  dilakukan pada file proyek, bukan mengharuskan framework/build tambahan.
+- Uji konfigurasi perangkat jaringan selalu lakukan di lingkungan lab/simulasi
+  dan sesuaikan sintaks dengan model serta versi perangkat.

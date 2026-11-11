@@ -1,15 +1,91 @@
 {
-  "name": "Buku Ajar TJKT Fase F",
-  "short_name": "TJKT F",
-  "start_url": "index.html",
+  "name": "Buku Ajar TJKT Fase F — SMKN 1 Kuantan Mudik",
+  "short_name": "TJKT Fase F",
+  "description": "Buku ajar digital TJKT Fase F dengan materi pendalaman, ilustrasi, kalkulator subnetting, asesmen, dan dukungan offline.",
+  "lang": "id",
+  "dir": "ltr",
+  "id": "tjkt-fase-f-smkn1km",
+  "start_url": "./index.html?source=pwa",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#1565c0",
-  "theme_color": "#1565c0",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "orientation": "any",
+  "background_color": "#edf2fb",
+  "theme_color": "#4268c9",
+  "categories": [
+    "education",
+    "books",
+    "reference"
+  ],
+  "prefer_related_applications": false,
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/2885/2885416.png",
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "assets/icons/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Materi Pembelajaran",
+      "short_name": "Materi",
+      "url": "./index.html?page=intro",
+      "icons": [
+        {
+          "src": "assets/icons/icon-96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Asesmen IP & Subnetting",
+      "short_name": "Asesmen",
+      "url": "./index.html?page=ip",
+      "icons": [
+        {
+          "src": "assets/icons/icon-96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Progress Belajar",
+      "short_name": "Progress",
+      "url": "./index.html?page=progress",
+      "icons": [
+        {
+          "src": "assets/icons/icon-96.png",
+          "sizes": "96x96"
+        }
+      ]
     }
   ]
 }
