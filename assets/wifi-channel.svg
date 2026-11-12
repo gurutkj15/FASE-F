@@ -1,44 +1,48 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" font-family="Inter, 'Segoe UI', sans-serif">
-  <rect width="720" height="300" rx="22" fill="#f8fafc"/>
-  <text x="360" y="34" text-anchor="middle" font-size="16" font-weight="800" fill="#0369a1">Channel WiFi 2.4 GHz — Hanya 3 yang Tidak Tumpang Tindih</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 334" font-family="Inter, 'Segoe UI', sans-serif">
+  <rect width="720" height="334" rx="22" fill="#f8fafc"/>
+  <text x="360" y="30" text-anchor="middle" font-size="16" font-weight="800" fill="#0369a1">Channel WiFi 2.4 GHz — Hanya 1, 6, 11 yang Bebas Tumpang Tindih</text>
+  <text x="360" y="52" text-anchor="middle" font-size="10.5" fill="#475569">Setiap channel berlebar 22 MHz (±2,2 nomor channel) sehingga banyak channel saling menimpa</text>
 
-  <!-- axis -->
-  <line x1="60" y1="200" x2="680" y2="200" stroke="#cbd5e1" stroke-width="2"/>
-  <g font-size="9.5" fill="#64748b" text-anchor="middle" font-family="'Fira Code', monospace">
-    <text x="70" y="218">1</text><text x="130" y="218">2</text><text x="190" y="218">3</text><text x="250" y="218">4</text>
-    <text x="310" y="218">5</text><text x="370" y="218">6</text><text x="430" y="218">7</text><text x="490" y="218">8</text>
-    <text x="550" y="218">9</text><text x="610" y="218">10</text><text x="670" y="218">11</text>
-  </g>
-  <text x="370" y="238" text-anchor="middle" font-size="10.5" fill="#94a3b8">Nomor channel 2.4 GHz (lebar 22 MHz per channel)</text>
-
-  <!-- recommended channels -->
-  <g font-family="Inter, sans-serif">
-    <path d="M40 200 q30 -110 60 0 z" fill="#22c55e" opacity="0.85"/>
-    <path d="M340 200 q30 -110 60 0 z" fill="#22c55e" opacity="0.85"/>
-    <path d="M640 200 q30 -110 60 0 z" fill="#22c55e" opacity="0.85"/>
-    <!-- overlapping others -->
-    <path d="M100 200 q30 -96 60 0 z" fill="#f59e0b" opacity="0.55"/>
-    <path d="M160 200 q30 -96 60 0 z" fill="#ef4444" opacity="0.45"/>
-    <path d="M220 200 q30 -96 60 0 z" fill="#f59e0b" opacity="0.55"/>
-    <path d="M280 200 q30 -96 60 0 z" fill="#ef4444" opacity="0.45"/>
-    <path d="M400 200 q30 -96 60 0 z" fill="#f59e0b" opacity="0.55"/>
-    <path d="M460 200 q30 -96 60 0 z" fill="#ef4444" opacity="0.45"/>
-    <path d="M520 200 q30 -96 60 0 z" fill="#f59e0b" opacity="0.55"/>
-    <path d="M580 200 q30 -96 60 0 z" fill="#ef4444" opacity="0.45"/>
+  <!-- lonceng channel lain (tumpang tindih, merah transparan) -->
+  <g stroke="#dc2626" stroke-opacity="0.55" stroke-width="1.5" fill="#ef4444" fill-opacity="0.28">
+    <path d="M75 250 C90 185 140 112 176 112 C212 112 262 185 277 250 Z"/>
+    <path d="M121 250 C136 185 186 112 222 112 C258 112 308 185 323 250 Z"/>
+    <path d="M167 250 C182 185 232 112 268 112 C304 112 354 185 369 250 Z"/>
+    <path d="M213 250 C228 185 278 112 314 112 C350 112 400 185 415 250 Z"/>
+    <path d="M305 250 C320 185 370 112 406 112 C442 112 492 185 507 250 Z"/>
+    <path d="M351 250 C366 185 416 112 452 112 C488 112 538 185 553 250 Z"/>
+    <path d="M397 250 C412 185 462 112 498 112 C534 112 584 185 599 250 Z"/>
+    <path d="M443 250 C458 185 508 112 544 112 C580 112 630 185 645 250 Z"/>
+    <path d="M489 250 C504 185 554 112 590 112 C626 112 676 185 691 250 Z"/>
   </g>
 
-  <g font-size="12" font-weight="800" text-anchor="middle">
-    <text x="70" y="76" fill="#15803d">1</text>
-    <text x="370" y="76" fill="#15803d">6</text>
-    <text x="670" y="76" fill="#15803d">11</text>
+  <!-- lonceng channel aman 1, 6, 11 (hijau, tidak saling tindih) -->
+  <g stroke="#16a34a" stroke-width="1.8" fill="#22c55e" fill-opacity="0.72">
+    <path d="M29 250 C44 182 94 110 130 110 C166 110 216 182 231 250 Z"/>
+    <path d="M259 250 C274 182 324 110 360 110 C396 110 446 182 461 250 Z"/>
+    <path d="M489 250 C504 182 554 110 590 110 C626 110 676 182 691 250 Z"/>
+  </g>
+  <g font-size="12" font-weight="800" fill="#14532d" text-anchor="middle">
+    <text x="130" y="132">1</text>
+    <text x="360" y="132">6</text>
+    <text x="590" y="132">11</text>
   </g>
 
-  <!-- legend -->
-  <g font-size="10.5" font-weight="600">
-    <rect x="60" y="252" width="240" height="32" rx="10" fill="#dcfce7"/>
-    <text x="180" y="273" text-anchor="middle" fill="#15803d">Channel 1, 6, 11 → saling bebas tumpang tindih</text>
-    <rect x="420" y="252" width="240" height="32" rx="10" fill="#fee2e2"/>
-    <text x="540" y="273" text-anchor="middle" fill="#b91c1c">Channel lain → interferensi &amp; kecepatan turun</text>
+  <!-- sumbu -->
+  <line x1="25" y1="250" x2="695" y2="250" stroke="#94a3b8" stroke-width="2"/>
+  <g font-size="10" fill="#475569" text-anchor="middle" font-family="'Fira Code', monospace">
+    <text x="130" y="268">1</text><text x="176" y="268">2</text><text x="222" y="268">3</text>
+    <text x="268" y="268">4</text><text x="314" y="268">5</text><text x="360" y="268">6</text>
+    <text x="406" y="268">7</text><text x="452" y="268">8</text><text x="498" y="268">9</text>
+    <text x="544" y="268">10</text><text x="590" y="268">11</text>
   </g>
-  <text x="360" y="46" text-anchor="middle" font-size="10.5" fill="#64748b">Diatur di Access Point: pilih channel yang berbeda dari AP tetangga</text>
+  <text x="360" y="287" text-anchor="middle" font-size="10" fill="#64748b">Nomor channel 2.4 GHz — lebar 22 MHz per channel (±2,2 nomor)</text>
+
+  <!-- legenda -->
+  <g font-size="11" font-weight="600" fill="#334155">
+    <rect x="96" y="302" width="16" height="14" rx="4" fill="#22c55e" stroke="#16a34a"/>
+    <text x="120" y="313">Channel 1, 6, 11 — saling bebas</text>
+    <rect x="416" y="302" width="16" height="14" rx="4" fill="#ef4444" fill-opacity="0.45" stroke="#dc2626"/>
+    <text x="440" y="313">Channel lain — tumpang tindih</text>
+  </g>
 </svg>
