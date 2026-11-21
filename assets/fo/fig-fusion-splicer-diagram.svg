@@ -1,58 +1,81 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 360" font-family="Inter, 'Segoe UI', sans-serif">
-  <rect width="760" height="360" rx="16" fill="#0f172a"/>
-  <text x="380" y="30" text-anchor="middle" font-size="15.5" font-weight="800" fill="#f8fafc">Prinsip Kerja Core-Alignment Fusion Splicer (Sistem PAS)</text>
-  <text x="380" y="48" text-anchor="middle" font-size="11" fill="#94a3b8">Peleburan silika murni 1600°C–2000°C menghasilkan sambungan permanen loss ≤ 0.05 dB (standar maks ≤ 0.10 dB)</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 392" font-family="Inter, 'Segoe UI', sans-serif">
+  <defs>
+    <radialGradient id="arcGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fef08a" stop-opacity="1"/>
+      <stop offset="45%" stop-color="#f97316" stop-opacity="0.72"/>
+      <stop offset="100%" stop-color="#f97316" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="chamberBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="760" height="392" rx="16" fill="#0f172a"/>
+  <text x="380" y="30" text-anchor="middle" font-size="16" font-weight="800" fill="#f8fafc">Prinsip Kerja Core-Alignment Fusion Splicer (Sistem PAS)</text>
+  <text x="380" y="49" text-anchor="middle" font-size="11.2" fill="#94a3b8">Peleburan silika murni 1600°C–2000°C menghasilkan sambungan permanen loss ≤ 0.05 dB (standar maks ≤ 0.10 dB)</text>
 
   <!-- Central schematic chamber -->
-  <rect x="34" y="68" width="692" height="176" rx="12" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <rect x="28" y="66" width="704" height="202" rx="14" fill="url(#chamberBg)" stroke="#334155" stroke-width="1.5"/>
 
-  <!-- Left Clamp + Stepper Motor -->
-  <rect x="64" y="130" width="90" height="52" rx="6" fill="#334155" stroke="#64748b"/>
-  <text x="109" y="152" text-anchor="middle" font-size="10" font-weight="700" fill="#cbd5e1">Motor X/Y/Z</text>
-  <text x="109" y="166" text-anchor="middle" font-size="9" fill="#94a3b8">&amp; Sheath Clamp</text>
+  <!-- Top Row Labels (Well-separated, zero overlap) -->
+  <text x="380" y="88" text-anchor="middle" font-size="11" font-weight="800" fill="#fb923c">Elektroda Tungsten (± 8000 V / ~1800°C)</text>
 
-  <!-- Left V-Groove -->
-  <rect x="180" y="142" width="120" height="34" rx="4" fill="#475569"/>
-  <text x="240" y="163" text-anchor="middle" font-size="9.5" font-weight="700" fill="#fde047">V-Groove Zirkonia</text>
+  <!-- PAS Camera Lenses placed cleanly to the left & right -->
+  <rect x="216" y="80" width="68" height="24" rx="6" fill="#0284c7" stroke="#38bdf8" stroke-width="1"/>
+  <text x="250" y="96" text-anchor="middle" font-size="10" font-weight="800" fill="#ffffff">Kamera X</text>
+  <line x1="266" y1="104" x2="366" y2="170" stroke="#38bdf8" stroke-width="1.2" stroke-dasharray="4 3" opacity="0.65"/>
 
-  <!-- Right V-Groove -->
-  <rect x="460" y="142" width="120" height="34" rx="4" fill="#475569"/>
-  <text x="520" y="163" text-anchor="middle" font-size="9.5" font-weight="700" fill="#fde047">V-Groove Zirkonia</text>
+  <rect x="476" y="80" width="68" height="24" rx="6" fill="#0284c7" stroke="#38bdf8" stroke-width="1"/>
+  <text x="510" y="96" text-anchor="middle" font-size="10" font-weight="800" fill="#ffffff">Kamera Y</text>
+  <line x1="494" y1="104" x2="394" y2="170" stroke="#38bdf8" stroke-width="1.2" stroke-dasharray="4 3" opacity="0.65"/>
 
-  <!-- Right Clamp + Motor -->
-  <rect x="606" y="130" width="90" height="52" rx="6" fill="#334155" stroke="#64748b"/>
-  <text x="651" y="152" text-anchor="middle" font-size="10" font-weight="700" fill="#cbd5e1">Motor X/Y/Z</text>
-  <text x="651" y="166" text-anchor="middle" font-size="9" fill="#94a3b8">&amp; Sheath Clamp</text>
+  <!-- Motor & Clamp Labels ABOVE blocks -->
+  <text x="104" y="130" text-anchor="middle" font-size="10.5" font-weight="800" fill="#e2e8f0">Motor X/Y/Z</text>
+  <text x="104" y="143" text-anchor="middle" font-size="9.5" fill="#94a3b8">&amp; Sheath Clamp</text>
 
-  <!-- Fibers left and right meeting in arc gap -->
-  <rect x="48" y="151" width="132" height="12" fill="#3b82f6"/>
-  <rect x="180" y="154" width="194" height="6" fill="#e0f2fe"/>
-  <rect x="386" y="154" width="194" height="6" fill="#e0f2fe"/>
-  <rect x="580" y="151" width="132" height="12" fill="#f97316"/>
+  <text x="656" y="130" text-anchor="middle" font-size="10.5" font-weight="800" fill="#e2e8f0">Motor X/Y/Z</text>
+  <text x="656" y="143" text-anchor="middle" font-size="9.5" fill="#94a3b8">&amp; Sheath Clamp</text>
+
+  <!-- Clamp Blocks -->
+  <rect x="58" y="152" width="92" height="44" rx="7" fill="#334155" stroke="#64748b" stroke-width="1.2"/>
+  <rect x="610" y="152" width="92" height="44" rx="7" fill="#334155" stroke="#64748b" stroke-width="1.2"/>
+
+  <!-- V-Groove Zirkonia Blocks -->
+  <rect x="180" y="160" width="120" height="28" rx="5" fill="#475569" stroke="#64748b" stroke-width="1"/>
+  <rect x="460" y="160" width="120" height="28" rx="5" fill="#475569" stroke="#64748b" stroke-width="1"/>
+
+  <!-- V-Groove Labels BELOW blocks with leader ticks (Zero overlap with fiber) -->
+  <line x1="240" y1="188" x2="240" y2="198" stroke="#fde047" stroke-width="1.2"/>
+  <text x="240" y="212" text-anchor="middle" font-size="10.5" font-weight="800" fill="#fde047">V-Groove Zirkonia</text>
+
+  <line x1="520" y1="188" x2="520" y2="198" stroke="#fde047" stroke-width="1.2"/>
+  <text x="520" y="212" text-anchor="middle" font-size="10.5" font-weight="800" fill="#fde047">V-Groove Zirkonia</text>
+
+  <!-- Fibers left and right meeting in arc gap (y=168..180) -->
+  <rect x="42" y="168" width="138" height="12" rx="3" fill="#3b82f6"/>
+  <rect x="180" y="171" width="194" height="6" fill="#e0f2fe"/>
+  <rect x="386" y="171" width="194" height="6" fill="#e0f2fe"/>
+  <rect x="580" y="168" width="138" height="12" rx="3" fill="#f97316"/>
 
   <!-- Upper & Lower Electrodes + Electric Arc -->
-  <polygon points="374,94 386,94 382,138 378,138" fill="#cbd5e1"/>
-  <polygon points="378,176 382,176 386,220 374,220" fill="#cbd5e1"/>
-  <circle cx="380" cy="157" r="14" fill="#f97316" opacity="0.55"/>
-  <circle cx="380" cy="157" r="7" fill="#fef08a"/>
-  <text x="380" y="88" text-anchor="middle" font-size="10.5" font-weight="800" fill="#fb923c">Elektroda Tungsten (± 8000 V / ~1800°C)</text>
+  <polygon points="374,104 386,104 382,154 378,154" fill="#cbd5e1"/>
+  <polygon points="378,194 382,194 386,236 374,236" fill="#cbd5e1"/>
+  <circle cx="380" cy="174" r="20" fill="url(#arcGlow)"/>
+  <circle cx="380" cy="174" r="6.5" fill="#fef08a"/>
 
-  <!-- PAS Camera Lens -->
-  <rect x="308" y="84" width="46" height="26" rx="5" fill="#0ea5e9"/>
-  <text x="331" y="101" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">Kamera X</text>
-  <rect x="406" y="84" width="46" height="26" rx="5" fill="#0ea5e9"/>
-  <text x="429" y="101" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">Kamera Y</text>
-  <text x="380" y="234" text-anchor="middle" font-size="10" font-weight="700" fill="#38bdf8">PAS (Profile Alignment System) + Uji Tarik Mekanis 200 g</text>
+  <!-- Bottom Chamber Label clearly below lower electrode -->
+  <text x="380" y="255" text-anchor="middle" font-size="10.5" font-weight="700" fill="#38bdf8">PAS (Profile Alignment System) + Uji Tarik Mekanis 200 g</text>
 
   <!-- 6-Step SOP Strip -->
-  <rect x="34" y="256" width="692" height="86" rx="12" fill="#172554" stroke="#3b82f6"/>
-  <text x="48" y="278" font-size="12" font-weight="800" fill="#93c5fd">SOP 6 Tahap Wajib Fusion Splicing (Standar Industri):</text>
+  <rect x="28" y="282" width="704" height="92" rx="12" fill="#172554" stroke="#3b82f6" stroke-width="1.4"/>
+  <text x="44" y="305" font-size="12" font-weight="800" fill="#93c5fd">SOP 6 Tahap Wajib Fusion Splicing (Standar Industri):</text>
   <g font-size="10" font-weight="700" fill="#f8fafc">
-    <rect x="48" y="290" width="104" height="38" rx="6" fill="#1e40af"/><text x="100" y="307" text-anchor="middle">1. Sleeve Masuk</text><text x="100" y="320" text-anchor="middle" font-size="8.5" fill="#bfdbfe">Sebelum kupas!</text>
-    <rect x="160" y="290" width="104" height="38" rx="6" fill="#1e40af"/><text x="212" y="307" text-anchor="middle">2. Strip 3–4 cm</text><text x="212" y="320" text-anchor="middle" font-size="8.5" fill="#bfdbfe">Miller 3-hole ±30°</text>
-    <rect x="272" y="290" width="104" height="38" rx="6" fill="#1e40af"/><text x="324" y="307" text-anchor="middle">3. Clean IPA 99%</text><text x="324" y="320" text-anchor="middle" font-size="8.5" fill="#bfdbfe">Tisu lint-free 1× usap</text>
-    <rect x="384" y="290" width="104" height="38" rx="6" fill="#1e40af"/><text x="436" y="307" text-anchor="middle">4. Cleave 90°</text><text x="436" y="320" text-anchor="middle" font-size="8.5" fill="#fca5a5">Dilarang lap ulang!</text>
-    <rect x="496" y="290" width="104" height="38" rx="6" fill="#1e40af"/><text x="548" y="307" text-anchor="middle">5. Arc Fusion</text><text x="548" y="320" text-anchor="middle" font-size="8.5" fill="#bbf7d0">Cek angle &amp; loss</text>
-    <rect x="608" y="290" width="104" height="38" rx="6" fill="#059669"/><text x="660" y="307" text-anchor="middle">6. Heater Shrink</text><text x="660" y="320" text-anchor="middle" font-size="8.5" fill="#d1fae5">180°C + tata tray</text>
+    <rect x="44" y="318" width="106" height="42" rx="7" fill="#1e40af"/><text x="97" y="336" text-anchor="middle">1. Sleeve Masuk</text><text x="97" y="350" text-anchor="middle" font-size="8.7" fill="#bfdbfe">Sebelum kupas!</text>
+    <rect x="158" y="318" width="106" height="42" rx="7" fill="#1e40af"/><text x="211" y="336" text-anchor="middle">2. Strip 3–4 cm</text><text x="211" y="350" text-anchor="middle" font-size="8.7" fill="#bfdbfe">Miller 3-hole ±30°</text>
+    <rect x="272" y="318" width="106" height="42" rx="7" fill="#1e40af"/><text x="325" y="336" text-anchor="middle">3. Clean IPA 99%</text><text x="325" y="350" text-anchor="middle" font-size="8.7" fill="#bfdbfe">Tisu lint-free 1× usap</text>
+    <rect x="386" y="318" width="106" height="42" rx="7" fill="#1e40af"/><text x="439" y="336" text-anchor="middle">4. Cleave 90°</text><text x="439" y="350" text-anchor="middle" font-size="8.7" fill="#fca5a5">Dilarang lap ulang!</text>
+    <rect x="500" y="318" width="106" height="42" rx="7" fill="#1e40af"/><text x="553" y="336" text-anchor="middle">5. Arc Fusion</text><text x="553" y="350" text-anchor="middle" font-size="8.7" fill="#bbf7d0">Cek angle &amp; loss</text>
+    <rect x="614" y="318" width="106" height="42" rx="7" fill="#059669"/><text x="667" y="336" text-anchor="middle">6. Heater Shrink</text><text x="667" y="350" text-anchor="middle" font-size="8.7" fill="#d1fae5">180°C + tata tray</text>
   </g>
 </svg>

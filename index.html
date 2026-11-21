@@ -8,7 +8,7 @@
     <title>TJKT Studio — Platform Belajar TKJ &amp; Fiber Optik Fase F</title>
     <meta name="description"
         content="TJKT Studio (SMKN 1 Kuantan Mudik): Platform belajar interaktif Konsentrasi TKJ &amp; Fiber Optik Fase F dengan ilustrasi perangkat, lab simulasi, dan 470 soal asesmen.">
-    <link rel="stylesheet" href="style.css?v=53">
+    <link rel="stylesheet" href="style.css?v=58">
     <link rel="manifest" href="manifest.json">
     <link
         href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap"
@@ -19,7 +19,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/icons/favicon-16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
-    <meta name="theme-color" id="theme-color-meta" content="#1e40af">
+    <meta name="theme-color" id="theme-color-meta" content="#2563eb">
     <meta name="color-scheme" content="light dark">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -45,7 +45,7 @@
 
 <body>
 
-    <!-- SPLASH (Minimalis: Hanya Akses Masuk Materi) -->
+    <!-- SPLASH (Minimalis & Elegan — Pemilihan Materi Sepenuhnya di Dalam Aplikasi) -->
     <div id="splash" class="splash">
         <div class="splash-grid-bg"></div>
         <div class="splash-orb splash-orb-1"></div>
@@ -60,24 +60,48 @@
                 <span>SMKN 1 KUANTAN MUDIK &bull; FASE F</span>
             </div>
             <h1>TKJ <span>Learning</span></h1>
-            <p class="splash-sub">Platform Belajar TKJ, Fiber Optik &amp; Lab Simulasi</p>
+            <p class="splash-sub">Media Pembelajaran Interaktif TKJ &amp; Fiber Optik</p>
 
             <div class="splash-cta-group">
-                <button type="button" id="btn-splash-enter" onclick="startApp('home')" class="btn-splash-enter">
-                    <span>Akses Materi</span>
+                <button type="button" id="btn-splash-enter" data-splash-target="home"
+                    onclick="return window.__enterSplash('home')" class="btn-splash-enter">
+                    <span>Mulai Belajar</span>
                     <i class="fas fa-arrow-right"></i>
                 </button>
             </div>
 
-            <div class="splash-stats">
-                <div class="ss-item"><span class="ss-num">2</span><span class="ss-lbl">Mapel</span></div>
-                <div class="ss-div"></div>
-                <div class="ss-item"><span class="ss-num">22</span><span class="ss-lbl">Topik</span></div>
-                <div class="ss-div"></div>
-                <div class="ss-item"><span class="ss-num">470</span><span class="ss-lbl">Soal</span></div>
+            <div class="splash-meta-line" aria-label="Ringkasan Konten">
+                <span><strong>2</strong> Mapel</span>
+                <span class="sml-dot" aria-hidden="true"></span>
+                <span><strong>22</strong> Topik</span>
+                <span class="sml-dot" aria-hidden="true"></span>
+                <span><strong>59</strong> Perangkat</span>
+                <span class="sml-dot" aria-hidden="true"></span>
+                <span><strong>470</strong> Soal</span>
             </div>
         </div>
     </div>
+    <script>
+        window.__enterSplash = function (target) {
+            target = target || 'home';
+            if (typeof window.startApp === 'function') {
+                try { window.startApp(target); return false; } catch (e) { console.error(e); }
+            }
+            try {
+                window.__pendingSplashTarget = target;
+                var s = document.getElementById('splash');
+                var a = document.getElementById('app');
+                if (a) a.classList.remove('hidden');
+                if (s) {
+                    s.style.pointerEvents = 'none';
+                    s.style.transition = 'opacity .25s ease';
+                    s.style.opacity = '0';
+                    setTimeout(function () { s.style.display = 'none'; }, 260);
+                }
+            } catch (err) {}
+            return false;
+        };
+    </script>
 
     <!-- APP -->
     <div id="app" class="hidden">
@@ -486,7 +510,7 @@
         </nav>
     </div>
 
-    <script src="app.js?v=53"></script>
+    <script src="app.js?v=58"></script>
 </body>
 
 </html>

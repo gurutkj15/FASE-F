@@ -3,11 +3,26 @@
 // ============================================================
 'use strict';
 
+// ── SAFE STORAGE HELPERS ────────────────────────────────────
+function safeGetJSON(key, fallback = {}) {
+    try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return fallback;
+        const parsed = JSON.parse(raw);
+        return (parsed && typeof parsed === 'object') ? parsed : fallback;
+    } catch (e) {
+        return fallback;
+    }
+}
+function safeSetJSON(key, val) {
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
+}
+
 // ── STATE ──────────────────────────────────────────────────
 let currentPage  = '';
 let currentTrack = 'tkj'; // 'tkj' | 'fo'
 let quizState    = {};
-let progress     = JSON.parse(localStorage.getItem('tjkt_progress') || '{}');
+let progress     = safeGetJSON('tjkt_progress', {});
 
 // ── ROUTER: hash + riwayat (back/forward) ──────────────────
 // Setiap halaman punya alamat sendiri (#/topologi, #/fo-tp/tp21, ...)
@@ -83,6 +98,11 @@ function startApp(target, skipRender = false) {
     }
 }
 window.startApp = startApp;
+if (typeof window !== 'undefined' && window.__pendingSplashTarget) {
+    const _pending = window.__pendingSplashTarget;
+    window.__pendingSplashTarget = null;
+    setTimeout(() => startApp(_pending), 0);
+}
 
 // ============================================================
 // KEMBALI KE AWAL — 30 menit tanpa aktivitas ATAU lewat tombol Portal Awal
@@ -201,7 +221,7 @@ const lessonTitles = {
 // mode 'enrich' (di view pengayaan): ukuran huruf, tandai selesai, cetak
 function lessonTools(id, mode = 'lesson') {
     if (!lessonEnrichment[id]) return '';
-    const done = JSON.parse(localStorage.getItem('tjkt_lesson_done') || '{}');
+    const done = safeGetJSON('tjkt_lesson_done');
     const isDone = !!done[id];
     const fontBtns = mode === 'enrich'
         ? `<button class="clay-btn" onclick="changeLessonFont(-1)" aria-label="Perkecil teks">A−</button>
@@ -346,7 +366,7 @@ function showEnrichment(id, opts) {
 
 // Halaman hub "Materi Pengayaan" — daftar 15 topik, tiap kartu membuka view pengayaan
 function pengayaanPage() {
-    const done = JSON.parse(localStorage.getItem('tjkt_lesson_done') || '{}');
+    const done = safeGetJSON('tjkt_lesson_done');
     const ids = Object.keys(lessonEnrichment);
     const doneCount = ids.filter(k => done[k]).length;
     const emoj = ['📘','🔬','🛠️','🔢','🔀','🧭','🌐','🔌','📶','💡','🔐','🧱','🔑','🐧','🗄️'];
@@ -370,9 +390,9 @@ function pengayaanPage() {
 }
 
 function toggleLessonDone(id, btn) {
-    const done = JSON.parse(localStorage.getItem('tjkt_lesson_done') || '{}');
+    const done = safeGetJSON('tjkt_lesson_done');
     done[id] = !done[id];
-    localStorage.setItem('tjkt_lesson_done', JSON.stringify(done));
+    safeSetJSON('tjkt_lesson_done', done);
     btn.classList.toggle('is-done', done[id]);
     btn.innerHTML = `<i class="fas fa-check-circle"></i> ${done[id]?'Sudah dipelajari':'Tandai selesai'}`;
     toast(done[id] ? 'Progres belajar tersimpan.' : 'Status materi diperbarui.');
@@ -633,8 +653,8 @@ function closeSidebar() {
     document.getElementById('sidebar').classList.remove('open');
     document.getElementById('overlay').classList.remove('active');
 }
-document.getElementById('menu-btn').addEventListener('click', toggleSidebar);
-document.getElementById('close-sidebar').addEventListener('click', closeSidebar);
+document.getElementById('menu-btn')?.addEventListener('click', toggleSidebar);
+document.getElementById('close-sidebar')?.addEventListener('click', closeSidebar);
 
 // ============================================================
 // DEKORASI HALAMAN — breadcrumb, daftar isi, pager, progres baca
@@ -749,10 +769,12 @@ function initReadBar() {
 }
 function updateReadBar() {
     const b = document.getElementById('read-bar');
+    const y = window.scrollY || 0;
+    document.querySelector('.topbar')?.classList.toggle('scrolled', y > 12);
     if (!b) return;
     const h = document.documentElement.scrollHeight - window.innerHeight;
-    b.style.width = h > 60 ? Math.min(100, (window.scrollY / h) * 100) + '%' : '0%';
-    b.classList.toggle('show', window.scrollY > 60);
+    b.style.width = h > 60 ? Math.min(100, (y / h) * 100) + '%' : '0%';
+    b.classList.toggle('show', y > 60);
 }
 initReadBar();
 
@@ -787,8 +809,8 @@ function resumeCard() {
 
 // Peta/alur belajar per jalur
 function learningPath(track) {
-    const doneTkj = JSON.parse(localStorage.getItem('tjkt_lesson_done') || '{}');
-    const doneFo = JSON.parse(localStorage.getItem('tjkt_fo_done') || '{}');
+    const doneTkj = safeGetJSON('tjkt_lesson_done');
+    const doneFo = safeGetJSON('tjkt_fo_done');
     const rows = track === 'fo'
         ? FO_TP.map((t, i) => ({ n:t.code, title:t.title, act:`foOpen('${t.id}')`, done:!!doneFo[t.id] || progress['fo_' + t.id] !== undefined }))
         : TKJ_ORDER.map(k => ({ n:E_GROUP[k], title:lessonTitles[k] || k, act:`showPage('${k}')`, done:!!doneTkj[k] || progress[k] !== undefined }));
@@ -947,37 +969,55 @@ function initMotion() {
     if (!root) return;
 
     // 1) Stagger: nomor urut untuk animasi masuk berurutan
-    const staggerSel = '#content > .card,#content > .hero-card,#content > .hero-banner,#content > .topic-banner,' +
-        '#content > .feat-card,#content > .quick-grid,#content > figure.illo,#content > .dense-box,#content > .callout,' +
+    const staggerSel = '#content > .crumb-bar,#content > .toc-card,#content > .card,#content > .hero-card,#content > .hero-banner,#content > .topic-banner,' +
+        '#content > .portal-hero,#content > .portal-grid,#content > .util-grid,#content > .feat-card,#content > .quick-grid,#content > figure.illo,#content > .dense-box,#content > .callout,' +
         '#content > .section-head,#content > .quiz-hero,#content > .q-card,#content > .quiz-nav,#content > .acc-item,' +
-        '#content > .tab-group,#content > .dev-grid,#content > .assess-grid,#content > .step-item,#content > .lesson-enrichment';
+        '#content > .tab-group,#content > .dev-grid,#content > .assess-grid,#content > .step-item,#content > .lesson-enrichment,#content > .sim-lab-card,#content > .learn-path-card';
     root.querySelectorAll(staggerSel).forEach((el, i) => {
         if (!el.style.getPropertyValue('--stagger')) el.style.setProperty('--stagger', Math.min(i, 12));
     });
 
-    // 2) Reveal on scroll untuk elemen dalam kartu (sub-bagian)
-    if (_revealObs) _revealObs.disconnect();
-    _revealObs = new IntersectionObserver((entries) => {
-        entries.forEach(e => {
-            if (e.isIntersecting) { e.target.classList.add('in'); _revealObs.unobserve(e.target); }
-        });
-    }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+    // 2) Reveal on scroll untuk elemen dalam kartu & grid perangkat
+    if (_revealObs && typeof _revealObs.disconnect === 'function') _revealObs.disconnect();
+    const canObs = typeof IntersectionObserver === 'function';
+    if (canObs) {
+        _revealObs = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) { e.target.classList.add('in'); _revealObs.unobserve(e.target); }
+            });
+        }, { threshold: 0.02, rootMargin: '0px 0px -2% 0px' });
+    } else {
+        _revealObs = null;
+    }
 
-    // Tandai blok besar dalam kartu agar muncul saat di-scroll
+    const revealTargets = [];
     root.querySelectorAll('.dense-box,.callout,figure.illo,.tab-group,.acc-item,.dev-grid,.table-wrap,.code-block,' +
-        '.step-item,.tag-row,.lesson-enrichment,.topo-explorer,.tebak-wrap,.flash-deck,.ppt-gallery,.assess-grid')
+        '.step-item,.tag-row,.lesson-enrichment,.topo-explorer,.tebak-wrap,.flash-deck,.ppt-gallery,.assess-grid,' +
+        '.portal-card,.util-card,.module-card,.dev-gloss-card,.fo-fig,.sim-lab-card')
         .forEach((el, i) => {
             if (el.closest('.reveal')) return;
             el.classList.add('reveal');
-            el.style.setProperty('--rd', (i % 5) * 60 + 'ms');
-            _revealObs.observe(el);
+            el.style.setProperty('--rd', (i % 5) * 45 + 'ms');
+            const rect = typeof el.getBoundingClientRect === 'function' ? el.getBoundingClientRect() : null;
+            const inView = !canObs || (rect && rect.top < (window.innerHeight || 900) * 1.12);
+            if (inView) {
+                revealTargets.push(el);
+            } else if (_revealObs) {
+                _revealObs.observe(el);
+            }
         });
+
+    if (revealTargets.length) {
+        const flushInView = () => revealTargets.forEach(el => el.classList.add('in'));
+        if (typeof requestAnimationFrame === 'function') requestAnimationFrame(flushInView);
+        else flushInView();
+    }
 
     // 3) Count-up untuk angka statistik
     root.querySelectorAll('[data-count]').forEach(el => countUp(el));
 
-    // 4) Ripple sekali pakai untuk semua tombol
-    root.querySelectorAll('button,.btn,.snav-item,.bnav-btn,.topbar-btn,.quick-card,.assess-card').forEach(bindRipple);
+    // 4) Ripple sekali pakai untuk semua tombol & kartu aksi
+    root.querySelectorAll('button,.btn,.snav-item,.bnav-btn,.topbar-btn,.quick-card,.assess-card,.util-card,.portal-card,.module-card,.dg-chip,.hero-pill,.crumb-link').forEach(bindRipple);
 }
 
 // Count-up angka (dari 0 ke nilai)
@@ -1045,8 +1085,77 @@ function initComponents() {
     document.querySelectorAll('.flip-card').forEach(c => {
         c.addEventListener('click', () => c.classList.toggle('flipped'));
     });
-    // MOTION
+    // LIGHTBOX & MOTION
+    initLightbox();
     initMotion();
+}
+
+// 🔍 GLASSMORPHISM IMAGE LIGHTBOX VIEWER
+function openLightbox(src, title, caption, badges = '') {
+    if (!src || typeof document === 'undefined' || !document.body) return;
+    let lb = document.getElementById('tjkt-lightbox');
+    if (!lb) {
+        lb = document.createElement('div');
+        lb.id = 'tjkt-lightbox';
+        lb.className = 'tjkt-lightbox';
+        lb.setAttribute('role', 'dialog');
+        lb.setAttribute('aria-modal', 'true');
+        lb.innerHTML = `<div class="tjkt-lb-dialog">
+            <div class="tjkt-lb-top">
+                <div class="tjkt-lb-meta"><span class="tjkt-lb-title" id="tjkt-lb-title"></span><span id="tjkt-lb-badges"></span></div>
+                <button type="button" class="tjkt-lb-close" id="tjkt-lb-close" aria-label="Tutup pratinjau"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="tjkt-lb-stage"><img id="tjkt-lb-img" src="" alt=""></div>
+            <div class="tjkt-lb-caption" id="tjkt-lb-caption"></div>
+        </div>`;
+        document.body.appendChild(lb);
+        lb.addEventListener('click', (e) => {
+            if (e.target === lb || e.target.closest('#tjkt-lb-close')) closeLightbox();
+        });
+    }
+    const img = document.getElementById('tjkt-lb-img');
+    const ttl = document.getElementById('tjkt-lb-title');
+    const bdg = document.getElementById('tjkt-lb-badges');
+    const cap = document.getElementById('tjkt-lb-caption');
+    if (img) { img.src = src; img.alt = title || 'Pratinjau gambar'; }
+    if (ttl) ttl.textContent = title || 'Pratinjau Gambar';
+    if (bdg) bdg.innerHTML = badges;
+    if (cap) {
+        cap.textContent = caption || '';
+        cap.style.display = caption ? '' : 'none';
+    }
+    lb.classList.add('open');
+}
+
+function closeLightbox() {
+    const lb = document.getElementById('tjkt-lightbox');
+    if (lb) lb.classList.remove('open');
+}
+
+function initLightbox() {
+    if (window._tjktLightboxBound) return;
+    window._tjktLightboxBound = true;
+    const root = document.getElementById('content');
+    if (!root) return;
+    root.addEventListener('click', (e) => {
+        const img = e.target.closest('.dgc-img-wrap img, figure.illo img, .img-showcase img, .fo-shot img, .ppt-illo img, .sim-visual-frame img');
+        if (!img) return;
+        const cardEl = img.closest('.dev-gloss-card');
+        let title = img.alt || 'Pratinjau Visual';
+        let caption = '';
+        let badges = '';
+        if (cardEl) {
+            title = cardEl.querySelector('.dgc-title')?.textContent?.trim() || title;
+            caption = cardEl.querySelector('.dgc-desc')?.textContent?.trim() || '';
+            const cat = cardEl.querySelector('.dgc-cat')?.textContent?.trim() || '';
+            const layer = cardEl.querySelector('.dgc-layer')?.textContent?.trim() || '';
+            badges = [cat ? `<span class="dgc-cat">${cat}</span>` : '', layer ? `<span class="dgc-layer">${layer}</span>` : ''].join(' ');
+        } else {
+            const fig = img.closest('figure, .fo-fig, .img-showcase, .ppt-illo');
+            caption = fig?.querySelector('figcaption, .fo-cap, .cap')?.textContent?.trim() || '';
+        }
+        openLightbox(img.currentSrc || img.src, title, caption, badges);
+    });
 }
 
 // ── HELPER: Build UI pieces ────────────────────────────────
@@ -1263,7 +1372,7 @@ function applyTheme(t, persist = false) {
     const ic = document.querySelector('#theme-btn i');
     if (ic) ic.className = t === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
     const meta = document.getElementById('theme-color-meta');
-    if (meta) meta.setAttribute('content', t === 'dark' ? '#0e1628' : '#1e40af');
+    if (meta) meta.setAttribute('content', t === 'dark' ? '#0e1628' : '#2563eb');
 }
 function toggleTheme() {
     const cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
@@ -2079,10 +2188,10 @@ window.addEventListener('offline', () => { updateNetStatus(); toast('Mode Offlin
 // HOME PAGE
 // ============================================================
 function home() {
-    const doneTkj = JSON.parse(localStorage.getItem('tjkt_lesson_done') || '{}');
+    const doneTkj = safeGetJSON('tjkt_lesson_done');
     const tkjDone = TKJ_ORDER.filter(k => !!doneTkj[k] || progress[k] !== undefined).length;
     const tkjPct = Math.round((tkjDone / TKJ_ORDER.length) * 100);
-    const foDone = JSON.parse(localStorage.getItem('tjkt_fo_done') || '{}');
+    const foDone = safeGetJSON('tjkt_fo_done');
     const foDoneCount = FO_TP.filter(t => !!foDone[t.id] || progress['fo_' + t.id] !== undefined).length;
     const foPct = Math.round((foDoneCount / FO_TP.length) * 100);
     const totalTopics = TKJ_ORDER.length + FO_TP.length;
@@ -2107,7 +2216,7 @@ function home() {
     <div class="portal-grid">
         <div class="portal-card" onclick="enterTrack('tkj')">
             <div class="pc-head">
-                <div class="pc-icon"><i class="fas fa-network-wired"></i></div>
+                <div class="pc-icon pc-icon-img"><img src="assets/icons/ui/network.svg" alt="" class="ui-svg-icon" width="26" height="26"></div>
                 <span class="pc-badge">MAPEL INTI · 5 ELEMEN</span>
             </div>
             <h2>Konsentrasi Program Keahlian</h2>
@@ -2130,7 +2239,7 @@ function home() {
 
         <div class="portal-card pc-fo" onclick="enterTrack('fo')">
             <div class="pc-head">
-                <div class="pc-icon"><i class="fas fa-bolt"></i></div>
+                <div class="pc-icon pc-icon-img"><img src="assets/icons/ui/fiber.svg" alt="" class="ui-svg-icon" width="26" height="26"></div>
                 <span class="pc-badge">MAPEL PILIHAN · ${FO_TP.length} TP</span>
             </div>
             <h2>Mata Pelajaran Pilihan: Fiber Optik</h2>
@@ -2154,26 +2263,26 @@ function home() {
 
     <div class="util-grid">
         <button type="button" class="util-card" onclick="showPage('glosariumPerangkat')">
-            <span class="util-card-ic"><i class="fas fa-server"></i></span>
+            <span class="util-card-ic util-ic-img"><img src="assets/icons/ui/server.svg" alt="" class="ui-svg-icon" width="22" height="22"></span>
             <div><strong>Glosarium Perangkat</strong><small>${glosariumPerangkatData.length} perangkat bergambar</small></div>
         </button>
         <button type="button" class="util-card" onclick="showPage('glosarium')">
-            <span class="util-card-ic"><i class="fas fa-book-open"></i></span>
+            <span class="util-card-ic util-ic-img"><img src="assets/icons/ui/books.svg" alt="" class="ui-svg-icon" width="22" height="22"></span>
             <div><strong>Glosarium Istilah</strong><small>${glosariumData.length} istilah teknis</small></div>
         </button>
         <button type="button" class="util-card" onclick="showPage('ip')">
-            <span class="util-card-ic"><i class="fas fa-calculator"></i></span>
+            <span class="util-card-ic util-ic-img"><img src="assets/icons/ui/lab.svg" alt="" class="ui-svg-icon" width="22" height="22"></span>
             <div><strong>Kalkulator Subnet</strong><small>IPv4, CIDR &amp; VLSM</small></div>
         </button>
         <button type="button" class="util-card" onclick="showPage('progress')">
-            <span class="util-card-ic"><i class="fas fa-chart-bar"></i></span>
+            <span class="util-card-ic util-ic-img"><img src="assets/icons/ui/chart.svg" alt="" class="ui-svg-icon" width="22" height="22"></span>
             <div><strong>Progress Belajar</strong><small>Rekap skor &amp; KKM 75</small></div>
         </button>
     </div>`;
 }
 
 function tkjPage() {
-    const doneTkj = JSON.parse(localStorage.getItem('tjkt_lesson_done') || '{}');
+    const doneTkj = safeGetJSON('tjkt_lesson_done');
     const elements = [
         {
             code: 'E1', cls: 'e1', name: 'Perencanaan & Pengalamatan Jaringan',
@@ -3741,7 +3850,7 @@ const foLessonTitles = {
 
 function foLessonTools(tpId, mode = 'lesson') {
     if (!FO_ENRICHMENT[tpId]) return '';
-    const done = JSON.parse(localStorage.getItem('tjkt_fo_done') || '{}');
+    const done = safeGetJSON('tjkt_fo_done');
     const isDone = !!done[tpId];
     const fontBtns = mode === 'enrich'
         ? `<button class="clay-btn" onclick="changeLessonFont(-1)" aria-label="Perkecil teks">A−</button>
@@ -3764,9 +3873,9 @@ function foLessonTools(tpId, mode = 'lesson') {
 }
 
 function toggleFoLessonDone(tpId, btn) {
-    const done = JSON.parse(localStorage.getItem('tjkt_fo_done') || '{}');
+    const done = safeGetJSON('tjkt_fo_done');
     done[tpId] = !done[tpId];
-    localStorage.setItem('tjkt_fo_done', JSON.stringify(done));
+    safeSetJSON('tjkt_fo_done', done);
     if (btn) {
         btn.classList.toggle('is-done', done[tpId]);
         btn.innerHTML = `<i class="fas fa-check-circle"></i> ${done[tpId] ? 'Sudah dipelajari' : 'Tandai selesai'}`;
@@ -3825,7 +3934,7 @@ function showFoEnrichment(tpId, opts) {
 }
 
 function foPengayaanPage() {
-    const done = JSON.parse(localStorage.getItem('tjkt_fo_done') || '{}');
+    const done = safeGetJSON('tjkt_fo_done');
     const ids = Object.keys(FO_ENRICHMENT);
     const doneCount = ids.filter(k => done[k]).length;
     const emoj = ['🦺','🛠️','🔌','🔥','📟','📈','📋'];
@@ -4298,7 +4407,7 @@ function foFig(fig, n, total) {
 // ---- Beranda Fiber Optik (tersendiri, susun per elemen/TP) ----
 function fiberOptikPage() {
     const totalFig = FO_DASAR.length + FO_TP.reduce((s, t) => s + t.figs.length, 0);
-    const foDone = JSON.parse(localStorage.getItem('tjkt_fo_done') || '{}');
+    const foDone = safeGetJSON('tjkt_fo_done');
     const foDoneCount = FO_TP.filter(t => !!foDone[t.id] || progress['fo_' + t.id] !== undefined).length;
     const pct = Math.round((foDoneCount / FO_TP.length) * 100);
     const foTotalQ = FO_TP.reduce((s, t) => s + ((assessments['fo_' + t.id] || []).length), 0) + ((assessments.fiber || []).length);
@@ -5196,10 +5305,6 @@ const glosariumData = [
     // ── Keamanan ──
     ['Keamanan','CIA Triad','Confidentiality, Integrity, Availability — 3 pilar keamanan informasi.'],
     ['Keamanan','AAA','Authentication, Authorization, Accounting — kerangka autentikasi.'],
-    ['Keamanan','MFA','Multi-Factor Authentication — 2+ faktor: password + OTP/biometrik.'],
-    ['Keamanan','802.1X','Autentikasi port-based sebelum perangkat diizinkan masuk jaringan.'],
-    ['Keamanan','RADIUS','Server AAA terpusat untuk autentikasi user jaringan.'],
-    ['Keamanan','SIEM','Security Information & Event Management — analisis log keamanan terpusat.'],
     ['Keamanan','IDS','Intrusion Detection System — mendeteksi & memberi peringatan ancaman.'],
     ['Keamanan','IPS','Intrusion Prevention System — mendeteksi DAN memblokir ancaman otomatis.'],
     ['Keamanan','VPN','Virtual Private Network — koneksi terenkripsi via jaringan publik.'],
@@ -5252,7 +5357,7 @@ const glosariumData = [
 ];
 
 // ============================================================
-// GLOSARIUM PERANGKAT — Katalog Visual Perangkat Jaringan & Fiber Optik
+// GLOSARIUM PERANGKAT KERAS JARINGAN & FIBER OPTIK (BERGAMBAR)
 // ============================================================
 const glosariumPerangkatData = [
     // ── 1. Router & Switch ──
@@ -5957,7 +6062,7 @@ function progressPage() {
 
 // Kartu progres jalur Fiber Optik (7 asesmen TP + komprehensif)
 function foProgressCard() {
-    const done = JSON.parse(localStorage.getItem('tjkt_fo_done') || '{}');
+    const done = safeGetJSON('tjkt_fo_done');
     const rows = FO_TP.map(t => ({ k:'fo_' + t.id, n:`${t.code} — ${t.title}`, done:!!done[t.id] }));
     const scores = rows.map(r => progress[r.k]).filter(s => s !== undefined);
     const avg = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
@@ -6684,7 +6789,7 @@ function showResult() {
 
     // Save progress
     progress[quizState.topic] = pct;
-    localStorage.setItem('tjkt_progress', JSON.stringify(progress));
+    safeSetJSON('tjkt_progress', progress);
 
     let grade, color, msg;
     if (pct >= 90) { grade='A'; color='#22c55e'; msg='Luar biasa! Kamu sangat menguasai materi ini! 🏆'; }
@@ -6757,7 +6862,7 @@ if ('serviceWorker' in navigator) {
             .then(reg => {
                 if (reg && typeof reg.update === 'function') reg.update().catch(() => {});
             })
-            .catch(err => console.log('SW Error:', err));
+            .catch(() => {});
     });
 }
 
@@ -6776,7 +6881,7 @@ window.addEventListener('load', () => {
     renderRoute(r, 0);
 });
 
-// Esc menutup sidebar / hasil pencarian
+// Esc menutup lightbox / sidebar / hasil pencarian
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') { closeSidebar(); closeSearch(); }
+    if (e.key === 'Escape') { closeLightbox(); closeSidebar(); closeSearch(); }
 });

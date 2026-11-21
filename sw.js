@@ -6,7 +6,7 @@
    - Navigasi halaman                          -> network-first, fallback cache
    - Resource CDN (font/icon)                  -> stale-while-revalidate
    ============================================================ */
-const VERSION = 'v53-hd-device-photos';
+const VERSION = 'v58-deploy-ready';
 const CACHE_APP = `tjkt-app-${VERSION}`;
 const CACHE_ASSET = `tjkt-assets-${VERSION}`;
 const CACHE_CDN = `tjkt-cdn-${VERSION}`;
@@ -14,14 +14,24 @@ const CACHE_CDN = `tjkt-cdn-${VERSION}`;
 const APP_SHELL = [
     './',
     './index.html',
-    './style.css?v=53',
-    './app.js?v=53',
+    './style.css?v=58',
+    './app.js?v=58',
     './manifest.json',
     './assets/icons/favicon.ico',
+    './assets/icons/favicon-32.png',
+    './assets/icons/favicon-16.png',
     './assets/icons/icon-192.png',
     './assets/icons/icon-512.png',
     './assets/icons/maskable-512.png',
-    './assets/icons/apple-touch-icon.png'
+    './assets/icons/apple-touch-icon.png',
+    './assets/icons/ui/network.svg',
+    './assets/icons/ui/fiber.svg',
+    './assets/icons/ui/server.svg',
+    './assets/icons/ui/books.svg',
+    './assets/icons/ui/chart.svg',
+    './assets/icons/ui/grad.svg',
+    './assets/icons/ui/lab.svg',
+    './assets/icons/ui/target.svg'
 ];
 
 // Ilustrasi pembelajaran (SVG kecil) — di-precache agar tersedia offline penuh
