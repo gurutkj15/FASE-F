@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 400" font-family="Inter, 'Segoe UI', sans-serif">
+  <rect width="860" height="400" rx="20" fill="#0f172a"/>
+  <text x="430" y="32" text-anchor="middle" font-size="17" font-weight="800" fill="#f8fafc">Arsitektur Sistem Keamanan Jaringan: NGFW, Inline IPS, Passive IDS, SIEM &amp; EDR</text>
+  <text x="430" y="51" text-anchor="middle" font-size="11.5" fill="#94a3b8">Perbandingan Penempatan IDS (Out-of-Band SPAN/TAP — Deteksi &amp; Alert) vs IPS (Inline — Blokir Paket Otomatis)</text>
+
+  <!-- Internet / Untrusted -->
+  <rect x="26" y="130" width="115" height="76" rx="12" fill="#450a0a" stroke="#ef4444" stroke-width="2"/>
+  <text x="83" y="162" text-anchor="middle" font-size="12" font-weight="800" fill="#fca5a5">INTERNET</text>
+  <text x="83" y="180" text-anchor="middle" font-size="9.5" fill="#fecaca">Untrusted WAN</text>
+  <text x="83" y="194" text-anchor="middle" font-size="9" fill="#f87171">(DDoS / Exploit)</text>
+
+  <!-- Perimeter Firewall -->
+  <rect x="172" y="130" width="136" height="76" rx="12" fill="#7c2d12" stroke="#f97316" stroke-width="2"/>
+  <text x="240" y="156" text-anchor="middle" font-size="12" font-weight="800" fill="#fed7aa">Perimeter NGFW</text>
+  <text x="240" y="173" text-anchor="middle" font-size="9.5" fill="#ffedd5">Stateful Firewall</text>
+  <text x="240" y="188" text-anchor="middle" font-size="9" fill="#fdba74">ACL + NAT + VPN</text>
+
+  <!-- Inline IPS -->
+  <rect x="340" y="130" width="144" height="76" rx="12" fill="#064e3b" stroke="#10b981" stroke-width="2.5"/>
+  <text x="412" y="155" text-anchor="middle" font-size="12" font-weight="800" fill="#6ee7b7">IPS (Inline Mode)</text>
+  <text x="412" y="172" text-anchor="middle" font-size="9.5" fill="#ecfdf5">Snort / Suricata IPS</text>
+  <text x="412" y="188" text-anchor="middle" font-size="9" font-weight="700" fill="#34d399">Blokir/Drop Paket Jahat</text>
+
+  <!-- Core Switch with SPAN port -->
+  <rect x="516" y="130" width="144" height="76" rx="12" fill="#1e3a8a" stroke="#3b82f6" stroke-width="2"/>
+  <text x="588" y="156" text-anchor="middle" font-size="12" font-weight="800" fill="#93c5fd">Core Switch L3</text>
+  <text x="588" y="173" text-anchor="middle" font-size="9.5" fill="#e2e8f0">802.1Q VLAN + DAI</text>
+  <text x="588" y="188" text-anchor="middle" font-size="9" fill="#38bdf8">SPAN / Port Mirroring</text>
+
+  <!-- Protected LAN & EDR -->
+  <rect x="692" y="114" width="142" height="108" rx="12" fill="#1e293b" stroke="#22c55e" stroke-width="2"/>
+  <text x="763" y="138" text-anchor="middle" font-size="11.5" font-weight="800" fill="#4ade80">Internal LAN &amp; Server</text>
+  <text x="763" y="156" text-anchor="middle" font-size="9.5" fill="#e2e8f0">• Endpoint Antivirus/EDR</text>
+  <text x="763" y="172" text-anchor="middle" font-size="9.5" fill="#e2e8f0">• Host Firewall (UFW)</text>
+  <text x="763" y="188" text-anchor="middle" font-size="9.5" fill="#e2e8f0">• Patch &amp; Hardening</text>
+  <text x="763" y="206" text-anchor="middle" font-size="9" fill="#86efac">Zero Trust Access</text>
+
+  <!-- Main Traffic Arrows -->
+  <line x1="141" y1="168" x2="172" y2="168" stroke="#f87171" stroke-width="3"/>
+  <line x1="308" y1="168" x2="340" y2="168" stroke="#fb923c" stroke-width="3"/>
+  <line x1="484" y1="168" x2="516" y2="168" stroke="#34d399" stroke-width="3"/>
+  <line x1="660" y1="168" x2="692" y2="168" stroke="#60a5fa" stroke-width="3"/>
+
+  <!-- DMZ Branch from NGFW -->
+  <line x1="240" y1="206" x2="240" y2="268" stroke="#fbbf24" stroke-width="2.5" stroke-dasharray="5,4"/>
+  <rect x="160" y="268" width="160" height="96" rx="12" fill="#1e293b" stroke="#f59e0b" stroke-width="2"/>
+  <text x="240" y="290" text-anchor="middle" font-size="11.5" font-weight="800" fill="#fbbf24">Zona DMZ (Semi-Trust)</text>
+  <text x="240" y="308" text-anchor="middle" font-size="9.5" fill="#e2e8f0">• Public Web Server (HTTPS)</text>
+  <text x="240" y="324" text-anchor="middle" font-size="9.5" fill="#e2e8f0">• Public DNS &amp; Mail Relay</text>
+  <text x="240" y="344" text-anchor="middle" font-size="9" fill="#fde68a">Terisolasi dari Database LAN</text>
+
+  <!-- Passive IDS & SIEM Branch from Core Switch SPAN Port -->
+  <line x1="588" y1="206" x2="588" y2="268" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="5,4"/>
+  <text x="646" y="242" text-anchor="middle" font-size="9.5" font-weight="700" fill="#38bdf8">Salinan Trafik (SPAN/TAP)</text>
+
+  <rect x="470" y="268" width="236" height="96" rx="12" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+  <text x="588" y="290" text-anchor="middle" font-size="11.5" font-weight="800" fill="#38bdf8">IDS (Passive Mode) &amp; SIEM / SOC</text>
+  <text x="588" y="308" text-anchor="middle" font-size="9.5" fill="#e2e8f0">• Analisis Deep Packet Inspection (DPI)</text>
+  <text x="588" y="324" text-anchor="middle" font-size="9.5" fill="#e2e8f0">• Deteksi Anomali &amp; Signature CVE</text>
+  <text x="588" y="344" text-anchor="middle" font-size="9" font-weight="700" fill="#7dd3fc">Mengirim Alert ke Admin &amp; Korelasi Log SIEM</text>
+</svg>

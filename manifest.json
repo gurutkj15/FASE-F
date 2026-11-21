@@ -1,7 +1,7 @@
 {
-  "name": "Buku Ajar TJKT Fase F — SMKN 1 Kuantan Mudik",
-  "short_name": "TJKT Fase F",
-  "description": "Buku ajar digital TJKT Fase F dengan materi pendalaman, ilustrasi, kalkulator subnetting, asesmen, dan dukungan offline.",
+  "name": "TJKT Studio — Platform Belajar TKJ & Fiber Optik Fase F",
+  "short_name": "TJKT Studio",
+  "description": "Platform belajar interaktif TKJ & Fiber Optik Fase F (SMKN 1 Kuantan Mudik): 22 topik berilustrasi, lab simulasi, glosarium perangkat, kalkulator IP, dan 470 soal asesmen offline.",
   "lang": "id",
   "dir": "ltr",
   "id": "tjkt-fase-f-smkn1km",

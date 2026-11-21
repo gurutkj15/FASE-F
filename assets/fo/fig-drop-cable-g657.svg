@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 340" font-family="Inter, 'Segoe UI', sans-serif">
+  <rect width="760" height="340" rx="16" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="380" y="30" text-anchor="middle" font-size="15.5" font-weight="800" fill="#0f172a">Penampang Kabel Drop Core FTTH Figure-8 (ITU-T G.657.A1 / A2)</text>
+  <text x="380" y="49" text-anchor="middle" font-size="11" fill="#64748b">Kabel pencabangan akhir (last-mile) dari ODP tiang menuju roset pelanggan rumah — tahan tekuk &amp; tarik mandiri</text>
+
+  <!-- 3D Isometric-ish Figure-8 Drop Cable Profile -->
+  <!-- Messenger top lobe -->
+  <ellipse cx="180" cy="122" rx="34" ry="26" fill="#0f172a" stroke="#475569" stroke-width="2"/>
+  <circle cx="180" cy="122" r="11" fill="#cbd5e1" stroke="#64748b" stroke-width="2"/>
+  <!-- Neck bridge -->
+  <rect x="171" y="142" width="18" height="22" fill="#0f172a"/>
+  <!-- Lower bow-type butterfly lobe -->
+  <rect x="108" y="162" width="144" height="62" rx="12" fill="#0f172a" stroke="#334155" stroke-width="2"/>
+  <!-- 2 FRP Strength members -->
+  <circle cx="134" cy="193" r="10" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+  <circle cx="226" cy="193" r="10" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+  <!-- 2 Fiber cores -->
+  <circle cx="172" cy="193" r="6" fill="#2563eb" stroke="#ffffff" stroke-width="1"/>
+  <circle cx="188" cy="193" r="6" fill="#f97316" stroke="#ffffff" stroke-width="1"/>
+
+  <!-- Annotations -->
+  <g font-size="11" font-weight="700">
+    <line x1="191" y1="120" x2="310" y2="96" stroke="#475569" stroke-width="1.5"/>
+    <text x="318" y="99" fill="#0f172a">1. Messenger Wire (Kawat Baja Ø 1.0–1.2 mm)</text>
+    <text x="318" y="114" font-size="10" font-weight="500" fill="#64748b">Menahan beban tarik bentangan udara ODP → rumah (dijepit S-Clamp / Strain Clamp)</text>
+
+    <line x1="234" y1="188" x2="310" y2="152" stroke="#0284c7" stroke-width="1.5"/>
+    <text x="318" y="155" fill="#0369a1">2. Dua Strength Member FRP (Fiber Reinforced Plastic)</text>
+    <text x="318" y="170" font-size="10" font-weight="500" fill="#64748b">Tulang dielektrik kiri-kanan pelindung serat dari himpitan &amp; lengkungan tajam</text>
+
+    <line x1="188" y1="198" x2="310" y2="205" stroke="#ea580c" stroke-width="1.5"/>
+    <text x="318" y="208" fill="#c2410c">3. Inti Serat Optik 1 atau 2 Core (Biru &amp; Orange)</text>
+    <text x="318" y="223" font-size="10" font-weight="500" fill="#64748b">Serat Single-Mode G.657.A1/A2 · Radius tekuk aman minimal 10 mm</text>
+
+    <line x1="114" y1="216" x2="114" y2="262" stroke="#334155" stroke-width="1.5"/>
+    <text x="318" y="256" fill="#1e293b">4. Jaket Luar LSZH (Low Smoke Zero Halogen)</text>
+    <text x="318" y="271" font-size="10" font-weight="500" fill="#64748b">Dimensi luar ± 2.0 × 5.0 mm · Tahan sinar UV &amp; tidak mengeluarkan asap beracun di indoor</text>
+  </g>
+
+  <rect x="28" y="286" width="704" height="40" rx="8" fill="#fffbeb" stroke="#f59e0b"/>
+  <text x="380" y="310" text-anchor="middle" font-size="10.8" font-weight="700" fill="#92400e">Catatan Istilah: Istilah yang benar adalah "Drop Cable / Drop Core" (pencabangan ke pelanggan), bukan "droop".</text>
+</svg>

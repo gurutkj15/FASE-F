@@ -1,47 +1,73 @@
-PWA-TJKT — CLAY EDITION & BUKU AJAR PENGAYAAN
-SMK Negeri 1 Kuantan Mudik
+=====================================================================
+PANDUAN FINALISASI & AUDIT STANDAR INDUSTRI / KURIKULUM NASIONAL (v43)
+=====================================================================
 
-ISI PAKET
-- index.html       : halaman utama aplikasi
-- style.css        : desain Claymorphism, tema terang/gelap, responsif, mode cetak
-- app.js           : navigasi, materi, kalkulator, asesmen, progres, dan interaksi
-- sw.js            : service worker offline-first (cache v10-clay-book)
-- manifest.json    : metadata instalasi PWA
-- assets/          : ilustrasi, foto perangkat, ikon, dan media pembelajaran
+1. PENYELARASAN PENUH DENGAN KURIKULUM NASIONAL (KEPMENDIKBUDRISTEK NO. 032/H/KR/2024)
+   - Struktur 5 Elemen Capaian Pembelajaran SMK/MAK Fase F TJKT diselaraskan secara konsisten
+     di Sidebar (index.html), Peta Materi (tkjPage), Capaian Pembelajaran (intro),
+     dan Materi Pengayaan (lessonEnrichment & lessonTitles):
+     * Elemen 1 (E1): Perencanaan dan Pengalamatan Jaringan
+       (1. Topologi, 2. Kebutuhan Teknis, 3. Peralatan Jaringan, 4. IP, CIDR & VLSM)
+     * Elemen 2 (E2): Teknologi Jaringan Kabel dan Nirkabel
+       (5. Jaringan Kabel, 6. Jaringan Nirkabel, 7. Fiber Optic)
+     * Elemen 3 (E3): Keamanan Jaringan
+       (8. Keamanan Jaringan, 9. Firewall & ACL, 10. Kriptografi)
+     * Elemen 4 (E4): Pemasangan dan Konfigurasi Perangkat Jaringan
+       (11. VLAN, 12. Routing Statis & Dinamis, 13. NAT & Internet Gateway)
+     * Elemen 5 (E5): Administrasi Sistem Jaringan
+       (14. Sistem Operasi Jaringan Linux, 15. Konfigurasi Server Jaringan)
 
-PENGEMBANGAN UTAMA
-1. Materi pengayaan bergaya buku ajar ditambahkan untuk 15 bahasan:
-   topologi, analisis kebutuhan, peralatan jaringan, IP/CIDR/VLSM/subnetting,
-   VLAN, routing, NAT/internet gateway, kabel, nirkabel, fiber optic,
-   keamanan jaringan, firewall/ACL, kriptografi, sistem operasi Linux,
-   dan layanan server.
-2. Setiap materi pengayaan memuat penjelasan konsep, tabel/komparasi,
-   contoh penerapan, prosedur kerja, troubleshooting, catatan teknisi,
-   dan latihan/evaluasi.
-3. Ditambahkan alat bantu belajar: ukuran teks A-/A+, penanda materi selesai,
-   penyimpanan progres lokal, dan cetak materi.
-4. Desain diperbarui ke Claymorphism dengan permukaan lembut, bayangan timbul,
-   kartu tactile, warna lembut, state hover/focus, serta penyesuaian dark mode.
-5. Bagian Linux yang pada paket sumber terpotong/tidak valid telah direkonstruksi
-   agar halaman Sistem Operasi Jaringan dapat dibuka.
-6. Cache Service Worker diperbarui agar versi baru tidak tertahan cache lama.
-7. Metadata PWA diperbarui.
+2. PERBAIKAN PENEMPATAN MATERI, AKURASI TEKNIS & TOMBOL ASESMEN
+   - Reordering lessonEnrichment (1..15): Memindahkan VLAN, Routing, dan NAT dari posisi 5–7
+     ke posisi 11–13 (Elemen 4) agar urut 100% sesuai E1 → E2 → E3 → E4 → E5.
+   - Perbaikan Bug Matematika & Visualisasi di Materi IP/Subnetting (ip()):
+     * Perbaikan off-by-one pada dropdown Kalkulator Subnetting (/24 s.d. /30 kini menampilkan
+       subnet mask yang tepat: 255.255.255.0 s.d. 255.255.255.252).
+     * Perbaikan visualisasi biner SVG CIDR /26 (26 bit network = 1, 6 bit host = 0).
+     * Perbaikan tabel VLSM Lantai 1 (/25 = 126 host tersedia, bukan 62).
+     * Perbaikan perhitungan broadcast 192.168.1.128/26 → 192.168.1.191.
+   - Perbaikan Konseptual Kriptografi (kriptografi()):
+     * Tanda tangan digital (Digital Signature) mengenkripsi hash pesan menggunakan
+       PRIVATE KEY PENGIRIM dan diverifikasi menggunakan PUBLIC KEY PENGIRIM.
+   - Pemisahan Materi Sistem Operasi Jaringan (linux()) vs Layanan Server (server()):
+     * Memindahkan galeri Network Operating System (Cisco IOS, MikroTik RouterOS, Juniper Junos)
+       dari halaman Konfigurasi Server ke halaman Sistem Operasi Jaringan.
+     * Menambahkan diagram FHS Linux (linux-filetree.svg) & ringkasan inti pada linux(),
+       serta memperbaiki tombol asesmen bawah linux() dari showAssessment('server')
+       menjadi showAssessment('linux').
+   - Melengkapi tombol CTA Asesmen di akhir seluruh 15 halaman materi Konsentrasi TKJ
+     dan menyelaraskan total 470 soal di seluruh aplikasi.
 
-CARA MENJALANKAN
-- Ekstrak ZIP.
-- Untuk pengujian lokal, jalankan melalui web server (bukan membuka file HTML
-  langsung), misalnya ekstensi Live Server di VS Code.
-- Untuk publikasi, unggah seluruh isi folder PWA-TJKT ke hosting yang mendukung
-  HTTPS. Service Worker dan instalasi PWA membutuhkan secure context (HTTPS),
-  kecuali localhost.
-- Setelah pembaruan, buka ulang aplikasi. Jika masih menampilkan versi lama,
-  tutup aplikasi PWA lalu lakukan refresh/reload; cache lama memakai versi v9
-  dan versi baru memakai v10-clay-book.
+3. AUDIT, RELOKASI & PENGGANTIAN GAMBAR STANDAR INDUSTRI
+   - Seluruh referensi gambar keliru/duplikat pada assets/imgs/img*.png telah dibersihkan:
+     * topologi(): Mengganti img23/24/25/27 (yang sebelumnya berisi gambar spektrum radio
+       dan kartu NIC) dengan diagram topologi yang sebenarnya (topologi-bus.png,
+       topologi-star.png, topologi-ring.jpg, topologi-tree.png).
+     * peralatan(): Memperbaiki seluruh label perangkat keras sesuai foto aktual
+       (Cisco ISR, Juniper SSR130, MikroTik hAP lite RB941-2nD, NETGEAR M4300 L3 Switch,
+       Cisco SG110-24HP PoE, TP-Link TL-SF1024D, Linksys WAP54G).
+     * routing(): Mengganti routing-flow.jpg (flowchart URL HTTP 404 web) dengan diagram SVG
+       mesin forwarding paket IP Layer 3 (assets/ppt/routing-l3-engine.svg) sesuai RFC 1812
+       (Longest Prefix Match, Administrative Distance, Metric) & menghapus duplikasi img94/96.
+     * nat(): Mengganti diagram ber-typo ("SWITH HUB" / "Destenation") & duplikat img99/102
+       dengan diagram SVG arsitektur NAT/PAT Masquerade & Port Forwarding
+       (assets/ppt/nat-mikrotik-topology.svg).
+     * kabel(): Mengganti tabel fungsi warna kabel yang keliru & ber-watermark serta menghapus
+       gambar NIC (img40.png) yang salah tempat dengan diagram SVG standar ANSI/TIA-568.2-D
+       T568A/T568B, 100BASE-TX vs 1000BASE-T Gigabit 4-Pair, IEEE 802.3af/at/bt PoE, dan
+       matriks kategori Cat5e–Cat8 (assets/ppt/kabel-t568-gigabit-poe.svg).
+     * nirkabel(): Mengganti diagram ber-watermark dengan diagram SVG arsitektur Wireless
+       Outdoor PtP Backhaul, Clearance ≥60% Zona Fresnel, PtMP Sectoral, EIRP, RSSI & SNR
+       (assets/ppt/wifi-ptp-ptmp-fresnel.svg).
+     * keamanan(): Memindahkan gambar yang terselip di dalam blok CIA Triad dan mengganti
+       ilustrasi IDS kasar dengan diagram arsitektur NGFW, DMZ, Inline IPS vs Passive SPAN/TAP
+       IDS, SIEM, & EDR (assets/ppt/sec-ids-ips-edr-arch.svg).
+     * intro() & server(): Menambahkan ilustrasi enkapsulasi OSI (packet-journey.svg) di intro()
+       dan memperbaiki gambar Apache HTTP Server (app-apache.jpg) di server().
 
-CATATAN
-- Data progres dan status materi disimpan pada localStorage browser/perangkat.
-  Data tersebut tidak otomatis tersinkron ke perangkat lain.
-- Aplikasi tetap menggunakan aset dan struktur proyek yang ada. Perubahan
-  dilakukan pada file proyek, bukan mengharuskan framework/build tambahan.
-- Uji konfigurasi perangkat jaringan selalu lakukan di lingkungan lab/simulasi
-  dan sesuaikan sintaks dengan model serta versi perangkat.
+4. REFERENSI & SUMBER STANDAR INDUSTRI TERVERIFIKASI
+   - Setiap modul pengayaan (15 topik TKJ & 7 TP Fiber Optik) kini dilengkapi tautan referensi
+     standar internasional: Kepmendikbudristek No. 032/H/KR/2024, SKKNI No. 321/2016,
+     IEEE 802.1Q/802.1w/802.3/802.11ax-be, IETF RFC 1812/1918/2131/2328/3022/4271/4632/6598/8200/8446,
+     ANSI/TIA-568.2-D & 568.3-D, ITU-T G.114/G.652/G.657/G.984, NIST SP 800-41/61/94 & FIPS 197,
+     OWASP Top 10, FOA, Linux Foundation FHS 3.0, ISC BIND9, dan Apache HTTP Server.

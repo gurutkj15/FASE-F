@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 430" font-family="Inter, 'Segoe UI', sans-serif">
+  <rect width="860" height="430" rx="20" fill="#0f172a"/>
+  <text x="430" y="34" text-anchor="middle" font-size="17" font-weight="800" fill="#f8fafc">Arsitektur Gateway NAT / PAT (RFC 3022) pada RouterOS &amp; Cisco IOS</text>
+  <text x="430" y="54" text-anchor="middle" font-size="11.5" fill="#94a3b8">Translasi IP Privat (RFC 1918) ke IP Publik WAN dengan Port Address Translation (Masquerade) &amp; Port Forwarding</text>
+
+  <!-- LAN Zone -->
+  <rect x="24" y="74" width="265" height="165" rx="14" fill="#1e293b" stroke="#3b82f6" stroke-width="2"/>
+  <text x="156" y="96" text-anchor="middle" font-size="12" font-weight="800" fill="#60a5fa">JARINGAN LOKAL (INSIDE / LAN)</text>
+  <text x="156" y="112" text-anchor="middle" font-size="10.5" font-family="'Fira Code', monospace" fill="#93c5fd">Subnet: 192.168.1.0/24</text>
+
+  <rect x="40" y="126" width="110" height="46" rx="8" fill="#0f172a" stroke="#475569"/>
+  <text x="95" y="146" text-anchor="middle" font-size="10.5" font-weight="700" fill="#f8fafc">PC-1 (Client)</text>
+  <text x="95" y="162" text-anchor="middle" font-size="9.5" font-family="'Fira Code', monospace" fill="#38bdf8">192.168.1.10</text>
+
+  <rect x="164" y="126" width="110" height="46" rx="8" fill="#0f172a" stroke="#475569"/>
+  <text x="219" y="146" text-anchor="middle" font-size="10.5" font-weight="700" fill="#f8fafc">Web Server LAN</text>
+  <text x="219" y="162" text-anchor="middle" font-size="9.5" font-family="'Fira Code', monospace" fill="#4ade80">192.168.1.100:80</text>
+
+  <rect x="75" y="186" width="164" height="38" rx="8" fill="#1e3a8a"/>
+  <text x="157" y="204" text-anchor="middle" font-size="10.5" font-weight="700" fill="#e2e8f0">Managed Switch Layer 2</text>
+  <text x="157" y="217" text-anchor="middle" font-size="9" fill="#93c5fd">Gateway Default → 192.168.1.1</text>
+
+  <!-- NAT Router Center -->
+  <rect x="318" y="74" width="224" height="165" rx="14" fill="#312e81" stroke="#818cf8" stroke-width="2.5"/>
+  <text x="430" y="98" text-anchor="middle" font-size="13" font-weight="800" fill="#c7d2fe">ROUTER GATEWAY + NAT</text>
+  <text x="430" y="115" text-anchor="middle" font-size="10" fill="#a5b4fc">(MikroTik RouterOS / Cisco ISR)</text>
+
+  <rect x="332" y="128" width="196" height="44" rx="8" fill="#1e1b4b"/>
+  <text x="430" y="146" text-anchor="middle" font-size="10" font-family="'Fira Code', monospace" fill="#60a5fa">ether2-LAN: 192.168.1.1/24</text>
+  <text x="430" y="162" text-anchor="middle" font-size="10" font-family="'Fira Code', monospace" fill="#fbbf24">ether1-WAN: 203.0.113.5/30</text>
+
+  <rect x="332" y="182" width="196" height="44" rx="8" fill="#0f172a"/>
+  <text x="430" y="200" text-anchor="middle" font-size="10" font-weight="700" fill="#4ade80">Conntrack NAT State Table</text>
+  <text x="430" y="215" text-anchor="middle" font-size="9.5" fill="#cbd5e1">SRCNAT (Masquerade) &amp; DSTNAT</text>
+
+  <!-- WAN Zone -->
+  <rect x="571" y="74" width="265" height="165" rx="14" fill="#1e293b" stroke="#f59e0b" stroke-width="2"/>
+  <text x="703" y="96" text-anchor="middle" font-size="12" font-weight="800" fill="#fbbf24">JARINGAN PUBLIK (OUTSIDE / WAN)</text>
+  <text x="703" y="112" text-anchor="middle" font-size="10.5" font-family="'Fira Code', monospace" fill="#fde68a">ISP Gateway: 203.0.113.4/30</text>
+
+  <rect x="588" y="130" width="108" height="54" rx="8" fill="#0f172a" stroke="#475569"/>
+  <text x="642" y="152" text-anchor="middle" font-size="10.5" font-weight="700" fill="#f8fafc">ISP / Internet</text>
+  <text x="642" y="168" text-anchor="middle" font-size="9.5" font-family="'Fira Code', monospace" fill="#fbbf24">203.0.113.6</text>
+
+  <rect x="710" y="130" width="112" height="54" rx="8" fill="#0f172a" stroke="#475569"/>
+  <text x="766" y="152" text-anchor="middle" font-size="10.5" font-weight="700" fill="#f8fafc">Cloud DNS/Web</text>
+  <text x="766" y="168" text-anchor="middle" font-size="9.5" font-family="'Fira Code', monospace" fill="#38bdf8">8.8.8.8:443</text>
+
+  <!-- Connectors -->
+  <line x1="289" y1="156" x2="318" y2="156" stroke="#60a5fa" stroke-width="3"/>
+  <line x1="542" y1="156" x2="571" y2="156" stroke="#fbbf24" stroke-width="3"/>
+
+  <!-- Bottom Packet Translation Table -->
+  <rect x="24" y="256" width="812" height="154" rx="14" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <text x="430" y="280" text-anchor="middle" font-size="13" font-weight="800" fill="#38bdf8">Proses Translasi Header Paket IP &amp; Port TCP/UDP pada Tabel NAT</text>
+
+  <!-- Outbound SRCNAT -->
+  <rect x="40" y="294" width="380" height="100" rx="10" fill="#0f172a" stroke="#22c55e" stroke-width="1.5"/>
+  <text x="230" y="314" text-anchor="middle" font-size="11.5" font-weight="800" fill="#4ade80">1. Outbound Traffic — SRCNAT / PAT (Masquerade)</text>
+  <g font-family="'Fira Code', monospace" font-size="10" fill="#e2e8f0">
+    <text x="54" y="336">Sebelum NAT (LAN):</text>
+    <text x="54" y="352" fill="#93c5fd">SRC: 192.168.1.10:54321  →  DST: 8.8.8.8:443</text>
+    <text x="54" y="370">Sesudah NAT (WAN):</text>
+    <text x="54" y="386" fill="#fbbf24">SRC: 203.0.113.5:61001   →  DST: 8.8.8.8:443</text>
+  </g>
+
+  <!-- Inbound DSTNAT -->
+  <rect x="440" y="294" width="380" height="100" rx="10" fill="#0f172a" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="630" y="314" text-anchor="middle" font-size="11.5" font-weight="800" fill="#fbbf24">2. Inbound Traffic — DSTNAT (Port Forwarding)</text>
+  <g font-family="'Fira Code', monospace" font-size="10" fill="#e2e8f0">
+    <text x="454" y="336">Sebelum NAT (dari Internet ke IP Publik):</text>
+    <text x="454" y="352" fill="#fde68a">SRC: 198.51.100.9:49152  →  DST: 203.0.113.5:8080</text>
+    <text x="454" y="370">Sesudah DSTNAT (diteruskan ke Server LAN):</text>
+    <text x="454" y="386" fill="#4ade80">SRC: 198.51.100.9:49152  →  DST: 192.168.1.100:80</text>
+  </g>
+</svg>

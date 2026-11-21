@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 340" font-family="Inter, 'Segoe UI', sans-serif">
+  <rect width="760" height="340" rx="16" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="380" y="30" text-anchor="middle" font-size="15.5" font-weight="800" fill="#0f172a">SOP Pengupasan 3 Lubang (Miller Stripper) &amp; Pemotongan Presisi (Cleaver)</text>
+
+  <!-- Left: 3-Hole Stripper Guide -->
+  <rect x="26" y="48" width="346" height="270" rx="12" fill="#fffbeb" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="199" y="72" text-anchor="middle" font-size="13" font-weight="800" fill="#92400e">1. Fiber Stripper 3-Lubang (Miller CFS-3)</text>
+  <text x="199" y="88" text-anchor="middle" font-size="10" fill="#78350f">Pegang sudut 30°–45°, tarik lembut satu arah (jangan dipuntir!)</text>
+
+  <g transform="translate(44,104)">
+    <rect x="0" y="0" width="310" height="54" rx="8" fill="#ffffff" stroke="#fde68a"/>
+    <circle cx="28" cy="27" r="14" fill="#eab308"/><text x="28" y="31" text-anchor="middle" font-size="11" font-weight="800" fill="#0f172a">H1</text>
+    <text x="54" y="22" font-size="11" font-weight="800" fill="#0f172a">Lubang 1 (Terbesar): Jaket 1.6–3.0 mm</text>
+    <text x="54" y="38" font-size="9.8" fill="#475569">Mengupas jaket luar patchcord/pigtail → menyisakan Kevlar &amp; buffer 900 µm</text>
+
+    <rect x="0" y="64" width="310" height="54" rx="8" fill="#ffffff" stroke="#fde68a"/>
+    <circle cx="28" cy="91" r="14" fill="#f97316"/><text x="28" y="95" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">H2</text>
+    <text x="54" y="86" font-size="11" font-weight="800" fill="#0f172a">Lubang 2 (Sedang): Buffer 900 µm → 250 µm</text>
+    <text x="54" y="102" font-size="9.8" fill="#475569">Mengupas buffer putih/kuning → menyisakan lapisan coating akrilat 250 µm</text>
+
+    <rect x="0" y="128" width="310" height="54" rx="8" fill="#ffffff" stroke="#fde68a"/>
+    <circle cx="28" cy="155" r="14" fill="#dc2626"/><text x="28" y="159" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">H3</text>
+    <text x="54" y="150" font-size="11" font-weight="800" fill="#0f172a">Lubang 3 (Terkecil): Coating 250 → 125 µm</text>
+    <text x="54" y="166" font-size="9.8" fill="#475569">Mengupas coating akrilat ±3–4 cm hingga tampak kaca bare fiber murni</text>
+  </g>
+
+  <!-- Right: Precision Cleaver -->
+  <rect x="388" y="48" width="346" height="270" rx="12" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="561" y="72" text-anchor="middle" font-size="13" font-weight="800" fill="#1e3a8a">2. Precision Fiber Cleaver (Sudut 90° ± 0.5°)</text>
+  <text x="561" y="88" text-anchor="middle" font-size="10" fill="#1d4ed8">Bilah tungsten putar (16–24 posisi) · Kotak serpihan otomatis</text>
+
+  <!-- Good vs Bad Cleave visual -->
+  <g transform="translate(406,108)">
+    <rect x="0" y="0" width="310" height="84" rx="8" fill="#0f172a"/>
+    <!-- Good cleave -->
+    <rect x="20" y="20" width="90" height="16" fill="#38bdf8" rx="1"/>
+    <line x1="110" y1="14" x2="110" y2="42" stroke="#22c55e" stroke-width="2.5"/>
+    <text x="65" y="58" text-anchor="middle" font-size="10" font-weight="800" fill="#4ade80">✓ Cleave Siku 90° (&lt; 0.5°)</text>
+    <text x="65" y="72" text-anchor="middle" font-size="8.5" fill="#94a3b8">Loss splice minimal ≤ 0.03 dB</text>
+
+    <!-- Bad cleave -->
+    <polygon points="180,20 278,20 262,36 180,36" fill="#f87171"/>
+    <text x="230" y="58" text-anchor="middle" font-size="10" font-weight="800" fill="#f87171">✗ Miring / Chipping (&gt; 1.5°)</text>
+    <text x="230" y="72" text-anchor="middle" font-size="8.5" fill="#fca5a5">Putar posisi blade / bersihkan pad</text>
+  </g>
+
+  <g font-size="10.2" fill="#1e293b">
+    <text x="406" y="218">• <tspan font-weight="700">Skala Panjang Potong:</tspan> 10–16 mm bare fiber (sesuai tipe splicer).</text>
+    <text x="406" y="238">• <tspan font-weight="700">Aturan Emas Cleaving:</tspan> Bersihkan serat dengan IPA 99% <tspan font-weight="800">SEBELUM</tspan> potong.</text>
+    <text x="406" y="258">• <tspan font-weight="700" fill="#dc2626">LARANGAN:</tspan> Jangan menyentuh atau menyeka ujung serat sesudah di-cleave!</text>
+    <text x="406" y="278">• <tspan font-weight="700">Pemeliharaan:</tspan> Putar nomor mata pisau jika sering muncul Cleave Error.</text>
+  </g>
+</svg>

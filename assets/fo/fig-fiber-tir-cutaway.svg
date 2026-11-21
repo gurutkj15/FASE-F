@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 280" font-family="Inter, 'Segoe UI', sans-serif">
+  <rect width="760" height="280" rx="16" fill="#0f172a"/>
+  <text x="380" y="28" text-anchor="middle" font-size="15" font-weight="800" fill="#f8fafc">Prinsip Total Internal Reflection (TIR) pada Inti Serat Optik</text>
+  <text x="380" y="45" text-anchor="middle" font-size="10.5" fill="#94a3b8">Hukum Snellius: Cahaya memantul lurus (zig-zag) di dalam Core ketika indeks bias n₁ &gt; n₂ dan sudut datang ≥ θc</text>
+
+  <!-- Optical Fiber longitudinal cutaway -->
+  <!-- Cladding top & bottom -->
+  <rect x="44" y="76" width="510" height="28" fill="#475569" rx="2"/>
+  <rect x="44" y="176" width="510" height="28" fill="#475569" rx="2"/>
+  <!-- Core -->
+  <rect x="44" y="104" width="510" height="72" fill="#0284c7" opacity="0.28" stroke="#38bdf8" stroke-width="1.5"/>
+
+  <!-- Accurate zigzag light ray reflecting off core/cladding boundaries -->
+  <polyline points="48,140 120,104 205,176 290,104 375,176 460,104 544,172"
+            fill="none" stroke="#facc15" stroke-width="3.2" stroke-linejoin="miter"/>
+  <!-- Axial fundamental mode in SMF -->
+  <line x1="48" y1="140" x2="546" y2="140" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="7 4"/>
+
+  <!-- Escaping refraction ray (exceeds critical angle) -->
+  <polyline points="48,140 94,104 128,68" fill="none" stroke="#ef4444" stroke-width="2" stroke-dasharray="4 3"/>
+  <text x="136" y="68" font-size="9.5" font-weight="700" fill="#fca5a5">Bocor/Refraksi (sudut &lt; θc / macrobend!)</text>
+
+  <!-- Right side info panel -->
+  <rect x="572" y="76" width="160" height="128" rx="10" fill="#1e293b" stroke="#334155"/>
+  <text x="652" y="98" text-anchor="middle" font-size="11" font-weight="800" fill="#38bdf8">Indeks Bias</text>
+  <text x="586" y="120" font-size="10.5" fill="#e2e8f0">• Core (n₁) ≈ <tspan font-weight="800" fill="#fde047">1.468</tspan></text>
+  <text x="586" y="139" font-size="10.5" fill="#e2e8f0">• Cladding (n₂) ≈ <tspan font-weight="800" fill="#cbd5e1">1.452</tspan></text>
+  <text x="586" y="158" font-size="10" fill="#94a3b8">• Syarat TIR: <tspan font-weight="700" fill="#34d399">n₁ &gt; n₂</tspan></text>
+  <text x="586" y="177" font-size="10" fill="#94a3b8">• Laju di kaca: ~204.000 km/s</text>
+
+  <!-- Bottom Labels -->
+  <text x="299" y="94" text-anchor="middle" font-size="10" font-weight="700" fill="#e2e8f0">Cladding (n₂ = 1.452 · Ø 125 µm)</text>
+  <text x="299" y="194" text-anchor="middle" font-size="10" font-weight="700" fill="#e2e8f0">Cladding (n₂ = 1.452 · Ø 125 µm)</text>
+  <text x="299" y="232" text-anchor="middle" font-size="10.5" fill="#cbd5e1"><tspan fill="#38bdf8" font-weight="700">Garis biru putus-putus:</tspan> Single Mode (SMF 9 µm) · <tspan fill="#facc15" font-weight="700">Garis kuning zig-zag:</tspan> Pemantulan Total (TIR) berulang</text>
+</svg>

@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 440" font-family="Inter, 'Segoe UI', sans-serif">
+  <defs>
+    <linearGradient id="bgL3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <marker id="arrBlue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1 L 9 5 L 0 9 z" fill="#38bdf8"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1 L 9 5 L 0 9 z" fill="#22c55e"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1 L 9 5 L 0 9 z" fill="#ef4444"/>
+    </marker>
+  </defs>
+
+  <rect width="860" height="440" rx="20" fill="url(#bgL3)"/>
+  <text x="430" y="34" text-anchor="middle" font-size="17" font-weight="800" fill="#f8fafc">Alur Keputusan Forwarding Paket IP pada Router (Layer 3 Routing Engine)</text>
+  <text x="430" y="54" text-anchor="middle" font-size="11.5" fill="#94a3b8">Standar IETF RFC 1812 (Requirements for IP Version 4 Routers) — Longest Prefix Match, Administrative Distance, &amp; Metric</text>
+
+  <!-- Step 1: Ingress Frame -->
+  <rect x="30" y="82" width="180" height="76" rx="12" fill="#1e3a8a" stroke="#3b82f6" stroke-width="2"/>
+  <text x="120" y="106" text-anchor="middle" font-size="12" font-weight="800" fill="#93c5fd">1. Frame Masuk (Ingress)</text>
+  <text x="120" y="124" text-anchor="middle" font-size="10.5" fill="#e2e8f0">Cek FCS (CRC-32) Layer 2</text>
+  <text x="120" y="140" text-anchor="middle" font-size="10" fill="#cbd5e1">Decapsulate Header Ethernet</text>
+
+  <line x1="210" y1="120" x2="252" y2="120" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#arrBlue)"/>
+
+  <!-- Step 2: Inspect IP Header -->
+  <rect x="256" y="82" width="190" height="76" rx="12" fill="#0f766e" stroke="#14b8a6" stroke-width="2"/>
+  <text x="351" y="106" text-anchor="middle" font-size="12" font-weight="800" fill="#5eead4">2. Periksa Header IPv4/v6</text>
+  <text x="351" y="124" text-anchor="middle" font-size="10.5" fill="#e2e8f0">Baca Destination IP &amp; Cek TTL</text>
+  <text x="351" y="140" text-anchor="middle" font-size="10" fill="#ccfbf1">Jika TTL ≤ 1 → ICMP Time Exceeded</text>
+
+  <line x1="446" y1="120" x2="488" y2="120" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#arrBlue)"/>
+
+  <!-- Step 3: Lookup Routing Table -->
+  <rect x="492" y="74" width="338" height="92" rx="12" fill="#312e81" stroke="#818cf8" stroke-width="2"/>
+  <text x="661" y="98" text-anchor="middle" font-size="12.5" font-weight="800" fill="#c7d2fe">3. Lookup Tabel Routing (FIB / CEF)</text>
+  <text x="661" y="117" text-anchor="middle" font-size="10.5" fill="#e2e8f0">Aturan 1: Longest Prefix Match (/30 &gt; /26 &gt; /24 &gt; /16 &gt; /0)</text>
+  <text x="661" y="134" text-anchor="middle" font-size="10.5" fill="#e2e8f0">Aturan 2: Administrative Distance Terkecil (C=0, S=1, OSPF=110)</text>
+  <text x="661" y="151" text-anchor="middle" font-size="10.5" fill="#a5b4fc">Aturan 3: Metric Terbaik (Cost OSPF / Hop RIP / ECMP)</text>
+
+  <line x1="661" y1="166" x2="661" y2="206" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#arrBlue)"/>
+
+  <!-- Step 4: Decision Diamond -->
+  <polygon points="661,210 775,255 661,300 547,255" fill="#1e293b" stroke="#f59e0b" stroke-width="2.5"/>
+  <text x="661" y="251" text-anchor="middle" font-size="12" font-weight="800" fill="#fbbf24">Rute / Default Route</text>
+  <text x="661" y="267" text-anchor="middle" font-size="11" font-weight="700" fill="#fde68a">(0.0.0.0/0) Ditemukan?</text>
+
+  <!-- Branch NO (Drop) -->
+  <line x1="547" y1="255" x2="455" y2="255" stroke="#ef4444" stroke-width="2.5" marker-end="url(#arrRed)"/>
+  <text x="502" y="246" text-anchor="middle" font-size="11" font-weight="800" fill="#f87171">TIDAK</text>
+
+  <rect x="245" y="217" width="206" height="76" rx="12" fill="#450a0a" stroke="#ef4444" stroke-width="2"/>
+  <text x="348" y="242" text-anchor="middle" font-size="12" font-weight="800" fill="#fca5a5">Drop Paket IP</text>
+  <text x="348" y="260" text-anchor="middle" font-size="10.5" fill="#fecaca">Kirim balasan ke Source IP:</text>
+  <text x="348" y="276" text-anchor="middle" font-size="10" font-family="'Fira Code', monospace" fill="#f87171">ICMP Destination Unreachable</text>
+
+  <!-- Branch YES (Forward) -->
+  <line x1="661" y1="300" x2="661" y2="338" stroke="#22c55e" stroke-width="2.5" marker-end="url(#arrGreen)"/>
+  <text x="680" y="323" font-size="11" font-weight="800" fill="#4ade80">YA</text>
+
+  <rect x="470" y="342" width="360" height="76" rx="12" fill="#064e3b" stroke="#10b981" stroke-width="2"/>
+  <text x="650" y="365" text-anchor="middle" font-size="12.5" font-weight="800" fill="#6ee7b7">4. Rewrite L2 Frame &amp; Egress Forwarding</text>
+  <text x="650" y="383" text-anchor="middle" font-size="10.5" fill="#ecfdf5">• Kurangi TTL = TTL − 1 &amp; Hitung Ulang IP Header Checksum</text>
+  <text x="650" y="400" text-anchor="middle" font-size="10.5" fill="#a7f3d0">• Pasang Source MAC Egress &amp; Dest MAC Next-Hop (ARP) + FCS Baru</text>
+
+  <!-- Left Bottom Reference Box: FIB Table Example -->
+  <rect x="30" y="210" width="195" height="208" rx="12" fill="#0f172a" stroke="#334155" stroke-width="1.5"/>
+  <text x="127" y="232" text-anchor="middle" font-size="11.5" font-weight="800" fill="#38bdf8">Contoh Tabel Routing</text>
+  <g font-family="'Fira Code', monospace" font-size="9.5" fill="#cbd5e1">
+    <text x="42" y="254" fill="#4ade80">C 192.168.10.0/26</text>
+    <text x="42" y="268" fill="#94a3b8">  via ether2 (AD 0)</text>
+    <text x="42" y="290" fill="#60a5fa">O 192.168.10.0/24</text>
+    <text x="42" y="304" fill="#94a3b8">  via 10.0.0.2 (AD 110)</text>
+    <text x="42" y="326" fill="#fbbf24">S 0.0.0.0/0 (Default)</text>
+    <text x="42" y="340" fill="#94a3b8">  via 203.0.113.1 (AD 1)</text>
+  </g>
+  <rect x="40" y="354" width="175" height="52" rx="8" fill="#1e293b"/>
+  <text x="127" y="372" text-anchor="middle" font-size="9.5" font-weight="700" fill="#f8fafc">Paket ke 192.168.10.25:</text>
+  <text x="127" y="386" text-anchor="middle" font-size="9" fill="#4ade80">Cocok /26, /24, &amp; /0</text>
+  <text x="127" y="399" text-anchor="middle" font-size="9" font-weight="700" fill="#38bdf8">Menang: /26 (Paling Spesifik!)</text>
+</svg>

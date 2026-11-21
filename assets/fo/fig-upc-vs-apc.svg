@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 360" font-family="Inter, 'Segoe UI', sans-serif">
+  <rect width="760" height="360" rx="16" fill="#0f172a"/>
+  <text x="380" y="30" text-anchor="middle" font-size="15.5" font-weight="800" fill="#f8fafc">Polishing Ferrule UPC vs APC 8° &amp; Standar Kebersihan IEC 61300-3-35</text>
+
+  <!-- UPC Card -->
+  <rect x="26" y="48" width="234" height="232" rx="12" fill="#172554" stroke="#3b82f6" stroke-width="2"/>
+  <text x="143" y="72" text-anchor="middle" font-size="13.5" font-weight="800" fill="#60a5fa">UPC (Bodi Biru — 0°)</text>
+  <text x="143" y="88" text-anchor="middle" font-size="10" fill="#93c5fd">Ultra Physical Contact</text>
+  <!-- Flat dome contact -->
+  <rect x="48" y="114" width="84" height="44" rx="4" fill="#93c5fd"/>
+  <rect x="148" y="114" width="84" height="44" rx="4" fill="#60a5fa"/>
+  <rect x="48" y="131" width="184" height="10" fill="#e0f2fe"/>
+  <!-- Reflection straight back -->
+  <line x1="72" y1="136" x2="140" y2="136" stroke="#facc15" stroke-width="2.5"/>
+  <line x1="140" y1="139" x2="82" y2="139" stroke="#f97316" stroke-width="2" stroke-dasharray="4 3"/>
+  <text x="143" y="178" text-anchor="middle" font-size="10" font-weight="700" fill="#fed7aa">Pantulan memantul lurus ke core</text>
+  <text x="143" y="200" text-anchor="middle" font-size="11" font-weight="800" fill="#ffffff">Return Loss ≥ 50 dB</text>
+  <text x="143" y="218" text-anchor="middle" font-size="9.5" fill="#cbd5e1">• Dipakai: Ethernet, ODF umum, Switch</text>
+  <text x="143" y="234" text-anchor="middle" font-size="9.5" fill="#cbd5e1">• Permukaan kontak: Kubah rata 0°</text>
+  <rect x="42" y="248" width="202" height="22" rx="6" fill="#2563eb"/>
+  <text x="143" y="263" text-anchor="middle" font-size="10" font-weight="800" fill="#fff">BIRU ↔ BIRU SAJA</text>
+
+  <!-- APC Card -->
+  <rect x="272" y="48" width="234" height="232" rx="12" fill="#064e3b" stroke="#10b981" stroke-width="2"/>
+  <text x="389" y="72" text-anchor="middle" font-size="13.5" font-weight="800" fill="#34d399">APC (Bodi Hijau — 8°)</text>
+  <text x="389" y="88" text-anchor="middle" font-size="10" fill="#a7f3d0">Angled Physical Contact</text>
+  <!-- 8-degree angled slant -->
+  <polygon points="294,114 388,114 378,158 294,158" fill="#6ee7b7"/>
+  <polygon points="396,114 484,114 484,158 386,158" fill="#34d399"/>
+  <line x1="388" y1="106" x2="376" y2="164" stroke="#facc15" stroke-width="2" stroke-dasharray="3 2"/>
+  <text x="394" y="109" font-size="9.5" font-weight="800" fill="#fde047">8°</text>
+  <!-- Oblique reflection into cladding -->
+  <line x1="312" y1="136" x2="383" y2="136" stroke="#facc15" stroke-width="2.5"/>
+  <line x1="383" y1="136" x2="344" y2="155" stroke="#ef4444" stroke-width="2.5"/>
+  <text x="389" y="178" text-anchor="middle" font-size="10" font-weight="700" fill="#a7f3d0">Pantulan dibelokkan ke cladding!</text>
+  <text x="389" y="200" text-anchor="middle" font-size="11" font-weight="800" fill="#ffffff">Return Loss ≥ 60 dB</text>
+  <text x="389" y="218" text-anchor="middle" font-size="9.5" fill="#d1fae5">• Wajib: OLT GPON, ODP, RF Video</text>
+  <text x="389" y="234" text-anchor="middle" font-size="9.5" fill="#d1fae5">• Pantulan balik nyaris nol</text>
+  <rect x="288" y="248" width="202" height="22" rx="6" fill="#059669"/>
+  <text x="389" y="263" text-anchor="middle" font-size="10" font-weight="800" fill="#fff">HIJAU ↔ HIJAU SAJA</text>
+
+  <!-- IEC 61300-3-35 Endface Zones -->
+  <rect x="518" y="48" width="216" height="232" rx="12" fill="#1e293b" stroke="#64748b" stroke-width="1.5"/>
+  <text x="626" y="72" text-anchor="middle" font-size="12.5" font-weight="800" fill="#e2e8f0">Inspeksi IEC 61300-3-35</text>
+  <text x="626" y="88" text-anchor="middle" font-size="9.5" fill="#94a3b8">Zona Permukaan Ferrule</text>
+  <circle cx="626" cy="148" r="52" fill="#475569" stroke="#94a3b8" stroke-width="1.5"/>
+  <circle cx="626" cy="148" r="38" fill="#64748b"/>
+  <circle cx="626" cy="148" r="24" fill="#94a3b8"/>
+  <circle cx="626" cy="148" r="7" fill="#ef4444" stroke="#fff" stroke-width="1.5"/>
+  <g font-size="9.5" fill="#e2e8f0">
+    <text x="530" y="216"><tspan font-weight="800" fill="#f87171">Zone A Core (0–25µm):</tspan> 0 debu/goresan!</text>
+    <text x="530" y="233"><tspan font-weight="800" fill="#cbd5e1">Zone B Cladding:</tspan> Toleransi mikro ketat</text>
+    <text x="530" y="250"><tspan font-weight="800" fill="#94a3b8">Zone C/D Contact:</tspan> Bebas partikel lepas</text>
+    <text x="530" y="267" fill="#38bdf8" font-weight="700">Inspect → Clean → Inspect → Mate</text>
+  </g>
+
+  <!-- Critical Warning Bar -->
+  <rect x="26" y="294" width="708" height="48" rx="10" fill="#7f1d1d" stroke="#ef4444" stroke-width="1.5"/>
+  <text x="380" y="314" text-anchor="middle" font-size="11.5" font-weight="800" fill="#fecaca">LARANGAN KERAS: Jangan pernah menyambungkan Konektor BIRU (UPC) dengan Konektor HIJAU (APC)!</text>
+  <text x="380" y="332" text-anchor="middle" font-size="10" fill="#fee2e2">Ujung cembung 0° akan menghancurkan puncak miring 8°, mematahkan inti kaca, dan memicu redaman masif &gt; 5 dB.</text>
+</svg>

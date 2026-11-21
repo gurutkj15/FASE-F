@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 360" font-family="Inter, 'Segoe UI', sans-serif">
+  <rect width="760" height="360" rx="16" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="380" y="28" text-anchor="middle" font-size="15.5" font-weight="800" fill="#0f172a">Kalibrasi Zeroing OPM/OLS (1-Jumper) &amp; Link Loss Budget GPON</text>
+
+  <!-- Step 1: Calibration Zeroing Box -->
+  <rect x="26" y="46" width="708" height="106" rx="12" fill="#ecfdf5" stroke="#10b981" stroke-width="1.5"/>
+  <text x="42" y="68" font-size="12" font-weight="800" fill="#065f46">1. Kalibrasi Titik Nol (Loopback Reference / Zeroing) — Standar TIA/EIA-526-7A</text>
+  <rect x="44" y="82" width="150" height="52" rx="8" fill="#047857"/><text x="119" y="104" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">OLS (Light Source)</text><text x="119" y="120" text-anchor="middle" font-size="9.5" fill="#d1fae5">Set λ = 1310 / 1550 nm</text>
+  <line x1="194" y1="108" x2="292" y2="108" stroke="#eab308" stroke-width="4"/>
+  <text x="243" y="96" text-anchor="middle" font-size="9.5" font-weight="700" fill="#854d0e">Golden Cord</text>
+  <rect x="292" y="82" width="166" height="52" rx="8" fill="#0f172a"/><text x="375" y="104" text-anchor="middle" font-size="11" font-weight="800" fill="#38bdf8">OPM (Power Meter)</text><text x="375" y="120" text-anchor="middle" font-size="9.5" fill="#a7f3d0">Tekan REF / ZERO → 0.00 dB</text>
+  <g font-size="10" fill="#064e3b">
+    <text x="478" y="96"><tspan font-weight="800">• dBm (Absolut):</tspan> Ref 1 mW = 0 dBm</text>
+    <text x="478" y="114"><tspan font-weight="800">• 0.1 mW = -10 dBm</tspan> · 0.01 mW = -20 dBm</text>
+    <text x="478" y="132"><tspan font-weight="800">• L(dB) = Pin(dBm) − Pout(dBm)</tspan></text>
+  </g>
+
+  <!-- Step 2: End-to-end GPON Power Budget -->
+  <rect x="26" y="166" width="708" height="174" rx="12" fill="#0f172a"/>
+  <text x="42" y="190" font-size="12" font-weight="800" fill="#fbbf24">2. Contoh Perhitungan End-to-End Link Loss Budget GPON Class C+ (8 km · λ 1490 nm)</text>
+
+  <!-- Waterfall nodes -->
+  <g transform="translate(40,210)">
+    <rect x="0" y="0" width="90" height="62" rx="8" fill="#1d4ed8"/><text x="45" y="22" text-anchor="middle" font-size="10" font-weight="800" fill="#fff">OLT Tx</text><text x="45" y="42" text-anchor="middle" font-size="12" font-weight="800" fill="#fde047">+4.0 dBm</text>
+    <text x="108" y="28" text-anchor="middle" font-size="11" fill="#94a3b8">→</text>
+
+    <rect x="122" y="0" width="112" height="62" rx="8" fill="#1e293b" stroke="#475569"/><text x="178" y="20" text-anchor="middle" font-size="9.5" font-weight="700" fill="#cbd5e1">Feeder 8 km</text><text x="178" y="36" text-anchor="middle" font-size="10.5" font-weight="800" fill="#f87171">-2.00 dB</text><text x="178" y="51" text-anchor="middle" font-size="8.5" fill="#94a3b8">4×Splice -0.40</text>
+    <text x="248" y="28" text-anchor="middle" font-size="11" fill="#94a3b8">→</text>
+
+    <rect x="262" y="0" width="102" height="62" rx="8" fill="#1e293b" stroke="#475569"/><text x="313" y="20" text-anchor="middle" font-size="9.5" font-weight="700" fill="#cbd5e1">Splitter ODC 1:4</text><text x="313" y="38" text-anchor="middle" font-size="11" font-weight="800" fill="#f87171">-7.20 dB</text><text x="313" y="52" text-anchor="middle" font-size="8.5" fill="#94a3b8">Konektor -1.00</text>
+    <text x="378" y="28" text-anchor="middle" font-size="11" fill="#94a3b8">→</text>
+
+    <rect x="392" y="0" width="102" height="62" rx="8" fill="#1e293b" stroke="#475569"/><text x="443" y="20" text-anchor="middle" font-size="9.5" font-weight="700" fill="#cbd5e1">Splitter ODP 1:8</text><text x="443" y="38" text-anchor="middle" font-size="11" font-weight="800" fill="#f87171">-10.50 dB</text><text x="443" y="52" text-anchor="middle" font-size="8.5" fill="#94a3b8">Margin -2.00</text>
+    <text x="510" y="28" text-anchor="middle" font-size="11" fill="#94a3b8">→</text>
+
+    <rect x="524" y="0" width="152" height="62" rx="8" fill="#065f46" stroke="#34d399" stroke-width="2"/><text x="600" y="20" text-anchor="middle" font-size="10" font-weight="800" fill="#a7f3d0">ONT Rx Terukur</text><text x="600" y="40" text-anchor="middle" font-size="13" font-weight="800" fill="#ffffff">-19.10 dBm</text><text x="600" y="54" text-anchor="middle" font-size="9" font-weight="700" fill="#6ee7b7">LULUS (-8 s/d -24 dBm)</text>
+  </g>
+  <text x="380" y="320" text-anchor="middle" font-size="10.5" fill="#94a3b8">Total Atenuasi α = (8×0.25) + (4×0.10) + (4×0.25) + 7.20 + 10.50 + 2.00 margin = <tspan font-weight="800" fill="#f8fafc">23.10 dB</tspan> (Batas Maks Class B+ 28 dB / Class C+ 32 dB)</text>
+</svg>

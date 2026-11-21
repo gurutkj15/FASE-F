@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 420" font-family="Inter, 'Segoe UI', sans-serif">
+  <rect width="860" height="420" rx="20" fill="#0f172a"/>
+  <text x="430" y="32" text-anchor="middle" font-size="17" font-weight="800" fill="#f8fafc">Arsitektur Jaringan Nirkabel Outdoor: PtP Backhaul, PtMP &amp; Zona Fresnel</text>
+  <text x="430" y="51" text-anchor="middle" font-size="11.5" fill="#94a3b8">Desain Link Radio Line-of-Sight (LOS), Perhitungan EIRP, RSSI/SNR, dan Propagasi Gelombang RF</text>
+
+  <!-- Left Box: PtP Link & Fresnel Zone -->
+  <rect x="24" y="70" width="485" height="200" rx="14" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+  <text x="266" y="92" text-anchor="middle" font-size="12.5" font-weight="800" fill="#38bdf8">1. Link Backhaul Point-to-Point (PtP) &amp; Clearance Zona Fresnel (≥ 60%)</text>
+
+  <!-- Tower A -->
+  <line x1="76" y1="236" x2="90" y2="135" stroke="#94a3b8" stroke-width="3"/>
+  <line x1="104" y1="236" x2="90" y2="135" stroke="#94a3b8" stroke-width="3"/>
+  <line x1="80" y1="200" x2="100" y2="200" stroke="#64748b" stroke-width="2"/>
+  <line x1="84" y1="168" x2="96" y2="168" stroke="#64748b" stroke-width="2"/>
+  <circle cx="95" cy="138" r="9" fill="#38bdf8"/>
+  <text x="90" y="254" text-anchor="middle" font-size="10" font-weight="700" fill="#f8fafc">Tower POP / NOC</text>
+
+  <!-- Tower B -->
+  <line x1="426" y1="236" x2="440" y2="135" stroke="#94a3b8" stroke-width="3"/>
+  <line x1="454" y1="236" x2="440" y2="135" stroke="#94a3b8" stroke-width="3"/>
+  <line x1="430" y1="200" x2="450" y2="200" stroke="#64748b" stroke-width="2"/>
+  <line x1="434" y1="168" x2="446" y2="168" stroke="#64748b" stroke-width="2"/>
+  <circle cx="435" cy="138" r="9" fill="#38bdf8"/>
+  <text x="440" y="254" text-anchor="middle" font-size="10" font-weight="700" fill="#f8fafc">Tower BTS Distribusi</text>
+
+  <!-- Fresnel Ellipse -->
+  <ellipse cx="265" cy="138" rx="158" ry="28" fill="#0284c7" fill-opacity="0.22" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <line x1="104" y1="138" x2="426" y2="138" stroke="#4ade80" stroke-width="2.5"/>
+  <text x="265" y="131" text-anchor="middle" font-size="10" font-weight="700" fill="#4ade80">Direct Line of Sight (LOS) — 5 GHz / 6 GHz Dish</text>
+  <text x="265" y="156" text-anchor="middle" font-size="9.5" fill="#bae6fd">Radius Zona Fresnel ke-1: r = 17,32 × √(d / (4 × f))</text>
+
+  <!-- Trees/Obstacles under Fresnel -->
+  <polygon points="210,236 220,192 230,236" fill="#15803d"/>
+  <polygon points="295,236 307,188 319,236" fill="#166534"/>
+  <text x="265" y="220" text-anchor="middle" font-size="9.5" fill="#fde68a">Bebas halangan pohon/gedung minimal 60% radius Fresnel</text>
+
+  <!-- Right Box: PtMP Distribution -->
+  <rect x="525" y="70" width="311" height="200" rx="14" fill="#1e293b" stroke="#a855f7" stroke-width="2"/>
+  <text x="680" y="92" text-anchor="middle" font-size="12.5" font-weight="800" fill="#c084fc">2. Distribusi Point-to-Multi-Point (PtMP)</text>
+
+  <rect x="542" y="135" width="76" height="64" rx="10" fill="#3b0764" stroke="#a855f7" stroke-width="1.5"/>
+  <text x="580" y="159" text-anchor="middle" font-size="10" font-weight="800" fill="#e9d5ff">AP Sectoral</text>
+  <text x="580" y="174" text-anchor="middle" font-size="9" fill="#d8b4fe">90° / 120°</text>
+  <text x="580" y="188" text-anchor="middle" font-size="8.5" fill="#f3e8ff">MIMO 5 GHz</text>
+
+  <!-- CPE Clients -->
+  <line x1="618" y1="150" x2="704" y2="118" stroke="#c084fc" stroke-width="2" stroke-dasharray="4,4"/>
+  <line x1="618" y1="167" x2="704" y2="167" stroke="#c084fc" stroke-width="2" stroke-dasharray="4,4"/>
+  <line x1="618" y1="184" x2="704" y2="216" stroke="#c084fc" stroke-width="2" stroke-dasharray="4,4"/>
+
+  <rect x="706" y="100" width="114" height="36" rx="7" fill="#0f172a" stroke="#475569"/>
+  <text x="763" y="116" text-anchor="middle" font-size="9.5" font-weight="700" fill="#f8fafc">CPE Pelanggan 1</text>
+  <text x="763" y="129" text-anchor="middle" font-size="8.5" fill="#4ade80">RSSI: −58 dBm (Excellent)</text>
+
+  <rect x="706" y="149" width="114" height="36" rx="7" fill="#0f172a" stroke="#475569"/>
+  <text x="763" y="165" text-anchor="middle" font-size="9.5" font-weight="700" fill="#f8fafc">CPE Pelanggan 2</text>
+  <text x="763" y="178" text-anchor="middle" font-size="8.5" fill="#38bdf8">RSSI: −64 dBm (Good)</text>
+
+  <rect x="706" y="198" width="114" height="36" rx="7" fill="#0f172a" stroke="#475569"/>
+  <text x="763" y="214" text-anchor="middle" font-size="9.5" font-weight="700" fill="#f8fafc">CPE Sekolah / Kantor</text>
+  <text x="763" y="227" text-anchor="middle" font-size="8.5" fill="#fbbf24">SNR ≥ 25 dB → MCS Tinggi</text>
+
+  <!-- Bottom Box: RF Link Budget & Metrics -->
+  <rect x="24" y="286" width="812" height="114" rx="14" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <text x="430" y="308" text-anchor="middle" font-size="12.5" font-weight="800" fill="#fbbf24">Parameter Standar Kualitas Sinyal Radio (Site Survey &amp; Link Budget)</text>
+
+  <g font-size="10.5" fill="#e2e8f0">
+    <rect x="40" y="320" width="248" height="66" rx="8" fill="#0f172a"/>
+    <text x="164" y="339" text-anchor="middle" font-weight="800" fill="#4ade80">EIRP &amp; Link Budget (dBm)</text>
+    <text x="164" y="356" text-anchor="middle" font-size="9.5" font-family="'Fira Code', monospace" fill="#cbd5e1">EIRP = P_tx + G_ant − L_cable</text>
+    <text x="164" y="373" text-anchor="middle" font-size="9.5" fill="#94a3b8">Rx = EIRP − FSPL + G_rx − L_rx</text>
+
+    <rect x="306" y="320" width="248" height="66" rx="8" fill="#0f172a"/>
+    <text x="430" y="339" text-anchor="middle" font-weight="800" fill="#38bdf8">Ambang RSSI &amp; Noise Floor</text>
+    <text x="430" y="356" text-anchor="middle" font-size="9.5" fill="#cbd5e1">Ideal Enterprise/VoIP: ≥ −65 dBm</text>
+    <text x="430" y="373" text-anchor="middle" font-size="9.5" fill="#94a3b8">Batas Minimum Koneksi: −75 s.d. −80 dBm</text>
+
+    <rect x="572" y="320" width="248" height="66" rx="8" fill="#0f172a"/>
+    <text x="696" y="339" text-anchor="middle" font-weight="800" fill="#c084fc">Signal-to-Noise Ratio (SNR)</text>
+    <text x="696" y="356" text-anchor="middle" font-size="9.5" font-family="'Fira Code', monospace" fill="#cbd5e1">SNR = RSSI − Noise Floor (dB)</text>
+    <text x="696" y="373" text-anchor="middle" font-size="9.5" fill="#94a3b8">Data Cepat (Wi-Fi 6/7 QAM): SNR ≥ 25 dB</text>
+  </g>
+</svg>

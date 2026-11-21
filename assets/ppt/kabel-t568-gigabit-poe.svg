@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 460" font-family="Inter, 'Segoe UI', sans-serif">
+  <rect width="880" height="460" rx="20" fill="#0f172a"/>
+  <text x="440" y="32" text-anchor="middle" font-size="17" font-weight="800" fill="#f8fafc">Standar Pinout ANSI/TIA-568.2-D (T568A vs T568B), Fungsi Pair &amp; Kategori UTP</text>
+  <text x="440" y="51" text-anchor="middle" font-size="11.5" fill="#94a3b8">Perbandingan Transmisi Fast Ethernet (100BASE-TX), Gigabit/10G (1000BASE-T/10GBASE-T), &amp; IEEE 802.3af/at/bt PoE</text>
+
+  <!-- Left Panel: Pinout Table -->
+  <rect x="22" y="68" width="490" height="372" rx="14" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <text x="267" y="92" text-anchor="middle" font-size="13" font-weight="800" fill="#38bdf8">Tabel Pin RJ-45 (8P8C) &amp; Fungsi Sinyal Listrik</text>
+
+  <!-- Header -->
+  <rect x="34" y="104" width="466" height="28" rx="6" fill="#0f172a"/>
+  <g font-size="10" font-weight="800" fill="#94a3b8">
+    <text x="52" y="122" text-anchor="middle">PIN</text>
+    <text x="125" y="122" text-anchor="middle">WARNA T568B</text>
+    <text x="220" y="122" text-anchor="middle">WARNA T568A</text>
+    <text x="315" y="122" text-anchor="middle">100BASE-TX</text>
+    <text x="428" y="122" text-anchor="middle">1000BASE-T &amp; PoE</text>
+  </g>
+
+  <!-- Rows 1 to 8 -->
+  <g font-size="10" font-family="'Fira Code', monospace">
+    <!-- Pin 1 -->
+    <rect x="34" y="136" width="466" height="32" rx="5" fill="#0f172a"/>
+    <text x="52" y="156" text-anchor="middle" fill="#f8fafc" font-weight="700">1</text>
+    <rect x="76" y="143" width="96" height="18" rx="4" fill="#f97316"/><text x="124" y="156" text-anchor="middle" fill="#fff" font-size="9.5">Putih-Oranye</text>
+    <rect x="178" y="143" width="84" height="18" rx="4" fill="#16a34a"/><text x="220" y="156" text-anchor="middle" fill="#fff" font-size="9.5">Putih-Hijau</text>
+    <text x="315" y="156" text-anchor="middle" fill="#4ade80">TX+ (Data)</text>
+    <text x="428" y="156" text-anchor="middle" fill="#38bdf8">BI_DA+ (PoE Alt-A)</text>
+
+    <!-- Pin 2 -->
+    <rect x="34" y="172" width="466" height="32" rx="5" fill="#172033"/>
+    <text x="52" y="192" text-anchor="middle" fill="#f8fafc" font-weight="700">2</text>
+    <rect x="76" y="179" width="96" height="18" rx="4" fill="#ea580c"/><text x="124" y="192" text-anchor="middle" fill="#fff" font-size="9.5">Oranye</text>
+    <rect x="178" y="179" width="84" height="18" rx="4" fill="#15803d"/><text x="220" y="192" text-anchor="middle" fill="#fff" font-size="9.5">Hijau</text>
+    <text x="315" y="192" text-anchor="middle" fill="#4ade80">TX− (Data)</text>
+    <text x="428" y="192" text-anchor="middle" fill="#38bdf8">BI_DA− (PoE Alt-A)</text>
+
+    <!-- Pin 3 -->
+    <rect x="34" y="208" width="466" height="32" rx="5" fill="#0f172a"/>
+    <text x="52" y="228" text-anchor="middle" fill="#f8fafc" font-weight="700">3</text>
+    <rect x="76" y="215" width="96" height="18" rx="4" fill="#16a34a"/><text x="124" y="228" text-anchor="middle" fill="#fff" font-size="9.5">Putih-Hijau</text>
+    <rect x="178" y="215" width="84" height="18" rx="4" fill="#f97316"/><text x="220" y="228" text-anchor="middle" fill="#fff" font-size="9.5">Putih-Oranye</text>
+    <text x="315" y="228" text-anchor="middle" fill="#fbbf24">RX+ (Data)</text>
+    <text x="428" y="228" text-anchor="middle" fill="#38bdf8">BI_DB+ (PoE Alt-A)</text>
+
+    <!-- Pin 4 -->
+    <rect x="34" y="244" width="466" height="32" rx="5" fill="#172033"/>
+    <text x="52" y="264" text-anchor="middle" fill="#f8fafc" font-weight="700">4</text>
+    <rect x="76" y="251" width="96" height="18" rx="4" fill="#2563eb"/><text x="124" y="264" text-anchor="middle" fill="#fff" font-size="9.5">Biru</text>
+    <rect x="178" y="251" width="84" height="18" rx="4" fill="#2563eb"/><text x="220" y="264" text-anchor="middle" fill="#fff" font-size="9.5">Biru</text>
+    <text x="315" y="264" text-anchor="middle" fill="#94a3b8">Cadangan / PoE</text>
+    <text x="428" y="264" text-anchor="middle" fill="#a78bfa">BI_DC+ (PoE Alt-B +)</text>
+
+    <!-- Pin 5 -->
+    <rect x="34" y="280" width="466" height="32" rx="5" fill="#0f172a"/>
+    <text x="52" y="300" text-anchor="middle" fill="#f8fafc" font-weight="700">5</text>
+    <rect x="76" y="287" width="96" height="18" rx="4" fill="#3b82f6"/><text x="124" y="300" text-anchor="middle" fill="#fff" font-size="9.5">Putih-Biru</text>
+    <rect x="178" y="287" width="84" height="18" rx="4" fill="#3b82f6"/><text x="220" y="300" text-anchor="middle" fill="#fff" font-size="9.5">Putih-Biru</text>
+    <text x="315" y="300" text-anchor="middle" fill="#94a3b8">Cadangan / PoE</text>
+    <text x="428" y="300" text-anchor="middle" fill="#a78bfa">BI_DC− (PoE Alt-B +)</text>
+
+    <!-- Pin 6 -->
+    <rect x="34" y="316" width="466" height="32" rx="5" fill="#172033"/>
+    <text x="52" y="336" text-anchor="middle" fill="#f8fafc" font-weight="700">6</text>
+    <rect x="76" y="323" width="96" height="18" rx="4" fill="#15803d"/><text x="124" y="336" text-anchor="middle" fill="#fff" font-size="9.5">Hijau</text>
+    <rect x="178" y="323" width="84" height="18" rx="4" fill="#ea580c"/><text x="220" y="336" text-anchor="middle" fill="#fff" font-size="9.5">Oranye</text>
+    <text x="315" y="336" text-anchor="middle" fill="#fbbf24">RX− (Data)</text>
+    <text x="428" y="336" text-anchor="middle" fill="#38bdf8">BI_DB− (PoE Alt-A)</text>
+
+    <!-- Pin 7 -->
+    <rect x="34" y="352" width="466" height="32" rx="5" fill="#0f172a"/>
+    <text x="52" y="372" text-anchor="middle" fill="#f8fafc" font-weight="700">7</text>
+    <rect x="76" y="359" width="96" height="18" rx="4" fill="#92400e"/><text x="124" y="372" text-anchor="middle" fill="#fff" font-size="9.5">Putih-Cokelat</text>
+    <rect x="178" y="359" width="84" height="18" rx="4" fill="#92400e"/><text x="220" y="372" text-anchor="middle" fill="#fff" font-size="9.5">Putih-Cokelat</text>
+    <text x="315" y="372" text-anchor="middle" fill="#94a3b8">Cadangan / PoE</text>
+    <text x="428" y="372" text-anchor="middle" fill="#a78bfa">BI_DD+ (PoE Alt-B −)</text>
+
+    <!-- Pin 8 -->
+    <rect x="34" y="388" width="466" height="32" rx="5" fill="#172033"/>
+    <text x="52" y="408" text-anchor="middle" fill="#f8fafc" font-weight="700">8</text>
+    <rect x="76" y="395" width="96" height="18" rx="4" fill="#78350f"/><text x="124" y="408" text-anchor="middle" fill="#fff" font-size="9.5">Cokelat</text>
+    <rect x="178" y="395" width="84" height="18" rx="4" fill="#78350f"/><text x="220" y="408" text-anchor="middle" fill="#fff" font-size="9.5">Cokelat</text>
+    <text x="315" y="408" text-anchor="middle" fill="#94a3b8">Cadangan / PoE</text>
+    <text x="428" y="408" text-anchor="middle" fill="#a78bfa">BI_DD− (PoE Alt-B −)</text>
+  </g>
+
+  <!-- Right Panel: Category Standards Table -->
+  <rect x="528" y="68" width="330" height="372" rx="14" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <text x="693" y="92" text-anchor="middle" font-size="13" font-weight="800" fill="#fbbf24">Standar Kategori Twisted Pair (TIA/ISO)</text>
+
+  <g font-size="10.5" fill="#e2e8f0">
+    <rect x="542" y="106" width="302" height="52" rx="8" fill="#0f172a" stroke="#334155"/>
+    <text x="554" y="125" font-weight="800" fill="#60a5fa">Cat 5e (ANSI/TIA-568.2-D) — 100 MHz</text>
+    <text x="554" y="144" font-size="9.5" fill="#cbd5e1">1 Gbps (1000BASE-T) s.d. 100 m | 2.5GBASE-T (100 m)</text>
+
+    <rect x="542" y="166" width="302" height="52" rx="8" fill="#0f172a" stroke="#334155"/>
+    <text x="554" y="185" font-weight="800" fill="#38bdf8">Cat 6 (Unshielded / Foiled) — 250 MHz</text>
+    <text x="554" y="204" font-size="9.5" fill="#cbd5e1">1 Gbps &amp; 5 Gbps (100 m) | 10GBASE-T maks. 55 meter</text>
+
+    <rect x="542" y="226" width="302" height="52" rx="8" fill="#0f172a" stroke="#22c55e" stroke-width="1.5"/>
+    <text x="554" y="245" font-weight="800" fill="#4ade80">Cat 6A (Augmented) — 500 MHz</text>
+    <text x="554" y="264" font-size="9.5" fill="#cbd5e1">10 Gbps (10GBASE-T) penuh 100 meter + PoE++ 90W</text>
+
+    <rect x="542" y="286" width="302" height="52" rx="8" fill="#0f172a" stroke="#334155"/>
+    <text x="554" y="305" font-weight="800" fill="#a78bfa">Cat 7 / Class F (S/FTP) — 600–1000 MHz</text>
+    <text x="554" y="324" font-size="9.5" fill="#cbd5e1">10 Gbps (100 m), individual pair foil + braid shield</text>
+
+    <rect x="542" y="346" width="302" height="78" rx="8" fill="#0f172a" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="554" y="366" font-weight="800" fill="#fbbf24">Cat 8 (Data Center ToR) — 2000 MHz</text>
+    <text x="554" y="384" font-size="9.5" fill="#cbd5e1">25GBASE-T &amp; 40GBASE-T jarak pendek maks. 30 meter</text>
+    <text x="554" y="402" font-size="9.5" fill="#fde68a">Catatan: Gigabit Ethernet memakai KEEMPAT pasang</text>
+    <text x="554" y="415" font-size="9.5" fill="#fde68a">(Pin 1–8) dua arah sekaligus + fitur Auto-MDI/MDIX.</text>
+  </g>
+</svg>

@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 320" font-family="Inter, 'Segoe UI', sans-serif">
+  <rect width="760" height="320" rx="16" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="380" y="30" text-anchor="middle" font-size="15.5" font-weight="800" fill="#0f172a">Standar Kode Warna 12 Serat Optik (ANSI/TIA-598-C &amp; Telkom Indonesia)</text>
+  <text x="380" y="48" text-anchor="middle" font-size="11" fill="#64748b">Urutan wajib 1 s/d 12 pada tiap Loose Tube maupun Pigtail Multi-Core ("BOHCA PUMHK PT")</text>
+
+  <!-- Row 1: 1-6 -->
+  <g transform="translate(30,68)">
+    <rect x="0" y="0" width="110" height="78" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+    <circle cx="55" cy="28" r="14" fill="#2563eb"/><text x="55" y="32" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">1</text>
+    <text x="55" y="58" text-anchor="middle" font-size="11.5" font-weight="800" fill="#1e3a8a">Biru (BL)</text>
+
+    <rect x="118" y="0" width="110" height="78" rx="10" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/>
+    <circle cx="173" cy="28" r="14" fill="#f97316"/><text x="173" y="32" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">2</text>
+    <text x="173" y="58" text-anchor="middle" font-size="11.5" font-weight="800" fill="#9a3412">Orange (OR)</text>
+
+    <rect x="236" y="0" width="110" height="78" rx="10" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+    <circle cx="291" cy="28" r="14" fill="#16a34a"/><text x="291" y="32" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">3</text>
+    <text x="291" y="58" text-anchor="middle" font-size="11.5" font-weight="800" fill="#14532d">Hijau (GN)</text>
+
+    <rect x="354" y="0" width="110" height="78" rx="10" fill="#fef3c7" stroke="#92400e" stroke-width="2"/>
+    <circle cx="409" cy="28" r="14" fill="#78350f"/><text x="409" y="32" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">4</text>
+    <text x="409" y="58" text-anchor="middle" font-size="11.5" font-weight="800" fill="#78350f">Cokelat (BN)</text>
+
+    <rect x="472" y="0" width="110" height="78" rx="10" fill="#f1f5f9" stroke="#64748b" stroke-width="2"/>
+    <circle cx="527" cy="28" r="14" fill="#64748b"/><text x="527" y="32" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">5</text>
+    <text x="527" y="58" text-anchor="middle" font-size="11.5" font-weight="800" fill="#334155">Abu-abu (SL)</text>
+
+    <rect x="590" y="0" width="110" height="78" rx="10" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
+    <circle cx="645" cy="28" r="14" fill="#f8fafc" stroke="#334155" stroke-width="2"/><text x="645" y="32" text-anchor="middle" font-size="11" font-weight="800" fill="#0f172a">6</text>
+    <text x="645" y="58" text-anchor="middle" font-size="11.5" font-weight="800" fill="#0f172a">Putih (WH)</text>
+  </g>
+
+  <!-- Row 2: 7-12 -->
+  <g transform="translate(30,158)">
+    <rect x="0" y="0" width="110" height="78" rx="10" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+    <circle cx="55" cy="28" r="14" fill="#dc2626"/><text x="55" y="32" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">7</text>
+    <text x="55" y="58" text-anchor="middle" font-size="11.5" font-weight="800" fill="#7f1d1d">Merah (RD)</text>
+
+    <rect x="118" y="0" width="110" height="78" rx="10" fill="#f1f5f9" stroke="#0f172a" stroke-width="2"/>
+    <circle cx="173" cy="28" r="14" fill="#0f172a"/><text x="173" y="32" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">8</text>
+    <text x="173" y="58" text-anchor="middle" font-size="11.5" font-weight="800" fill="#0f172a">Hitam (BK)</text>
+
+    <rect x="236" y="0" width="110" height="78" rx="10" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
+    <circle cx="291" cy="28" r="14" fill="#eab308"/><text x="291" y="32" text-anchor="middle" font-size="11" font-weight="800" fill="#0f172a">9</text>
+    <text x="291" y="58" text-anchor="middle" font-size="11.5" font-weight="800" fill="#854d0e">Kuning (YE)</text>
+
+    <rect x="354" y="0" width="110" height="78" rx="10" fill="#faf5ff" stroke="#7e22ce" stroke-width="2"/>
+    <circle cx="409" cy="28" r="14" fill="#9333ea"/><text x="409" y="32" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">10</text>
+    <text x="409" y="58" text-anchor="middle" font-size="11.5" font-weight="800" fill="#581c87">Ungu (VI)</text>
+
+    <rect x="472" y="0" width="110" height="78" rx="10" fill="#fdf2f8" stroke="#db2777" stroke-width="2"/>
+    <circle cx="527" cy="28" r="14" fill="#ec4899"/><text x="527" y="32" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">11</text>
+    <text x="527" y="58" text-anchor="middle" font-size="11.5" font-weight="800" fill="#831843">Pink (RS)</text>
+
+    <rect x="590" y="0" width="110" height="78" rx="10" fill="#ecfeff" stroke="#06b6d4" stroke-width="2"/>
+    <circle cx="645" cy="28" r="14" fill="#06b6d4"/><text x="645" y="32" text-anchor="middle" font-size="11" font-weight="800" fill="#0f172a">12</text>
+    <text x="645" y="58" text-anchor="middle" font-size="11.5" font-weight="800" fill="#155e75">Toska (AQ)</text>
+  </g>
+
+  <rect x="30" y="250" width="700" height="52" rx="10" fill="#0f172a"/>
+  <text x="380" y="271" text-anchor="middle" font-size="11" font-weight="700" fill="#38bdf8">Aturan Pengelompokan Multi-Tube (Contoh Kabel Feeder 24 Core &amp; 48 Core):</text>
+  <text x="380" y="290" text-anchor="middle" font-size="10.5" fill="#cbd5e1">Tube 1 (Biru) = Core 1–12 · Tube 2 (Orange) = Core 13–24 · Tube 3 (Hijau) = Core 25–36 · Tube 4 (Cokelat) = Core 37–48</text>
+</svg>

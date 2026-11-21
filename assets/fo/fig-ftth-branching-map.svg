@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 360" font-family="Inter, 'Segoe UI', sans-serif">
+  <rect width="760" height="360" rx="16" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="380" y="30" text-anchor="middle" font-size="15.5" font-weight="800" fill="#0f172a">As-Built Topologi Jaringan FTTH ODN (Hulu STO ke Pelanggan)</text>
+  <text x="380" y="48" text-anchor="middle" font-size="11" fill="#64748b">Downstream 1490 nm / Upstream 1310 nm — Standar Label &amp; Pencabangan Pasif (ODF – JC – ODC – ODP – Roset – ONT)</text>
+
+  <!-- Main pipeline -->
+  <g transform="translate(26,76)">
+    <!-- OLT & ODF -->
+    <rect x="0" y="20" width="96" height="86" rx="10" fill="#1e3a8a"/>
+    <text x="48" y="46" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">OLT / ODF</text>
+    <text x="48" y="64" text-anchor="middle" font-size="9.5" fill="#bfdbfe">Central STO</text>
+    <text x="48" y="80" text-anchor="middle" font-size="9" fill="#fde047">+3 s/d +7 dBm</text>
+    <text x="48" y="95" text-anchor="middle" font-size="8.5" fill="#e2e8f0">G.652.D Feeder</text>
+
+    <line x1="96" y1="63" x2="158" y2="63" stroke="#2563eb" stroke-width="3.5"/>
+    <text x="127" y="54" text-anchor="middle" font-size="8.5" font-weight="700" fill="#1e40af">24C ADSS</text>
+
+    <!-- Joint Closure -->
+    <rect x="158" y="34" width="100" height="58" rx="8" fill="#334155"/>
+    <text x="208" y="57" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">Joint Closure</text>
+    <text x="208" y="73" text-anchor="middle" font-size="9" fill="#cbd5e1">Fusion ≤ 0.1 dB</text>
+    <text x="208" y="85" text-anchor="middle" font-size="8.5" fill="#94a3b8">TB / TO / TH</text>
+
+    <line x1="258" y1="63" x2="310" y2="63" stroke="#2563eb" stroke-width="3.5"/>
+
+    <!-- ODC -->
+    <rect x="310" y="20" width="102" height="86" rx="10" fill="#0f766e"/>
+    <text x="361" y="45" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">ODC</text>
+    <text x="361" y="62" text-anchor="middle" font-size="9.5" fill="#ccfbf1">Splitter 1:4</text>
+    <text x="361" y="78" text-anchor="middle" font-size="9" fill="#fde047">Loss ≈ 7.2 dB</text>
+    <text x="361" y="94" text-anchor="middle" font-size="8.5" fill="#e2e8f0">Distribusi 12C</text>
+
+    <!-- Branches from ODC to 3 ODPs -->
+    <polyline points="412,63 438,63 438,24 468,24" fill="none" stroke="#0d9488" stroke-width="2.5"/>
+    <line x1="412" y1="63" x2="468" y2="63" stroke="#0d9488" stroke-width="2.5"/>
+    <polyline points="438,63 438,102 468,102" fill="none" stroke="#0d9488" stroke-width="2.5"/>
+
+    <!-- ODP 1..3 -->
+    <rect x="468" y="4" width="96" height="38" rx="6" fill="#0284c7"/>
+    <text x="516" y="21" text-anchor="middle" font-size="10" font-weight="800" fill="#fff">ODP-01 (1:8)</text>
+    <text x="516" y="34" text-anchor="middle" font-size="8.5" fill="#e0f2fe">SC/APC · 10.5 dB</text>
+
+    <rect x="468" y="44" width="96" height="38" rx="6" fill="#0369a1"/>
+    <text x="516" y="61" text-anchor="middle" font-size="10" font-weight="800" fill="#fff">ODP-02 (1:8)</text>
+    <text x="516" y="74" text-anchor="middle" font-size="8.5" fill="#bae6fd">SC/APC · 10.5 dB</text>
+
+    <rect x="468" y="84" width="96" height="38" rx="6" fill="#0369a1"/>
+    <text x="516" y="101" text-anchor="middle" font-size="10" font-weight="800" fill="#fff">ODP-03 (1:8)</text>
+    <text x="516" y="114" text-anchor="middle" font-size="8.5" fill="#bae6fd">SC/APC · 10.5 dB</text>
+
+    <!-- Drop Cable -> Roset -> ONT -->
+    <line x1="564" y1="23" x2="606" y2="23" stroke="#f59e0b" stroke-width="2.5"/>
+    <line x1="564" y1="63" x2="606" y2="63" stroke="#f59e0b" stroke-width="2.5"/>
+    <text x="585" y="15" text-anchor="middle" font-size="8" font-weight="700" fill="#b45309">G.657</text>
+
+    <rect x="606" y="4" width="102" height="38" rx="6" fill="#f59e0b"/>
+    <text x="657" y="21" text-anchor="middle" font-size="10" font-weight="800" fill="#0f172a">Roset → ONT</text>
+    <text x="657" y="34" text-anchor="middle" font-size="8.5" font-weight="700" fill="#451a03">Rx -8 s/d -24 dBm</text>
+
+    <rect x="606" y="44" width="102" height="38" rx="6" fill="#f59e0b"/>
+    <text x="657" y="61" text-anchor="middle" font-size="10" font-weight="800" fill="#0f172a">Roset → ONT</text>
+    <text x="657" y="74" text-anchor="middle" font-size="8.5" font-weight="700" fill="#451a03">Client IKR/IKG</text>
+  </g>
+
+  <!-- Labeling & ATP Footer -->
+  <rect x="26" y="220" width="708" height="122" rx="12" fill="#0f172a"/>
+  <text x="42" y="244" font-size="12" font-weight="800" fill="#34d399">Standar Pelabelan, Uji Terima (ATP / BAUT) &amp; Serah Terima (BAST)</text>
+  <g font-size="10.2" fill="#e2e8f0">
+    <text x="42" y="266">• <tspan font-weight="700" fill="#38bdf8">Label Kabel Feeder/Distribusi:</tspan> <tspan font-family="monospace" fill="#fde047">[ASAL] / [TUJUAN] / [CORE] / [SERAT] / [TAHUN]</tspan> → Contoh: <tspan font-family="monospace">ODC-KMD-01 / ODP-KT-05 / 24C / G.652D / 2026</tspan></text>
+    <text x="42" y="286">• <tspan font-weight="700" fill="#38bdf8">Label Drop Pelanggan:</tspan> <tspan font-family="monospace" fill="#fde047">[ID_ODP] / [PORT] / [PELANGGAN]</tspan> → Contoh: <tspan font-family="monospace">ODP-KT-05 / PORT-03 / LAB-TKJ-01</tspan></text>
+    <text x="42" y="306">• <tspan font-weight="700" fill="#38bdf8">Komponen Closeout BAUT/BAST:</tspan> As-Built Drawing berkoordinat GPS · Core Assignment Sheet · OPM Table · Trace OTDR (.SOR) · Foto Geotagged</text>
+    <text x="42" y="326">• <tspan font-weight="700" fill="#fca5a5">Re-Work Wajib:</tspan> Jika splice &gt; 0.10 dB atau ONT Rx &lt; -24 dBm, potong dan splice ulang sebelum penandatanganan BAUT.</text>
+  </g>
+</svg>
