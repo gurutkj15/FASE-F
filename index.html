@@ -8,8 +8,12 @@
     <title>TJKT Studio — Platform Belajar TKJ &amp; Fiber Optik Fase F</title>
     <meta name="description"
         content="TJKT Studio (SMKN 1 Kuantan Mudik): Platform belajar interaktif Konsentrasi TKJ &amp; Fiber Optik Fase F dengan ilustrasi perangkat, lab simulasi, dan 470 soal asesmen.">
-    <link rel="stylesheet" href="style.css?v=58">
+    <link rel="stylesheet" href="style.css?v=60">
     <link rel="manifest" href="manifest.json">
+    <!-- PRAKONEKSI: pustaka animasi (GSAP / Motion / Lenis) diambil via dynamic import -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap"
         rel="stylesheet">
@@ -68,6 +72,21 @@
                     <span>Mulai Belajar</span>
                     <i class="fas fa-arrow-right"></i>
                 </button>
+                <div class="splash-quick-links" aria-label="Akses langsung mata pelajaran">
+                    <button type="button" class="splash-quick-btn" onclick="return window.__enterSplash('tkj')">
+                        <i class="fas fa-network-wired"></i>
+                        <span>Konsentrasi TKJ</span>
+                    </button>
+                    <button type="button" class="splash-quick-btn fo" onclick="return window.__enterSplash('fiberOptik')">
+                        <i class="fas fa-bolt"></i>
+                        <span>Fiber Optik</span>
+                    </button>
+                    <button type="button" id="btn-splash-resume" class="splash-quick-btn resume hidden"
+                        onclick="return window.__enterSplash(this.dataset.target || 'home')">
+                        <i class="fas fa-history"></i>
+                        <span id="splash-resume-label">Lanjutkan</span>
+                    </button>
+                </div>
             </div>
 
             <div class="splash-meta-line" aria-label="Ringkasan Konten">
@@ -120,7 +139,7 @@
                     oninput="searchMateri(this.value)" onkeydown="searchKey(event)" aria-label="Cari materi">
             </div>
 
-            <nav class="sidebar-nav">
+            <nav class="sidebar-nav" data-lenis-prevent>
                 <!-- PEMILIH MAPEL: 2 jalur belajar terpisah -->
                 <div class="snav-tabs" role="tablist" aria-label="Pilih mapel">
                     <button type="button" class="snav-tab active" role="tab" data-track="tkj" aria-selected="true"
@@ -481,9 +500,12 @@
                     title="Koneksi terputus - materi tetap bisa dibuka"><i class="fas fa-wifi-slash"></i> Offline</span>
                 <button class="topbar-btn install-btn hidden" id="install-btn" title="Pasang aplikasi di perangkat"><i
                         class="fas fa-download"></i></button>
-                <button class="topbar-btn" id="search-top-btn" onclick="openQuickSearch()"
-                    title="Cari materi, TP, atau istilah" aria-label="Cari materi"><i
-                        class="fas fa-search"></i></button>
+                <button class="topbar-btn topbar-search-trigger" id="search-top-btn" onclick="openQuickSearch()"
+                    title="Cari materi, TP, atau istilah (Ctrl+K)" aria-label="Cari materi">
+                    <i class="fas fa-search"></i>
+                    <span class="tst-label">Cari materi...</span>
+                    <kbd class="tst-kbd">Ctrl K</kbd>
+                </button>
                 <button class="topbar-btn" id="track-btn" onclick="restartToBeginning()" title="Layar pembuka"
                     aria-label="Layar pembuka"><i class="fas fa-power-off"></i></button>
                 <button class="topbar-btn" id="theme-btn" onclick="toggleTheme()" title="Ganti tema terang/gelap"
@@ -491,13 +513,33 @@
             </div>
         </header>
 
-        <!-- SEARCH OVERLAY -->
-        <div id="search-results" class="search-results hidden"></div>
+        <!-- SEARCH OVERLAY (Sidebar Inline) -->
+        <div id="search-results" class="search-results hidden" data-lenis-prevent></div>
+
+        <!-- COMMAND PALETTE (Ctrl+K / Quick Search Modal) -->
+        <div id="cmdk-modal" class="cmdk-modal hidden" role="dialog" aria-modal="true" aria-label="Pencarian Cepat">
+            <div class="cmdk-backdrop" onclick="closeQuickSearch()"></div>
+            <div class="cmdk-dialog">
+                <div class="cmdk-input-wrap">
+                    <i class="fas fa-search cmdk-ic"></i>
+                    <input type="text" id="cmdk-input" autocomplete="off" spellcheck="false"
+                        placeholder="Cari topik, TP Fiber Optik, perangkat, istilah, atau kuis..."
+                        oninput="cmdkSearch(this.value)" onkeydown="cmdkKey(event)" aria-label="Pencarian cepat">
+                    <kbd class="cmdk-esc" onclick="closeQuickSearch()" title="Tutup (Esc)">ESC</kbd>
+                </div>
+                <div id="cmdk-list" class="cmdk-list" data-lenis-prevent></div>
+                <div class="cmdk-foot">
+                    <span><kbd>↑</kbd><kbd>↓</kbd> Navigasi</span>
+                    <span><kbd>Enter</kbd> Buka</span>
+                    <span><kbd>Esc</kbd> Tutup</span>
+                </div>
+            </div>
+        </div>
 
         <!-- MAIN -->
         <main id="content" class="main-content"></main>
 
-        <!-- BOTTOM NAV -->
+        <!-- BOTTOM NAV (Mobile & Tablet Floating Pill) -->
         <nav class="bottom-nav" aria-label="Navigasi utama">
             <button onclick="showPage('home')" class="bnav-btn" id="bn-home" title="Beranda"><i
                     class="fas fa-home"></i><span>Beranda</span></button>
@@ -510,7 +552,10 @@
         </nav>
     </div>
 
-    <script src="app.js?v=58"></script>
+    <script src="app.js?v=60"></script>
+    <!-- LAPISAN ANIMASI MODERN — GSAP (koreografi & ScrollTrigger), Motion (spring micro-interaction),
+         Lenis (smooth scroll & sync). ES module, diload setelah app.js, gagal CDN = tetap jalan. -->
+    <script type="module" src="anim.js?v=60"></script>
 </body>
 
 </html>

@@ -6,7 +6,7 @@
    - Navigasi halaman                          -> network-first, fallback cache
    - Resource CDN (font/icon)                  -> stale-while-revalidate
    ============================================================ */
-const VERSION = 'v58-deploy-ready';
+const VERSION = 'v60-modern-gsap-motion-lenis';
 const CACHE_APP = `tjkt-app-${VERSION}`;
 const CACHE_ASSET = `tjkt-assets-${VERSION}`;
 const CACHE_CDN = `tjkt-cdn-${VERSION}`;
@@ -14,8 +14,9 @@ const CACHE_CDN = `tjkt-cdn-${VERSION}`;
 const APP_SHELL = [
     './',
     './index.html',
-    './style.css?v=58',
-    './app.js?v=58',
+    './style.css?v=60',
+    './app.js?v=60',
+    './anim.js?v=60',
     './manifest.json',
     './assets/icons/favicon.ico',
     './assets/icons/favicon-32.png',
@@ -177,10 +178,11 @@ self.addEventListener('fetch', event => {
         return;
     }
 
-    // 3) CDN (font, font-awesome) -> stale-while-revalidate, gagal pun tetap ada di cache
+    // 3) CDN (font, font-awesome, pustaka animasi) -> stale-while-revalidate, gagal pun tetap ada di cache
     if (url.hostname.includes('googleapis.com') ||
         url.hostname.includes('gstatic.com') ||
         url.hostname.includes('cdnjs.cloudflare.com') ||
+        url.hostname.includes('jsdelivr.net') ||
         url.hostname.includes('flaticon.com')) {
         event.respondWith(
             caches.open(CACHE_CDN).then(cache =>

@@ -50,7 +50,12 @@ function parseRoute(hash) {
     return { kind: 'page', id: a };
 }
 function renderRoute(r, restoreY) {
-    if (!r) return;
+    // Hash kosong (mis. tombol Back dari #/topologi) -> kembali ke beranda,
+    // jangan dibiarkan menampilkan halaman sebelumnya.
+    if (!r) {
+        if (location.hash && location.hash !== '#') return;
+        r = { kind: 'page', id: 'home' };
+    }
     _lastRoute = location.hash;
     _routeSilent = true;
     try {
@@ -62,7 +67,7 @@ function renderRoute(r, restoreY) {
     } finally {
         setTimeout(() => { _routeSilent = false; }, 0);
     }
-    setTimeout(() => window.scrollTo(0, restoreY || 0), 200);
+    setTimeout(() => scrollPageTo(restoreY || 0), 200);
 }
 window.addEventListener('popstate', () => {
     const key = location.hash || '#/home';
@@ -74,27 +79,81 @@ window.addEventListener('hashchange', () => {
     renderRoute(parseRoute(location.hash), 0);
 });
 
+// ── PERGULIRAN — satu pintu untuk scroll; memakai Lenis bila aktif ──
+function scrollPageTo(y, smooth) {
+    const top = y || 0;
+    const lenis = window.__lenis;
+    if (lenis && typeof lenis.scrollTo === 'function') {
+        try { lenis.scrollTo(top, { immediate: !smooth, force: true }); return; }
+        catch (e) { /* jatuh ke scroll native di bawah */ }
+    }
+    if (smooth) window.scrollTo({ top, behavior: 'smooth' });
+    else window.scrollTo(0, top);
+}
+window.scrollPageTo = scrollPageTo;
+
+function scrollToAnchor(id) {
+    const target = id && document.getElementById(id);
+    if (!target) return;
+    const m = window.__tjktMotion;
+    if (m && typeof m.scrollTo === 'function') {
+        if (m.scrollTo(target, { offset: -86, duration: 0.95 })) return;
+    }
+    const y = target.getBoundingClientRect().top + (window.scrollY || 0) - 86;
+    window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+}
+window.scrollToAnchor = scrollToAnchor;
+
+function setModalScrollLock(locked) {
+    try {
+        document.dispatchEvent(new CustomEvent('tjkt:lock-scroll', { detail: { locked: !!locked } }));
+    } catch (e) {}
+}
+
+// Beritahu lapisan animasi (GSAP / Motion / Lenis) bahwa halaman selesai dirender
+function notifyPage() {
+    try {
+        document.dispatchEvent(new CustomEvent('tjkt:page', { detail: { page: currentPage, track: currentTrack } }));
+    } catch (e) {}
+}
+window.notifyPage = notifyPage;
+
 // ── SPLASH ────────────────────────────────────────────────
 let _splashHideTimer = null;
 function startApp(target, skipRender = false) {
     clearTimeout(_splashHideTimer);
-    const dest = target && pages[target] ? target : 'home';
-    currentTrack = (dest === 'fiberOptik' || dest === 'fo-pengayaan' || dest.startsWith('fo-')) ? 'fo' : 'tkj';
+    let dest = target || 'home';
+    let special = null;
+    if (dest.startsWith('enrich_')) { special = { kind: 'enrich', id: dest.slice(7) }; dest = 'home'; }
+    else if (dest.startsWith('fo_enrich_')) { special = { kind: 'foEnrich', id: dest.slice(10) }; dest = 'fiberOptik'; }
+    else if (!pages[dest]) { dest = 'home'; }
+
+    currentTrack = (dest === 'fiberOptik' || dest === 'fo-pengayaan' || dest.startsWith('fo-') || (special && special.kind === 'foEnrich')) ? 'fo' : 'tkj';
     try { syncTrackUI(currentTrack); } catch (e) { console.error(e); }
 
     const splash = document.getElementById('splash');
     const app = document.getElementById('app');
     if (app) app.classList.remove('hidden');
+    setModalScrollLock(false);
+
     if (!skipRender) {
-        try { showPage(dest); } catch (e) { console.error(e); }
+        try {
+            if (special && special.kind === 'enrich') showEnrichment(special.id);
+            else if (special && special.kind === 'foEnrich') showFoEnrichment(special.id);
+            else showPage(dest);
+        } catch (e) { console.error(e); }
     }
-    if (splash) {
+    if (splash && splash.style.display !== 'none') {
         splash.style.pointerEvents = 'none';
-        splash.style.transition = 'opacity .28s ease';
-        splash.style.opacity = '0';
-        _splashHideTimer = setTimeout(() => {
-            splash.style.display = 'none';
-        }, 290);
+        const m = window.__tjktMotion;
+        const handled = m && typeof m.exitSplash === 'function' && m.exitSplash(splash);
+        if (!handled) {
+            splash.style.transition = 'opacity .28s ease';
+            splash.style.opacity = '0';
+            _splashHideTimer = setTimeout(() => {
+                splash.style.display = 'none';
+            }, 290);
+        }
     }
 }
 window.startApp = startApp;
@@ -115,6 +174,7 @@ function restartToBeginning() {
     clearTimeout(_splashHideTimer);
     closeSidebar();
     closeSearch();
+    closeQuickSearch();
     // tampilkan lagi layar pembuka (splash)
     const splash = document.getElementById('splash');
     const app = document.getElementById('app');
@@ -125,7 +185,9 @@ function restartToBeginning() {
         splash.style.opacity = '1';
     }
     if (app) app.classList.add('hidden');
-    window.scrollTo(0, 0);
+    scrollPageTo(0);
+    hydrateSplashResume();
+    try { document.dispatchEvent(new CustomEvent('tjkt:splash-show')); } catch (e) {}
     idleTimer = setTimeout(restartToBeginning, IDLE_LIMIT);
 }
 window.restartToBeginning = restartToBeginning;
@@ -156,7 +218,7 @@ function initTopButton() {
     b.setAttribute('aria-label', 'Kembali ke atas');
     b.title = 'Kembali ke atas';
     b.innerHTML = '<i class="fas fa-arrow-up"></i><span>Atas</span>';
-    b.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    b.addEventListener('click', () => scrollPageTo(0, true));
     document.body.appendChild(b);
     window.addEventListener('scroll', () => {
         b.classList.toggle('show', window.scrollY > 420);
@@ -175,34 +237,20 @@ const pages = {
 };
 
 const lessonEnrichment = {
-  "topologi": "\n<h2>1. Memahami Topologi dan Arsitektur Jaringan (Elemen 1)</h2>\n<p>Topologi adalah cara perangkat disusun dan dihubungkan, baik secara fisik maupun logis. Topologi fisik menjelaskan tata letak pengkabelan dan lokasi perangkat, sedangkan topologi logis menjelaskan bagaimana frame Ethernet (Layer 2) atau paket IP (Layer 3) mengalir melintasi jaringan. Arsitektur jaringan mencakup model layanan (Client-Server vs Peer-to-Peer), hierarki <i>Three-Tier</i> (Core, Distribution, Access) atau <i>Spine-Leaf</i> pada data center modern, segmentasi VLAN, redundansi jalur (Spanning Tree Protocol IEEE 802.1D / RSTP 802.1w &amp; EtherChannel/LACP IEEE 802.3ad), serta manajemen terpusat.</p>\n<h3>Memilih Topologi Berdasarkan Kebutuhan Industri</h3>\n<table><thead><tr><th>Topologi</th><th>Karakteristik Teknis</th><th>Penerapan &amp; Mitigasi Risiko</th></tr></thead><tbody>\n<tr><td><b>Star</b></td><td>Setiap endpoint terhubung point-to-point ke switch akses pusat</td><td>Standar utama LAN modern (IEEE 802.3); isolasi gangguan mudah. Titik kritis pada switch pusat dimitigasi dengan dual-power/stacking.</td></tr>\n<tr><td><b>Extended Star / Tree</b></td><td>Hierarki switch Access → Distribution → Core</td><td>Standar gedung bertingkat, kampus, dan SMK; wajib mengaktifkan RSTP (802.1w) dan LACP pada uplink redundan untuk mencegah switching loop.</td></tr>\n<tr><td><b>Mesh (Full / Partial)</b></td><td>Banyak jalur redundan antar-router/node (\(N(N-1)/2\) link untuk full mesh)</td><td>Digunakan pada WAN backbone ISP, OSPF/BGP core, dan Wireless Mesh; failover otomatis ketika satu link putus.</td></tr>\n<tr><td><b>Bus &amp; Ring</b></td><td>Media bersama (coaxial 10BASE2) atau cincin token/FDDI/SDH</td><td>Penting secara historis pada Ethernet klasik, namun di industri fiber modern konsep Ring hidup kembali sebagai <b>Metro Ethernet Ring (ITU-T G.8032 ERPS)</b> dengan failover &lt;50 ms.</td></tr>\n<tr><td><b>Hybrid / Spine-Leaf</b></td><td>Kombinasi beberapa topologi atau arsitektur 2-tier <i>Clos network</i></td><td>Standar jaringan enterprise, rumah sakit, dan data center cloud modern dengan latensi antar-server seragam (east-west traffic).</td></tr></tbody></table>\n<h3>Arsitektur Client-Server, Peer-to-Peer, dan Three-Tier</h3>\n<p>Pada <b>Client-Server</b>, server menyediakan layanan terpusat (Active Directory/LDAP, DNS, DHCP, Web, File/Samba, Database) sehingga kebijakan keamanan (AAA), autentikasi, dan backup 3-2-1 dapat dikelola dari satu titik. Pada <b>Peer-to-Peer (P2P)</b>, setiap host bertindak sebagai client sekaligus server tanpa kontrol terpusat (hanya cocok untuk workgroup kecil &lt;10 PC). Pada jaringan kampus/enterprise, Cisco dan standar industri merekomendasikan <b>Hierarchical Three-Tier Model</b>: <i>Access Layer</i> (koneksi port user, PoE, 802.1X, PortFast/BPDU Guard), <i>Distribution Layer</i> (terminasi VLAN/SVI, ACL policy, QoS, FHRP/HSRP/VRRP), dan <i>Core Layer</i> (switching/routing backbone berkecepatan tinggi 10G/40G/100G tanpa pemrosesan ACL yang membebani latensi).</p>\n<h3>Studi Kasus: Merancang Jaringan Laboratorium TJKT Standar Industri</h3>\n<p>Sebuah laboratorium TJKT memiliki 32 PC siswa, 1 PC instruktur, 1 server lokal (proxmox/virtualisasi), 1 printer jaringan, dan 2 Access Point Wi-Fi 6. Rancangan standar industri menggunakan topologi <b>Extended Star</b>: dua Managed Gigabit Switch 24-Port (dengan 2 port uplink SFP+ 10G LACP ke switch distribusi/router gateway), pemisahan VLAN Guru (VLAN 10), VLAN Siswa (VLAN 20), VLAN Server Lab (VLAN 30), dan VLAN Manajemen (VLAN 99), disertai proteksi loop RSTP serta dokumentasi <i>As-Built Drawing</i>.</p>\n<h3>Langkah Kerja Perencanaan Jaringan</h3>\n<ol><li>Identifikasi kebutuhan pengguna, jumlah concurrent user, aplikasi, lokasi, dan target SLA.</li><li>Gambar denah fisik (<i>floor plan</i>) dan diagram logis (L2/L3); beri label port, jalur kabel, VLAN, dan subnet.</li><li>Tentukan kapasitas backplane switch, throughput routing (Mpps), PoE budget (IEEE 802.3af/at/bt), dan kecepatan uplink.</li><li>Rencanakan skema alamat IPv4/IPv6 (VLSM), gateway, DHCP, DNS, serta matriks akses firewall antar-VLAN.</li><li>Hitung bill of materials (BoM): panjang kabel UTP/FO + slack 15%, patch panel, rack 19 inci, UPS online/line-interactive, dan grounding.</li><li>Uji rancangan dengan simulator (Cisco Packet Tracer / GNS3 / EVE-NG) atau pilot test, lalu sahkan dokumentasi.</li></ol>\n<div class=\"lesson-note\"><b>Catatan Praktisi:</b> Jangan memilih switch hanya dari jumlah port RJ-45. Periksa <i>switching capacity</i> (Gbps), <i>forwarding rate</i> (Mpps), dukungan IEEE 802.1Q VLAN, RSTP, LACP, SNMP/NetFlow monitoring, dan total <i>PoE power budget</i> (Watt).</div>\n<h3>Sumber &amp; Referensi Standar Industri</h3>\n<ul><li><a href=\"https://kurikulum.kemdikbud.go.id/\" target=\"_blank\" rel=\"noopener\">Kepmendikbudristek No. 032/H/KR/2024 — Capaian Pembelajaran SMK/MAK Fase F Teknik Jaringan Komputer dan Telekomunikasi (Elemen 1–5)</a></li><li><a href=\"https://www.cisco.com/c/en/us/td/docs/solutions/Enterprise/Campus/campover.html\" target=\"_blank\" rel=\"noopener\">Cisco Validated Design — Campus Network for High Availability (Three-Tier Core, Distribution, Access Architecture)</a></li><li><a href=\"https://standards.ieee.org/ieee/802.1Q/6844/\" target=\"_blank\" rel=\"noopener\">IEEE 802.1Q &amp; IEEE 802.1w (RSTP) — Standard for Local and Metropolitan Area Networks: Bridges and Bridged Networks</a></li></ul>\n",
-
+  "topologi": "\n<h2>1. Memahami Topologi dan Arsitektur Jaringan (Elemen 1)</h2>\n<p>Topologi adalah cara perangkat disusun dan dihubungkan, baik secara fisik maupun logis. Topologi fisik menjelaskan tata letak pengkabelan dan lokasi perangkat, sedangkan topologi logis menjelaskan bagaimana frame Ethernet (Layer 2) atau paket IP (Layer 3) mengalir melintasi jaringan. Arsitektur jaringan mencakup model layanan (Client-Server vs Peer-to-Peer), hierarki <i>Three-Tier</i> (Core, Distribution, Access) atau <i>Spine-Leaf</i> pada data center modern, segmentasi VLAN, redundansi jalur (Spanning Tree Protocol IEEE 802.1D / RSTP 802.1w &amp; EtherChannel/LACP IEEE 802.3ad), serta manajemen terpusat.</p>\n<h3>Memilih Topologi Berdasarkan Kebutuhan Industri</h3>\n<table><thead><tr><th>Topologi</th><th>Karakteristik Teknis</th><th>Penerapan &amp; Mitigasi Risiko</th></tr></thead><tbody>\n<tr><td><b>Star</b></td><td>Setiap endpoint terhubung point-to-point ke switch akses pusat</td><td>Standar utama LAN modern (IEEE 802.3); isolasi gangguan mudah. Titik kritis pada switch pusat dimitigasi dengan dual-power/stacking.</td></tr>\n<tr><td><b>Extended Star / Tree</b></td><td>Hierarki switch Access → Distribution → Core</td><td>Standar gedung bertingkat, kampus, dan SMK; wajib mengaktifkan RSTP (802.1w) dan LACP pada uplink redundan untuk mencegah switching loop.</td></tr>\n<tr><td><b>Mesh (Full / Partial)</b></td><td>Banyak jalur redundan antar-router/node ((N(N-1)/2) link untuk full mesh)</td><td>Digunakan pada WAN backbone ISP, OSPF/BGP core, dan Wireless Mesh; failover otomatis ketika satu link putus.</td></tr>\n<tr><td><b>Bus &amp; Ring</b></td><td>Media bersama (coaxial 10BASE2) atau cincin token/FDDI/SDH</td><td>Penting secara historis pada Ethernet klasik, namun di industri fiber modern konsep Ring hidup kembali sebagai <b>Metro Ethernet Ring (ITU-T G.8032 ERPS)</b> dengan failover &lt;50 ms.</td></tr>\n<tr><td><b>Hybrid / Spine-Leaf</b></td><td>Kombinasi beberapa topologi atau arsitektur 2-tier <i>Clos network</i></td><td>Standar jaringan enterprise, rumah sakit, dan data center cloud modern dengan latensi antar-server seragam (east-west traffic).</td></tr></tbody></table>\n<h3>Arsitektur Client-Server, Peer-to-Peer, dan Three-Tier</h3>\n<p>Pada <b>Client-Server</b>, server menyediakan layanan terpusat (Active Directory/LDAP, DNS, DHCP, Web, File/Samba, Database) sehingga kebijakan keamanan (AAA), autentikasi, dan backup 3-2-1 dapat dikelola dari satu titik. Pada <b>Peer-to-Peer (P2P)</b>, setiap host bertindak sebagai client sekaligus server tanpa kontrol terpusat (hanya cocok untuk workgroup kecil &lt;10 PC). Pada jaringan kampus/enterprise, Cisco dan standar industri merekomendasikan <b>Hierarchical Three-Tier Model</b>: <i>Access Layer</i> (koneksi port user, PoE, 802.1X, PortFast/BPDU Guard), <i>Distribution Layer</i> (terminasi VLAN/SVI, ACL policy, QoS, FHRP/HSRP/VRRP), dan <i>Core Layer</i> (switching/routing backbone berkecepatan tinggi 10G/40G/100G tanpa pemrosesan ACL yang membebani latensi).</p>\n<h3>Studi Kasus: Merancang Jaringan Laboratorium TJKT Standar Industri</h3>\n<p>Sebuah laboratorium TJKT memiliki 32 PC siswa, 1 PC instruktur, 1 server lokal (proxmox/virtualisasi), 1 printer jaringan, dan 2 Access Point Wi-Fi 6. Rancangan standar industri menggunakan topologi <b>Extended Star</b>: dua Managed Gigabit Switch 24-Port (dengan 2 port uplink SFP+ 10G LACP ke switch distribusi/router gateway), pemisahan VLAN Guru (VLAN 10), VLAN Siswa (VLAN 20), VLAN Server Lab (VLAN 30), dan VLAN Manajemen (VLAN 99), disertai proteksi loop RSTP serta dokumentasi <i>As-Built Drawing</i>.</p>\n<h3>Langkah Kerja Perencanaan Jaringan</h3>\n<ol><li>Identifikasi kebutuhan pengguna, jumlah concurrent user, aplikasi, lokasi, dan target SLA.</li><li>Gambar denah fisik (<i>floor plan</i>) dan diagram logis (L2/L3); beri label port, jalur kabel, VLAN, dan subnet.</li><li>Tentukan kapasitas backplane switch, throughput routing (Mpps), PoE budget (IEEE 802.3af/at/bt), dan kecepatan uplink.</li><li>Rencanakan skema alamat IPv4/IPv6 (VLSM), gateway, DHCP, DNS, serta matriks akses firewall antar-VLAN.</li><li>Hitung bill of materials (BoM): panjang kabel UTP/FO + slack 15%, patch panel, rack 19 inci, UPS online/line-interactive, dan grounding.</li><li>Uji rancangan dengan simulator (Cisco Packet Tracer / GNS3 / EVE-NG) atau pilot test, lalu sahkan dokumentasi.</li></ol>\n<div class=\"lesson-note\"><b>Catatan Praktisi:</b> Jangan memilih switch hanya dari jumlah port RJ-45. Periksa <i>switching capacity</i> (Gbps), <i>forwarding rate</i> (Mpps), dukungan IEEE 802.1Q VLAN, RSTP, LACP, SNMP/NetFlow monitoring, dan total <i>PoE power budget</i> (Watt).</div>\n<h3>Sumber &amp; Referensi Standar Industri</h3>\n<ul><li><a href=\"https://kurikulum.kemdikbud.go.id/\" target=\"_blank\" rel=\"noopener\">Kepmendikbudristek No. 032/H/KR/2024 — Capaian Pembelajaran SMK/MAK Fase F Teknik Jaringan Komputer dan Telekomunikasi (Elemen 1–5)</a></li><li><a href=\"https://www.cisco.com/c/en/us/td/docs/solutions/Enterprise/Campus/campover.html\" target=\"_blank\" rel=\"noopener\">Cisco Validated Design — Campus Network for High Availability (Three-Tier Core, Distribution, Access Architecture)</a></li><li><a href=\"https://standards.ieee.org/ieee/802.1Q/6844/\" target=\"_blank\" rel=\"noopener\">IEEE 802.1Q &amp; IEEE 802.1w (RSTP) — Standard for Local and Metropolitan Area Networks: Bridges and Bridged Networks</a></li></ul>\n",
   "kebutuhan": "\n<h2>2. Analisis Kebutuhan Teknis Pengguna Jaringan (Elemen 1)</h2>\n<p>Analisis kebutuhan teknis (<i>Technical Requirements Analysis</i>) adalah proses rekayasa untuk menerjemahkan kebutuhan operasional organisasi ke dalam spesifikasi parameter jaringan yang terukur, dapat diuji (<i>verifiable</i>), dan sesuai anggaran (RAB). Seorang network engineer tidak boleh membeli perangkat atau menarik kabel sebelum memetakan profil pengguna, jenis trafik aplikasi (VoIP, video conference, ERP, CBT ujian), jam puncak (<i>peak hour</i>), serta target Service Level Agreement (SLA).</p>\n<h3>Enam Dimensi Kebutuhan Teknis Jaringan</h3>\n<ul><li><b>Pengguna (User Profile):</b> jumlah total akun, <i>concurrent users</i> (pengguna aktif bersamaan), rasio perangkat per user (BYOD), mobilitas, dan tingkat hak akses.</li><li><b>Bisnis &amp; Operasional:</b> jam operasional kritis, prioritas aplikasi (<i>mission-critical</i> vs <i>best-effort</i>), anggaran investasi (CAPEX) &amp; operasional (OPEX), serta biaya kerugian akibat downtime.</li><li><b>Perangkat Keras (Hardware):</b> spesifikasi PC/endpoint, server, switch (managed/PoE), router, access point, modul SFP/SFP+, rack server, dan kapasitas UPS (VA/Watt &amp; runtime menit).</li><li><b>Perangkat Lunak (Software):</b> sistem operasi server/client, lisensi, hypervisor virtualisasi, NMS monitoring (Zabbix, PRTG, LibreNMS), dan kompatibilitas protokol.</li><li><b>Konektivitas &amp; Parameter QoS (ITU-T G.114):</b> bandwidth internet (CIR vs MIR, rasio 1:1 dedicated vs broadband 1:4/1:8), throughput LAN, <b>latensi satu arah &lt; 150 ms</b> (LAN lokal &lt; 5 ms), <b>jitter &lt; 30 ms</b> untuk VoIP/video, <b>packet loss &lt; 1%</b>, dan target ketersediaan (SLA 99,5% s.d. 99,99%).</li><li><b>Keamanan &amp; Skalabilitas:</b> segmentasi VLAN, kontrol akses 802.1X/WPA3, firewall NGFW, pencatatan log (syslog), backup otomatis, dan cadangan ekspansi kapasitas 30–50% untuk 3–5 tahun ke depan.</li></ul>\n<h3>Rumus Estimasi Bandwidth &amp; Kapasitas</h3>\n<p>Dalam praktik industri, kebutuhan bandwidth total dihitung dengan memperhitungkan <i>Concurrency Ratio</i> (persentase user yang aktif mengunduh pada detik yang sama, biasanya 20%–50%) dan <i>Overhead</i> protokol TCP/IP (~10–15%):</p>\n<pre><code>Bandwidth Total = (Jumlah User × Concurrency Ratio × Bandwidth Rata-rata Aplikasi) × 1,25 (Safety Margin)</code></pre>\n<h3>Contoh Matriks Konversi Keluhan Pengguna ke Spesifikasi Teknis</h3>\n<table><thead><tr><th>Kebutuhan / Keluhan Pengguna</th><th>Spesifikasi Teknis &amp; Parameter Uji (Acceptance Criteria)</th></tr></thead><tbody><tr><td>Video pembelajaran &amp; Zoom sering patah-patah saat jam pelajaran</td><td>Ukur throughput pada jam sibuk; terapkan QoS/Traffic Shaping; jamin latensi &lt; 50 ms, jitter &lt; 20 ms, packet loss &lt; 0,5% (standar ITU-T G.114).</td></tr><tr><td>Sinyal Wi-Fi hilang di pojok ruang kelas &amp; koneksi lambat saat 35 siswa login</td><td>Lakukan <i>Wireless Site Survey</i>; targetkan sinyal <b>RSSI ≥ −65 dBm</b> dan <b>SNR ≥ 25 dB</b> di seluruh sudut ruang; gunakan AP Dual-Band Wi-Fi 6 (MU-MIMO/OFDMA).</td></tr><tr><td>Server nilai &amp; administrasi TU tidak boleh diakses dari Wi-Fi siswa</td><td>Segmentasi ke VLAN berbeda (IEEE 802.1Q), terapkan Extended ACL / Firewall Policy (deny VLAN Siswa → Server TU), dan uji penetrasi akses.</td></tr><tr><td>Jaringan harus tetap hidup saat listrik PLN padam mendadak selama ujian</td><td>Sediakan UPS pada rack core/router/switch PoE dengan kapasitas beban minimal 15–30 menit + proteksi surge arrester dan grounding &lt; 5 Ohm.</td></tr></tbody></table>\n<div class=\"lesson-note\"><b>Kriteria Penerimaan (User Acceptance Test / UAT):</b> Dokumen analisis kebutuhan wajib ditutup dengan checklist UAT yang ditandatangani bersama: uji DHCP lease, uji throughput (<code>iperf3</code>), uji ping/latency/jitter, uji isolasi VLAN, dan uji failover.</div>\n<h3>Sumber &amp; Referensi Standar Industri</h3>\n<ul><li><a href=\"https://www.itu.int/rec/T-REC-G.114\" target=\"_blank\" rel=\"noopener\">ITU-T Recommendation G.114 — One-way transmission time (Standar Internasional Latensi &lt;150 ms &amp; QoS)</a></li><li><a href=\"https://datatracker.ietf.org/doc/html/rfc2544\" target=\"_blank\" rel=\"noopener\">IETF RFC 2544 — Benchmarking Methodology for Network Interconnect Devices (Throughput, Latency, Frame Loss)</a></li><li><a href=\"https://skkni.kemnaker.go.id/\" target=\"_blank\" rel=\"noopener\">SKKNI Bidang Jaringan Komputer (Kepmenaker No. 321 Tahun 2016) — Unit Kompetensi Mengumpulkan Kebutuhan Teknis Pengguna (J.611000.001.01)</a></li></ul>\n",
-
   "peralatan": "\n<h2>3. Inventarisasi dan Pemilihan Perangkat Jaringan (Elemen 1)</h2>\n<p>Pemilihan dan inventarisasi perangkat jaringan (<i>Network Asset Management</i>) menuntut pemahaman mendalam tentang pemetaan <b>Model OSI 7 Layer</b>, spesifikasi elektrikal/optik, serta kemampuan pemrosesan paket perangkat. Dokumen inventaris industri mencatat Hostname, Model/Part Number, Serial Number, MAC Address, IP Management, Lokasi Rack (U-position), Versi OS/Firmware, Status Garansi, serta Jadwal Backup Konfigurasi.</p>\n<h3>Pemetaan Perangkat pada Model OSI &amp; Parameter Kunci</h3>\n<table><thead><tr><th>Perangkat</th><th>Layer OSI</th><th>Fungsi Teknis &amp; Parameter Spesifikasi Utama</th></tr></thead><tbody>\n<tr><td><b>Hub / Repeater</b></td><td>Layer 1 (Physical)</td><td>Meregenerasi dan menyebarkan bit listrik ke seluruh port (1 <i>collision domain</i> &amp; 1 <i>broadcast domain</i>, half-duplex). Sudah digantikan oleh switch.</td></tr>\n<tr><td><b>Switch (L2 / L3)</b></td><td>Layer 2 / Layer 3</td><td>Meneruskan frame secara <i>full-duplex</i> berdasarkan <b>MAC Address Table (CAM)</b>; setiap port adalah 1 collision domain terpisah. Switch Managed mendukung IEEE 802.1Q VLAN, STP/RSTP, LACP, Port Mirroring (SPAN), 802.1X, dan SVI (L3 routing).</td></tr>\n<tr><td><b>Router</b></td><td>Layer 3 (Network)</td><td>Memisahkan <i>broadcast domain</i> dan meneruskan paket antar-subnet berdasarkan <b>Routing Table (FIB)</b> dengan prinsip <i>Longest Prefix Match</i>. Mendukung NAT, DHCP, VPN, QoS, dan protokol OSPF/BGP.</td></tr>\n<tr><td><b>Access Point (AP)</b></td><td>Layer 1–2 (WLAN)</td><td>Menjembatani frame nirkabel IEEE 802.11 ke Ethernet IEEE 802.3. AP Enterprise mendukung Multi-SSID dengan VLAN Tagging, PoE input, Roaming (802.11k/v/r), dan manajemen terpusat (Controller/Cloud).</td></tr>\n<tr><td><b>Firewall / NGFW</b></td><td>Layer 3–7</td><td>Menginspeksi state sesi (Stateful), memfilter trafik dengan ACL, Deep Packet Inspection (DPI), IPS, Application Control, dan SSL/TLS Inspection.</td></tr>\n<tr><td><b>Modem / ONT / ONU</b></td><td>Layer 1–2 (atau L3 HGU)</td><td>Mengonversi sinyal optik GPON/XGS-PON (1490 nm Rx / 1310 nm Tx) atau RF/DSL dari jaringan akses ISP menjadi antarmuka Ethernet RJ-45 di sisi pelanggan.</td></tr>\n<tr><td><b>NIC &amp; Transceiver SFP</b></td><td>Layer 1–2</td><td>Kartu antarmuka jaringan (RJ-45 / Wi-Fi / SFP+) yang memiliki alamat fisik <b>MAC Address 48-bit</b> (24-bit OUI vendor + 24-bit unik NIC). Modul SFP (1G), SFP+ (10G), dan QSFP28 (100G) memungkinkan pemilihan media fiber SMF/MMF secara modular.</td></tr></tbody></table>\n<h3>Standar Power over Ethernet (PoE) — IEEE 802.3</h3>\n<p>Switch PoE menyuplai daya listrik DC bersama data melalui kabel UTP Cat5e/Cat6 ke Access Point, IP Camera (CCTV), dan VoIP Phone tanpa adaptor listrik terpisah:</p>\n<ul><li><b>IEEE 802.3af (PoE / Type 1):</b> Daya maks. <b>15,4 W</b> per port dari switch (12,95 W di perangkat PD) pada tegangan 44–57 V DC.</li><li><b>IEEE 802.3at (PoE+ / Type 2):</b> Daya maks. <b>30 W</b> per port (25,5 W di perangkat PD) — standar untuk Access Point Wi-Fi 6 dan kamera PTZ.</li><li><b>IEEE 802.3bt (PoE++ / 4PPoE Type 3 &amp; 4):</b> Daya maks. <b>60 W</b> (Type 3) hingga <b>90–100 W</b> (Type 4) menggunakan keempat pasang kawat untuk AP Wi-Fi 7 dan thin-client.</li><li><b>Passive PoE (24V / 48V):</b> Menyuplai tegangan DC terus-menerus tanpa negosiasi resistansi IEEE 802.3 (umum pada CPE radio MikroTik/Ubiquiti) — <i>jangan ditancapkan ke perangkat non-PoE tanpa memeriksa voltase!</i></li></ul>\n<div class=\"lesson-note\"><b>Praktik Terbaik Inventarisasi:</b> Selalu hitung total <i>PoE Power Budget</i> switch (misal switch 24 port PoE+ dengan total budget 195 W hanya sanggup menyalakan ~12 perangkat @15W secara bersamaan, bukan 24 port penuh @30W!).</div>\n<h3>Sumber &amp; Referensi Standar Industri</h3>\n<ul><li><a href=\"https://standards.ieee.org/ieee/802.3/10422/\" target=\"_blank\" rel=\"noopener\">IEEE 802.3-2022 — IEEE Standard for Ethernet (1000BASE-T, 10GBASE-T, SFP+, &amp; PoE 802.3af/at/bt)</a></li><li><a href=\"https://www.iso.org/standard/20269.html\" target=\"_blank\" rel=\"noopener\">ISO/IEC 7498-1 — Information technology — Open Systems Interconnection (OSI) Basic Reference Model</a></li></ul>\n",
-
-  "ip": "\n<h2>4. Pengalamatan IPv4, IPv6, CIDR, VLSM, dan Subnetting (Elemen 1)</h2>\n<p>Pengalamatan IP (<i>Internet Protocol Addressing</i>) merupakan fondasi komunikasi Layer 3. Alamat <b>IPv4 (IETF RFC 791)</b> sepanjang 32-bit dibagi menjadi 4 oktet desimal (0–255), sedangkan <b>IPv6 (IETF RFC 8200)</b> sepanjang 128-bit ditulis dalam 8 blok heksadesimal 16-bit yang dipisahkan titik dua (misal <code>2001:db8:85a3::8a2e:370:7334/64</code>). Setiap alamat IP terbagi atas porsi <b>Network Prefix</b> dan <b>Host Identifier</b> yang dibatasi oleh <i>Subnet Mask</i> atau panjang prefix <b>CIDR (RFC 4632)</b>.</p>\n<h3>Klasifikasi Alamat IPv4 Khusus &amp; Privat (Standar IETF RFC)</h3>\n<table><thead><tr><th>Kategori Alamat</th><th>Rentang Blok CIDR</th><th>Standar RFC</th><th>Fungsi &amp; Aturan Routing</th></tr></thead><tbody>\n<tr><td><b>IP Private Kelas A</b></td><td><code>10.0.0.0/8</code> (10.0.0.0 – 10.255.255.255)</td><td>RFC 1918</td><td>Jaringan lokal enterprise/ISP internal (16.777.214 host); wajib di-NAT ke internet.</td></tr>\n<tr><td><b>IP Private Kelas B</b></td><td><code>172.16.0.0/12</code> (172.16.0.0 – 172.31.255.255)</td><td>RFC 1918</td><td>Jaringan kampus/gedung menengah (1.048.574 host); tidak dirutekan di internet publik.</td></tr>\n<tr><td><b>IP Private Kelas C</b></td><td><code>192.168.0.0/16</code> (192.168.0.0 – 192.168.255.255)</td><td>RFC 1918</td><td>Jaringan LAN sekolah, kantor SOHO, dan rumah (65.534 host; 256 subnet /24).</td></tr>\n<tr><td><b>Carrier-Grade NAT (CGNAT)</b></td><td><code>100.64.0.0/10</code> (100.64.0.0 – 100.127.255.255)</td><td>RFC 6598</td><td>Shared Address Space antara CPE/ONT pelanggan dan core NAT ISP (tidak bentrok dengan RFC 1918 LAN).</td></tr>\n<tr><td><b>Loopback</b></td><td><code>127.0.0.0/8</code> (umum: <code>127.0.0.1</code>)</td><td>RFC 1122</td><td>Pengujian tumpukan TCP/IP lokal (localhost) tanpa melewati kartu jaringan fisik.</td></tr>\n<tr><td><b>Link-Local (APIPA)</b></td><td><code>169.254.0.0/16</code></td><td>RFC 3927</td><td>Ditetapkan otomatis oleh OS saat client gagal mendapatkan respons dari DHCP server.</td></tr>\n<tr><td><b>Point-to-Point Link</b></td><td>Prefix <code>/30</code> (2 host) atau <code>/31</code> (2 host tanpa broadcast)</td><td>RFC 3021</td><td>Penghematan alamat IP untuk link antar-router point-to-point.</td></tr></tbody></table>\n<h3>Rumus Cepat Subnetting &amp; Tabel Referensi CIDR (/24 s.d. /30)</h3>\n<ul><li><b>Bit Host (\(m\))</b> = \(32 - \\text{Prefix}\). <b>Total Alamat per Blok</b> = \(2^m\). <b>Host Usable</b> = \(2^m - 2\) (dikurangi 1 Network ID &amp; 1 Broadcast Address).</li><li><b>Block Size (Kelipatan Subnet)</b> = \(256 - \\text{Nilai Oktet Terakhir Subnet Mask}\).</li><li><b>Broadcast Address</b> = \(\\text{Network Address Berikutnya} - 1\).</li></ul>\n<table><thead><tr><th>Prefix</th><th>Subnet Mask</th><th>Block Size</th><th>Total IP</th><th>Host Usable</th><th>Jumlah Subnet dari /24</th></tr></thead><tbody>\n<tr><td><code>/24</code></td><td>255.255.255.0</td><td>256</td><td>256</td><td><b>254</b></td><td>1</td></tr>\n<tr><td><code>/25</code></td><td>255.255.255.128</td><td>128</td><td>128</td><td><b>126</b></td><td>2 (.0, .128)</td></tr>\n<tr><td><code>/26</code></td><td>255.255.255.192</td><td>64</td><td>64</td><td><b>62</b></td><td>4 (.0, .64, .128, .192)</td></tr>\n<tr><td><code>/27</code></td><td>255.255.255.224</td><td>32</td><td>32</td><td><b>30</b></td><td>8 (.0, .32, .64, ..., .224)</td></tr>\n<tr><td><code>/28</code></td><td>255.255.255.240</td><td>16</td><td>16</td><td><b>14</b></td><td>16 (.0, .16, .32, ..., .240)</td></tr>\n<tr><td><code>/29</code></td><td>255.255.255.248</td><td>8</td><td>8</td><td><b>6</b></td><td>32</td></tr>\n<tr><td><code>/30</code></td><td>255.255.255.252</td><td>4</td><td>4</td><td><b>2</b></td><td>64 (Link WAN antar-router)</td></tr></tbody></table>\n<h3>Metode VLSM (Variable Length Subnet Mask) Anti-Overlap</h3>\n<p>Untuk mengalokasikan satu blok induk (misal <code>192.168.10.0/24</code>) ke beberapa divisi dengan ukuran berbeda: <b>(1) Urutkan kebutuhan host dari TERBESAR ke TERKECIL</b>, (2) Pilih prefix terkecil yang jumlah <i>host usable</i>-nya \(\\ge\) kebutuhan, (3) Tempatkan subnet secara berurutan pada batas kelipatan <i>block size</i>-nya. Contoh: Lantai 1 (100 host) → <code>192.168.10.0/25</code> (usable .1–.126, broadcast .127); Lantai 2 (50 host) → <code>192.168.10.128/26</code> (usable .129–.190, broadcast .191); Lantai 3 (25 host) → <code>192.168.10.192/27</code> (usable .193–.222, broadcast .223); Link Router WAN (2 host) → <code>192.168.10.224/30</code> (usable .225–.226, broadcast .227).</p>\n<div class=\"lesson-note\"><b>Pengantar IPv6:</b> Pada IPv6, prefix standar untuk sebuah subnet LAN adalah <code>/64</code>. Setiap interface otomatis memiliki alamat <i>Link-Local</i> <code>fe80::/10</code>, alamat <i>Global Unicast</i> <code>2000::/3</code> (untuk internet), atau <i>Unique Local Address (ULA)</i> <code>fc00::/7</code> (setara IP private). IPv6 menghapus broadcast dan menggantinya dengan <i>Multicast</i> (<code>ff00::/8</code>) serta <i>Neighbor Discovery Protocol (NDP)</i>.</div>\n<h3>Sumber &amp; Referensi Standar Industri</h3>\n<ul><li><a href=\"https://datatracker.ietf.org/doc/html/rfc1918\" target=\"_blank\" rel=\"noopener\">IETF RFC 1918 — Address Allocation for Private Internets (10/8, 172.16/12, 192.168/16)</a></li><li><a href=\"https://datatracker.ietf.org/doc/html/rfc4632\" target=\"_blank\" rel=\"noopener\">IETF RFC 4632 — Classless Inter-domain Routing (CIDR): The Internet Address Assignment and Aggregation Plan</a></li><li><a href=\"https://datatracker.ietf.org/doc/html/rfc8200\" target=\"_blank\" rel=\"noopener\">IETF RFC 8200 — Internet Protocol, Version 6 (IPv6) Specification</a></li></ul>\n",
-
+  "ip": "\n<h2>4. Pengalamatan IPv4, IPv6, CIDR, VLSM, dan Subnetting (Elemen 1)</h2>\n<p>Pengalamatan IP (<i>Internet Protocol Addressing</i>) merupakan fondasi komunikasi Layer 3. Alamat <b>IPv4 (IETF RFC 791)</b> sepanjang 32-bit dibagi menjadi 4 oktet desimal (0–255), sedangkan <b>IPv6 (IETF RFC 8200)</b> sepanjang 128-bit ditulis dalam 8 blok heksadesimal 16-bit yang dipisahkan titik dua (misal <code>2001:db8:85a3::8a2e:370:7334/64</code>). Setiap alamat IP terbagi atas porsi <b>Network Prefix</b> dan <b>Host Identifier</b> yang dibatasi oleh <i>Subnet Mask</i> atau panjang prefix <b>CIDR (RFC 4632)</b>.</p>\n<h3>Klasifikasi Alamat IPv4 Khusus &amp; Privat (Standar IETF RFC)</h3>\n<table><thead><tr><th>Kategori Alamat</th><th>Rentang Blok CIDR</th><th>Standar RFC</th><th>Fungsi &amp; Aturan Routing</th></tr></thead><tbody>\n<tr><td><b>IP Private Kelas A</b></td><td><code>10.0.0.0/8</code> (10.0.0.0 – 10.255.255.255)</td><td>RFC 1918</td><td>Jaringan lokal enterprise/ISP internal (16.777.214 host); wajib di-NAT ke internet.</td></tr>\n<tr><td><b>IP Private Kelas B</b></td><td><code>172.16.0.0/12</code> (172.16.0.0 – 172.31.255.255)</td><td>RFC 1918</td><td>Jaringan kampus/gedung menengah (1.048.574 host); tidak dirutekan di internet publik.</td></tr>\n<tr><td><b>IP Private Kelas C</b></td><td><code>192.168.0.0/16</code> (192.168.0.0 – 192.168.255.255)</td><td>RFC 1918</td><td>Jaringan LAN sekolah, kantor SOHO, dan rumah (65.534 host; 256 subnet /24).</td></tr>\n<tr><td><b>Carrier-Grade NAT (CGNAT)</b></td><td><code>100.64.0.0/10</code> (100.64.0.0 – 100.127.255.255)</td><td>RFC 6598</td><td>Shared Address Space antara CPE/ONT pelanggan dan core NAT ISP (tidak bentrok dengan RFC 1918 LAN).</td></tr>\n<tr><td><b>Loopback</b></td><td><code>127.0.0.0/8</code> (umum: <code>127.0.0.1</code>)</td><td>RFC 1122</td><td>Pengujian tumpukan TCP/IP lokal (localhost) tanpa melewati kartu jaringan fisik.</td></tr>\n<tr><td><b>Link-Local (APIPA)</b></td><td><code>169.254.0.0/16</code></td><td>RFC 3927</td><td>Ditetapkan otomatis oleh OS saat client gagal mendapatkan respons dari DHCP server.</td></tr>\n<tr><td><b>Point-to-Point Link</b></td><td>Prefix <code>/30</code> (2 host) atau <code>/31</code> (2 host tanpa broadcast)</td><td>RFC 3021</td><td>Penghematan alamat IP untuk link antar-router point-to-point.</td></tr></tbody></table>\n<h3>Rumus Cepat Subnetting &amp; Tabel Referensi CIDR (/24 s.d. /30)</h3>\n<ul><li><b>Bit Host ((m))</b> = (32 - Prefix). <b>Total Alamat per Blok</b> = (2^m). <b>Host Usable</b> = (2^m - 2) (dikurangi 1 Network ID &amp; 1 Broadcast Address).</li><li><b>Block Size (Kelipatan Subnet)</b> = (256 - Nilai Oktet Terakhir Subnet Mask).</li><li><b>Broadcast Address</b> = (Network Address Berikutnya - 1).</li></ul>\n<table><thead><tr><th>Prefix</th><th>Subnet Mask</th><th>Block Size</th><th>Total IP</th><th>Host Usable</th><th>Jumlah Subnet dari /24</th></tr></thead><tbody>\n<tr><td><code>/24</code></td><td>255.255.255.0</td><td>256</td><td>256</td><td><b>254</b></td><td>1</td></tr>\n<tr><td><code>/25</code></td><td>255.255.255.128</td><td>128</td><td>128</td><td><b>126</b></td><td>2 (.0, .128)</td></tr>\n<tr><td><code>/26</code></td><td>255.255.255.192</td><td>64</td><td>64</td><td><b>62</b></td><td>4 (.0, .64, .128, .192)</td></tr>\n<tr><td><code>/27</code></td><td>255.255.255.224</td><td>32</td><td>32</td><td><b>30</b></td><td>8 (.0, .32, .64, ..., .224)</td></tr>\n<tr><td><code>/28</code></td><td>255.255.255.240</td><td>16</td><td>16</td><td><b>14</b></td><td>16 (.0, .16, .32, ..., .240)</td></tr>\n<tr><td><code>/29</code></td><td>255.255.255.248</td><td>8</td><td>8</td><td><b>6</b></td><td>32</td></tr>\n<tr><td><code>/30</code></td><td>255.255.255.252</td><td>4</td><td>4</td><td><b>2</b></td><td>64 (Link WAN antar-router)</td></tr></tbody></table>\n<h3>Metode VLSM (Variable Length Subnet Mask) Anti-Overlap</h3>\n<p>Untuk mengalokasikan satu blok induk (misal <code>192.168.10.0/24</code>) ke beberapa divisi dengan ukuran berbeda: <b>(1) Urutkan kebutuhan host dari TERBESAR ke TERKECIL</b>, (2) Pilih prefix terkecil yang jumlah <i>host usable</i>-nya (≥) kebutuhan, (3) Tempatkan subnet secara berurutan pada batas kelipatan <i>block size</i>-nya. Contoh: Lantai 1 (100 host) → <code>192.168.10.0/25</code> (usable .1–.126, broadcast .127); Lantai 2 (50 host) → <code>192.168.10.128/26</code> (usable .129–.190, broadcast .191); Lantai 3 (25 host) → <code>192.168.10.192/27</code> (usable .193–.222, broadcast .223); Link Router WAN (2 host) → <code>192.168.10.224/30</code> (usable .225–.226, broadcast .227).</p>\n<div class=\"lesson-note\"><b>Pengantar IPv6:</b> Pada IPv6, prefix standar untuk sebuah subnet LAN adalah <code>/64</code>. Setiap interface otomatis memiliki alamat <i>Link-Local</i> <code>fe80::/10</code>, alamat <i>Global Unicast</i> <code>2000::/3</code> (untuk internet), atau <i>Unique Local Address (ULA)</i> <code>fc00::/7</code> (setara IP private). IPv6 menghapus broadcast dan menggantinya dengan <i>Multicast</i> (<code>ff00::/8</code>) serta <i>Neighbor Discovery Protocol (NDP)</i>.</div>\n<h3>Sumber &amp; Referensi Standar Industri</h3>\n<ul><li><a href=\"https://datatracker.ietf.org/doc/html/rfc1918\" target=\"_blank\" rel=\"noopener\">IETF RFC 1918 — Address Allocation for Private Internets (10/8, 172.16/12, 192.168/16)</a></li><li><a href=\"https://datatracker.ietf.org/doc/html/rfc4632\" target=\"_blank\" rel=\"noopener\">IETF RFC 4632 — Classless Inter-domain Routing (CIDR): The Internet Address Assignment and Aggregation Plan</a></li><li><a href=\"https://datatracker.ietf.org/doc/html/rfc8200\" target=\"_blank\" rel=\"noopener\">IETF RFC 8200 — Internet Protocol, Version 6 (IPv6) Specification</a></li></ul>\n",
   "kabel": "\n<h2>5. Media Transmisi Kabel dan Instalasi Terstruktur (Elemen 2)</h2>\n<p>Pengkabelan terstruktur (<i>Structured Cabling System</i>) diatur oleh standar internasional <b>ANSI/TIA-568.2-D</b> dan <b>ISO/IEC 11801</b>. Sebuah saluran permanen (<i>channel link</i>) kabel tembaga Twisted Pair dibatasi maksimal <b>100 meter</b>, yang terdiri atas <b>90 meter Horizontal Permanent Link</b> (kabel solid di dalam dinding/tray dari Patch Panel ke Wall Outlet/Keystone) ditambah maksimal <b>10 meter Patch Cord</b> (kabel stranded fleksibel di sisi perangkat dan rack).</p>\n<h3>Konstruksi Twisted Pair (ISO/IEC 11801) &amp; Kategori</h3>\n<ul><li><b>U/UTP (Unshielded Twisted Pair):</b> 4 pasang kawat tembaga berpilin tanpa pelindung foil; mengandalkan variasi rapat pilinan (<i>twist rate</i>) untuk membatalkan medan magnet <i>crosstalk</i> (NEXT/FEXT).</li><li><b>F/UTP (Foiled Twisted Pair / FTP):</b> Memiliki selubung aluminium foil (<i>overall foil shield</i>) dan kawat <i>drain wire</i> di sekeliling 4 pasang kawat untuk menahan EMI sedang.</li><li><b>S/FTP (Screened Foiled Twisted Pair / STP):</b> Setiap pasang kawat dibungkus foil sendiri-sendiri ditambah anyaman kawat tembaga (<i>braided shield</i>) keseluruhan (standar Cat 7 dan Cat 8); wajib di-grounding pada patch panel.</li></ul>\n<h3>Standar Pinout T568A vs T568B &amp; Fungsi Sinyal (100BASE-TX vs 1000BASE-T &amp; PoE)</h3>\n<table><thead><tr><th>Pin RJ-45</th><th>Warna T568B</th><th>Warna T568A</th><th>Fast Ethernet (100BASE-TX)</th><th>Gigabit / 10G (1000BASE-T+)</th><th>IEEE 802.3af/at PoE</th></tr></thead><tbody>\n<tr><td><b>Pin 1</b></td><td>Putih-Oranye</td><td>Putih-Hijau</td><td>Transmit (TX+)</td><td>Bidirectional Pair A (BI_DA+)</td><td>PoE Mode A (+)</td></tr>\n<tr><td><b>Pin 2</b></td><td>Oranye</td><td>Hijau</td><td>Transmit (TX−)</td><td>Bidirectional Pair A (BI_DA−)</td><td>PoE Mode A (+)</td></tr>\n<tr><td><b>Pin 3</b></td><td>Putih-Hijau</td><td>Putih-Oranye</td><td>Receive (RX+)</td><td>Bidirectional Pair B (BI_DB+)</td><td>PoE Mode A (−)</td></tr>\n<tr><td><b>Pin 4</b></td><td>Biru</td><td>Biru</td><td>Tidak dipakai data</td><td>Bidirectional Pair C (BI_DC+)</td><td>PoE Mode B (+)</td></tr>\n<tr><td><b>Pin 5</b></td><td>Putih-Biru</td><td>Putih-Biru</td><td>Tidak dipakai data</td><td>Bidirectional Pair C (BI_DC−)</td><td>PoE Mode B (+)</td></tr>\n<tr><td><b>Pin 6</b></td><td>Hijau</td><td>Oranye</td><td>Receive (RX−)</td><td>Bidirectional Pair B (BI_DB−)</td><td>PoE Mode A (−)</td></tr>\n<tr><td><b>Pin 7</b></td><td>Putih-Cokelat</td><td>Putih-Cokelat</td><td>Tidak dipakai data</td><td>Bidirectional Pair D (BI_DD+)</td><td>PoE Mode B (−)</td></tr>\n<tr><td><b>Pin 8</b></td><td>Cokelat</td><td>Cokelat</td><td>Tidak dipakai data</td><td>Bidirectional Pair D (BI_DD−)</td><td>PoE Mode B (−)</td></tr></tbody></table>\n<div class=\"lesson-note\"><b>Koreksi Mitos Lapangan:</b> Pada jaringan modern <b>Gigabit Ethernet (1000BASE-T), 2.5G, 5G, dan 10GBASE-T</b>, <b>KEEMPAT pasang kawat (Pin 1–8) aktif mengirim dan menerima data secara bersamaan (full-duplex PAM-5)</b>! Jika satu saja kawat pada pin 4, 5, 7, atau 8 putus/gagal crimp, link Gigabit otomatis turun derajat (<i>downgrade</i>) menjadi 100 Mbps atau putus bila memakai PoE Mode B.</div>\n<h3>Parameter Sertifikasi Pengujian Kabel (Fluke Cable Qualifier / Certifier)</h3>\n<ul><li><b>Wiremap:</b> Memastikan kontinuitas pin 1–8 bebas dari <i>Open</i> (putus), <i>Short</i> (korslet), <i>Reversed Pair</i> (terbalik polaritas), <i>Crossed Pair</i>, dan <i>Split Pair</i> (salah pasangan pilinan yang memicu crosstalk parah meski LED LAN tester tampak menyala 1–8!).</li><li><b>Insertion Loss &amp; Length:</b> Redaman sinyal sepanjang kabel dan verifikasi panjang fisik ≤ 100 m via TDR (<i>Time Domain Reflectometry</i>).</li><li><b>NEXT &amp; FEXT (Near/Far-End Crosstalk):</b> Kebocoran sinyal elektromagnetik antar-pasangan kawat; untuk lulus sertifikasi Cat6/Cat6A, batas kupasan pilinan (<i>untwist</i>) di dekat pin RJ-45/Keystone <b>tidak boleh melebihi 13 mm (0,5 inci)</b>.</li></ul>\n<h3>Sumber &amp; Referensi Standar Industri</h3>\n<ul><li><a href=\"https://tiaonline.org/what-we-do/standards/\" target=\"_blank\" rel=\"noopener\">ANSI/TIA-568.2-D — Balanced Twisted-Pair Telecommunications Cabling and Components Standard</a></li><li><a href=\"https://standards.ieee.org/ieee/802.3/10422/\" target=\"_blank\" rel=\"noopener\">IEEE 802.3ab (1000BASE-T) &amp; IEEE 802.3an (10GBASE-T) Ethernet Over Twisted Pair Specifications</a></li></ul>\n",
-
-  "nirkabel": "\n<h2>6. Jaringan Nirkabel (WLAN IEEE 802.11) dan Perencanaan RF (Elemen 2)</h2>\n<p>Jaringan nirkabel (Wireless LAN) bekerja pada lapisan Physical (PHY) dan Data Link (MAC) menurut standar <b>IEEE 802.11</b> dengan mekanisme akses media <b>CSMA/CA (Carrier Sense Multiple Access with Collision Avoidance)</b>. Karena gelombang radio menggunakan ruang udara bersama (<i>half-duplex shared medium</i>), perencanaan frekuensi, lebar kanal, daya pancar (EIRP), dan site survey menentukan stabilitas jaringan.</p>\n<h3>Evolusi Standar IEEE 802.11 (Wi-Fi Alliance)</h3>\n<table><thead><tr><th>Generasi</th><th>Standar IEEE</th><th>Pita Frekuensi</th><th>Teknologi Modulasi &amp; MIMO</th><th>Kecepatan Teoretis Maks</th></tr></thead><tbody>\n<tr><td><b>Wi-Fi 4</b></td><td>802.11n (2009)</td><td>2,4 GHz &amp; 5 GHz</td><td>OFDM, 64-QAM, MIMO 4×4, kanal 20/40 MHz</td><td>600 Mbps</td></tr>\n<tr><td><b>Wi-Fi 5</b></td><td>802.11ac (2013)</td><td>5 GHz</td><td>OFDM, 256-QAM, Downlink MU-MIMO, kanal s.d. 80/160 MHz</td><td>3,5 – 6,9 Gbps</td></tr>\n<tr><td><b>Wi-Fi 6 / 6E</b></td><td>802.11ax (2019/2021)</td><td>2,4 / 5 / 6 GHz (6E)</td><td><b>OFDMA</b> (UL/DL), 1024-QAM, 8×8 MU-MIMO, BSS Coloring, TWT</td><td>9,6 Gbps</td></tr>\n<tr><td><b>Wi-Fi 7</b></td><td>802.11be (2024)</td><td>2,4 / 5 / 6 GHz</td><td>4096-QAM, kanal 320 MHz, <b>Multi-Link Operation (MLO)</b>, 16×16 MU-MIMO</td><td>46 Gbps</td></tr></tbody></table>\n<h3>Perencanaan Kanal, RSSI, SNR, dan Zona Fresnel Outdoor</h3>\n<ul><li><b>Kanal Non-Overlapping 2,4 GHz:</b> Lebar tiap kanal 22 MHz dengan jarak pusat 5 MHz, sehingga hanya <b>Kanal 1 (2412 MHz), Kanal 6 (2437 MHz), dan Kanal 11 (2462 MHz)</b> yang bebas tumpang-tindih. Menggunakan kanal 2, 3, 4, 8, atau 9 justru menimbulkan <i>Adjacent-Channel Interference (ACI)</i> yang jauh lebih merusak daripada <i>Co-Channel Interference (CCI)</i>!</li><li><b>Pita 5 GHz &amp;Lebar Kanal:</b> Memiliki &gt;20 kanal 20 MHz non-overlap (UNII-1 Kanal 36–48, UNII-2 DFS Kanal 52–144, UNII-3 Kanal 149–165). Untuk lingkungan sekolah/kantor padat AP, gunakan lebar kanal <b>20 MHz atau 40 MHz</b> agar kanal tidak cepat habis.</li><li><b>Target Site Survey (RSSI &amp; SNR):</b> Kekuatan sinyal terima (<b>RSSI</b>) diukur dalam skala negatif dBm: <b>−30 s.d. −65 dBm = Sangat Baik</b> (standar wajib untuk VoIP, video conference, dan CBT ujian); −67 s.d. −70 dBm = Cukup untuk browsing; di bawah −75 dBm = Buruk/rawan putus. <b>SNR (Signal-to-Noise Ratio)</b> = \(\\text{RSSI} - \\text{Noise Floor}\); wajib <b>≥ 25 dB</b> (contoh: RSSI −65 dBm dengan noise floor −92 dBm menghasilkan SNR = 27 dB).</li><li><b>Link Outdoor PtP/PtMP &amp; Zona Fresnel:</b> Untuk menembak sinyal antar-gedung/desa menggunakan radio directional (MIMO Dish/Sectoral), selain <i>Line of Sight (LOS)</i> visual, minimal <b>60% radius Zona Fresnel pertama</b> harus bebas dari halangan pucuk pohon/atap gedung: \(r_1 = 17,32 \\times \\sqrt{d_{\\text{km}} / (4 \\times f_{\\text{GHz}})}\).</li></ul>\n<h3>Standar Keamanan WLAN Modern</h3>\n<p>Hindari WEP (RC4) dan WPA-TKIP karena dapat ditembus dalam hitungan menit. Gunakan minimal <b>WPA2-AES (CCMP-128)</b> atau <b>WPA3-Personal (SAE — Simultaneous Authentication of Equals)</b> yang tahan terhadap serangan <i>offline dictionary crack</i> dan <i>KRACK</i>, ditambah <b>Protected Management Frames (IEEE 802.11w / PMF)</b> untuk mencegah serangan <i>Wi-Fi Deauthentication</i>. Untuk jaringan institusi/kampus, gunakan <b>WPA2/WPA3-Enterprise (IEEE 802.1X / EAP-TLS / PEAP)</b> dengan server RADIUS (FreeRADIUS).</p>\n<h3>Sumber &amp; Referensi Standar Industri</h3>\n<ul><li><a href=\"https://standards.ieee.org/ieee/802.11/7028/\" target=\"_blank\" rel=\"noopener\">IEEE 802.11ax / 802.11be — Wireless LAN Medium Access Control (MAC) and Physical Layer (PHY) Specifications</a></li><li><a href=\"https://www.wi-fi.org/discover-wi-fi/security\" target=\"_blank\" rel=\"noopener\">Wi-Fi Alliance — WPA3 Security &amp; Wi-Fi CERTIFIED 6/7 Technical Overview</a></li></ul>\n",
-
+  "nirkabel": "\n<h2>6. Jaringan Nirkabel (WLAN IEEE 802.11) dan Perencanaan RF (Elemen 2)</h2>\n<p>Jaringan nirkabel (Wireless LAN) bekerja pada lapisan Physical (PHY) dan Data Link (MAC) menurut standar <b>IEEE 802.11</b> dengan mekanisme akses media <b>CSMA/CA (Carrier Sense Multiple Access with Collision Avoidance)</b>. Karena gelombang radio menggunakan ruang udara bersama (<i>half-duplex shared medium</i>), perencanaan frekuensi, lebar kanal, daya pancar (EIRP), dan site survey menentukan stabilitas jaringan.</p>\n<h3>Evolusi Standar IEEE 802.11 (Wi-Fi Alliance)</h3>\n<table><thead><tr><th>Generasi</th><th>Standar IEEE</th><th>Pita Frekuensi</th><th>Teknologi Modulasi &amp; MIMO</th><th>Kecepatan Teoretis Maks</th></tr></thead><tbody>\n<tr><td><b>Wi-Fi 4</b></td><td>802.11n (2009)</td><td>2,4 GHz &amp; 5 GHz</td><td>OFDM, 64-QAM, MIMO 4×4, kanal 20/40 MHz</td><td>600 Mbps</td></tr>\n<tr><td><b>Wi-Fi 5</b></td><td>802.11ac (2013)</td><td>5 GHz</td><td>OFDM, 256-QAM, Downlink MU-MIMO, kanal s.d. 80/160 MHz</td><td>3,5 – 6,9 Gbps</td></tr>\n<tr><td><b>Wi-Fi 6 / 6E</b></td><td>802.11ax (2019/2021)</td><td>2,4 / 5 / 6 GHz (6E)</td><td><b>OFDMA</b> (UL/DL), 1024-QAM, 8×8 MU-MIMO, BSS Coloring, TWT</td><td>9,6 Gbps</td></tr>\n<tr><td><b>Wi-Fi 7</b></td><td>802.11be (2024)</td><td>2,4 / 5 / 6 GHz</td><td>4096-QAM, kanal 320 MHz, <b>Multi-Link Operation (MLO)</b>, 16×16 MU-MIMO</td><td>46 Gbps</td></tr></tbody></table>\n<h3>Perencanaan Kanal, RSSI, SNR, dan Zona Fresnel Outdoor</h3>\n<ul><li><b>Kanal Non-Overlapping 2,4 GHz:</b> Lebar tiap kanal 22 MHz dengan jarak pusat 5 MHz, sehingga hanya <b>Kanal 1 (2412 MHz), Kanal 6 (2437 MHz), dan Kanal 11 (2462 MHz)</b> yang bebas tumpang-tindih. Menggunakan kanal 2, 3, 4, 8, atau 9 justru menimbulkan <i>Adjacent-Channel Interference (ACI)</i> yang jauh lebih merusak daripada <i>Co-Channel Interference (CCI)</i>!</li><li><b>Pita 5 GHz &amp;Lebar Kanal:</b> Memiliki &gt;20 kanal 20 MHz non-overlap (UNII-1 Kanal 36–48, UNII-2 DFS Kanal 52–144, UNII-3 Kanal 149–165). Untuk lingkungan sekolah/kantor padat AP, gunakan lebar kanal <b>20 MHz atau 40 MHz</b> agar kanal tidak cepat habis.</li><li><b>Target Site Survey (RSSI &amp; SNR):</b> Kekuatan sinyal terima (<b>RSSI</b>) diukur dalam skala negatif dBm: <b>−30 s.d. −65 dBm = Sangat Baik</b> (standar wajib untuk VoIP, video conference, dan CBT ujian); −67 s.d. −70 dBm = Cukup untuk browsing; di bawah −75 dBm = Buruk/rawan putus. <b>SNR (Signal-to-Noise Ratio)</b> = (RSSI - Noise Floor); wajib <b>≥ 25 dB</b> (contoh: RSSI −65 dBm dengan noise floor −92 dBm menghasilkan SNR = 27 dB).</li><li><b>Link Outdoor PtP/PtMP &amp; Zona Fresnel:</b> Untuk menembak sinyal antar-gedung/desa menggunakan radio directional (MIMO Dish/Sectoral), selain <i>Line of Sight (LOS)</i> visual, minimal <b>60% radius Zona Fresnel pertama</b> harus bebas dari halangan pucuk pohon/atap gedung: (r_1 = 17,32 × √(d<sub>km</sub> / (4 × f<sub>GHz</sub>))).</li></ul>\n<h3>Standar Keamanan WLAN Modern</h3>\n<p>Hindari WEP (RC4) dan WPA-TKIP karena dapat ditembus dalam hitungan menit. Gunakan minimal <b>WPA2-AES (CCMP-128)</b> atau <b>WPA3-Personal (SAE — Simultaneous Authentication of Equals)</b> yang tahan terhadap serangan <i>offline dictionary crack</i> dan <i>KRACK</i>, ditambah <b>Protected Management Frames (IEEE 802.11w / PMF)</b> untuk mencegah serangan <i>Wi-Fi Deauthentication</i>. Untuk jaringan institusi/kampus, gunakan <b>WPA2/WPA3-Enterprise (IEEE 802.1X / EAP-TLS / PEAP)</b> dengan server RADIUS (FreeRADIUS).</p>\n<h3>Sumber &amp; Referensi Standar Industri</h3>\n<ul><li><a href=\"https://standards.ieee.org/ieee/802.11/7028/\" target=\"_blank\" rel=\"noopener\">IEEE 802.11ax / 802.11be — Wireless LAN Medium Access Control (MAC) and Physical Layer (PHY) Specifications</a></li><li><a href=\"https://www.wi-fi.org/discover-wi-fi/security\" target=\"_blank\" rel=\"noopener\">Wi-Fi Alliance — WPA3 Security &amp; Wi-Fi CERTIFIED 6/7 Technical Overview</a></li></ul>\n",
   "fiber": "\n<h2>7. Teknologi Fiber Optic Standar Industri (FOA, ITU-T &amp; TIA-568) (Elemen 2)</h2>\n<p>Sistem komunikasi serat optik memandu pulsa cahaya melalui inti kaca silika (<i>core</i>) yang dikelilingi <i>cladding</i> berindeks bias lebih rendah berdasarkan prinsip hukum Snellius — <b>Total Internal Reflection (TIR)</b>. Lapisan <i>coating</i> akrilat 250 µm, penguat tarik (Aramid Kevlar/FRP), dan jaket luar LSZH/HDPE menjaga serat bebas kelembapan dan tegangan mekanis.</p>\n<h3>Klasifikasi Serat Standar ITU-T &amp; TIA-568.3-D</h3>\n<table><thead><tr><th>Standar Serat</th><th>Core/Cladding</th><th>Atenuasi Maks</th><th>Radius Aman</th><th>Aplikasi Industri</th></tr></thead><tbody>\n<tr><td><b>ITU-T G.652.D (OS2)</b></td><td>9 / 125 µm</td><td>≤0,40 @1310 · ≤0,30 @1550 nm (tipikal 0,35/0,22)</td><td>30 mm</td><td>Feeder &amp; backbone jarak jauh (Low Water Peak)</td></tr>\n<tr><td><b>ITU-T G.657.A1 / A2</b></td><td>9 / 125 µm</td><td>Kompatibel penuh G.652.D</td><td>10 mm / 7,5 mm</td><td>Kabel Drop Core FTTH ke rumah pelanggan</td></tr>\n<tr><td><b>ITU-T G.657.B3</b></td><td>9 / 125 µm</td><td>Ultra Bend-Insensitive</td><td>5 mm</td><td>Kabel indoor IKR belokan kusen tajam</td></tr>\n<tr><td><b>OM3 / OM4 / OM5 (MMF)</b></td><td>50 / 125 µm</td><td>≤3,0 @850 · ≤1,5 @1300 nm (TIA-568.3-D)</td><td>30 mm</td><td>Switch 10G–400G data center hingga 550 m (VCSEL)</td></tr>\n</tbody></table>\n<h3>Kode Warna 12 Serat (ANSI/TIA-598-C)</h3>\n<p>Urutan 12 warna wajib: <b>1. Biru (BL)</b>, <b>2. Orange (OR)</b>, <b>3. Hijau (GN)</b>, <b>4. Cokelat (BN)</b>, <b>5. Abu-abu (SL)</b>, <b>6. Putih (WH)</b>, <b>7. Merah (RD)</b>, <b>8. Hitam (BK)</b>, <b>9. Kuning (YE)</b>, <b>10. Ungu (VI)</b>, <b>11. Pink (RS)</b>, <b>12. Toska (AQ)</b>. Pada kabel 24+ core, pola warna ini diulang dengan warna <i>loose tube</i> mengikuti urutan yang sama.</p>\n<h3>Polishing Konektor (UPC vs APC) &amp; Standar IEC 61300-3-35</h3>\n<ul><li><b>UPC (Bodi Biru, 0° kubah):</b> Return Loss ≥ 50 dB — digunakan pada switch Ethernet dan patch ODF umum.</li><li><b>APC (Bodi Hijau, sudut miring 8°):</b> Pantulan cahaya dibuang ke cladding sehingga Return Loss ≥ 60 dB — wajib untuk port OLT/ODP GPON/XGS-PON &amp; RF Video. <b>DILARANG keras menyambungkan Biru (UPC) ke Hijau (APC)!</b></li><li><b>IEC 61300-3-35:</b> Mewajibkan inspeksi visual mikroskop sebelum kawin konektor (Zone A inti 0–25 µm wajib nol debu/goresan) dengan alur <i>Inspect → Clean (IPA 99,9% + One-Click / Lint-free wipe) → Inspect → Mate</i>.</li></ul>\n<h3>Arsitektur FTTH ODN &amp; Link Power Budget GPON (ITU-T G.984)</h3>\n<p>Alur pasif ODN: <b>OLT (STO) → ODF → Feeder G.652.D → ODC (Splitter 1:4 ≈ 7,2 dB) → Distribusi → ODP (Splitter 1:8 ≈ 10,5 dB) → Drop Cable G.657 → Roset → ONT</b>. Standar ITU-T G.984 mendefinisikan batas atenuasi maksimum <b>Class B+ = 28 dB</b> (minimum 13 dB) dan <b>Class C+ = 32 dB</b> (minimum 17 dB). Daya terima (Rx) optimal ONT dijaga pada <b>−8 dBm s/d −24 dBm</b>; di atas −8 dBm memicu saturasi (butuh attenuator).</p>\n<h3>Pengujian Tier-1 (OLTS/OPM) vs Tier-2 (OTDR) — Aturan FOA &amp; TIA-568</h3>\n<p><b>Tier-1 (OLTS / OLS + OPM):</b> Wajib hukumnya untuk sertifikasi total Insertion Loss link end-to-end dengan kalibrasi titik nol (<i>Zeroing</i>). Batas rencana TIA-568.3-D: konektor ≤ 0,75 dB (praktik ≤ 0,25 dB), splice ≤ 0,30 dB (standar Telkom ≤ 0,10 dB; tipikal fusion ≤ 0,05 dB). <b>Tier-2 (OTDR):</b> Menguji jarak event, loss sambungan, macrobend (uji beda atenuasi 1310 vs 1550 nm), dan titik putus dari satu ujung menggunakan <b>Launch Cable (500–1000 m)</b> untuk melewati Dead Zone (EDZ/ADZ). <i>Catatan penting: OTDR tidak boleh menggantikan pengukuran OPM/OLTS.</i></p>\n<div class=\"lesson-note\"><b>Keselamatan Laser (IEC 60825-2 / ANSI Z136.2) &amp; K3LH:</b> Panjang gelombang 1310/1490/1550 nm bersifat tak kasat mata. Port transceiver standar tergolong <b>Hazard Level 1M</b> (berbahaya bila dilihat lewat mikroskop optik tanpa filter IR) sedangkan jalur penguat EDFA/DWDM mencapai <b>Class 3B</b>. Wajib kenakan kacamata safety ANSI Z87.1 dan buang serpihan serat kaca 125 µm ke wadah tertutup berlabel (tidak terdeteksi X-Ray medis).</div>\n<h3>Sumber &amp; Referensi Standar Industri</h3>\n<ul><li><a href=\"https://www.thefoa.org/tech/ref/\" target=\"_blank\" rel=\"noopener\">The Fiber Optic Association (FOA) — Online Reference Guide (Safety, Installation, Testing &amp; OTDR)</a></li><li><a href=\"https://www.itu.int/rec/T-REC-G.652\" target=\"_blank\" rel=\"noopener\">ITU-T G.652 — Characteristics of a single-mode optical fibre cable</a></li><li><a href=\"https://www.itu.int/rec/T-REC-G.657\" target=\"_blank\" rel=\"noopener\">ITU-T G.657 — Bend-loss insensitive single-mode optical fibre</a></li><li><a href=\"https://www.itu.int/rec/T-REC-G.984.2\" target=\"_blank\" rel=\"noopener\">ITU-T G.984.2 — Gigabit-capable Passive Optical Networks (GPON) Class B+/C+ Power Budget</a></li></ul>\n",
-
   "keamanan": "\n<h2>8. Dasar Keamanan Jaringan &amp; Pertahanan Berlapis (Elemen 3)</h2>\n<p>Keamanan jaringan modern berpedoman pada kerangka kerja <b>ISO/IEC 27001</b>, <b>NIST Cybersecurity Framework (CSF 2.0: Govern, Identify, Protect, Detect, Respond, Recover)</b>, dan prinsip <b>Zero Trust Architecture (NIST SP 800-207: &quot;Never Trust, Always Verify&quot;)</b>. Seluruh kontrol keamanan bertujuan menegakkan tiga pilar <b>CIA Triad</b> (<i>Confidentiality, Integrity, Availability</i>) ditambah <i>Non-Repudiation</i> (anti-penyangkalan melalui tanda tangan digital dan audit log).</p>\n<h3>Taksonomi Serangan Jaringan &amp; Mitigasi Teknis Layer 2–7</h3>\n<table><thead><tr><th>Lapisan / Jenis Serangan</th><th>Mekanisme Eksploitasi</th><th>Kontrol Mitigasi Standar Industri</th></tr></thead><tbody>\n<tr><td><b>L2: ARP Spoofing / Poisoning (MITM)</b></td><td>Penyerang mengirim paket ARP Reply palsu untuk membelokkan trafik LAN ke MAC address-nya</td><td>Aktifkan <b>DHCP Snooping</b> + <b>Dynamic ARP Inspection (DAI)</b> dan <b>Port Security</b> pada Managed Switch.</td></tr>\n<tr><td><b>L2: DHCP Starvation &amp; Rogue DHCP</b></td><td>Membanjiri DHCP Request dengan MAC acak hingga pool habis, lalu menyodorkan gateway palsu</td><td>Aktifkan <b>DHCP Snooping</b> (tentukan port <i>Trusted</i> hanya ke arah uplink DHCP server resmi, port klien <i>Untrusted</i>).</td></tr>\n<tr><td><b>L2: VLAN Hopping (Switch Spoofing / Double Tag)</b></td><td>Mengirim frame DTP untuk membuka trunk atau menyisipkan double-tag 802.1Q pada Native VLAN 1</td><td>Matikan DTP (<code>switchport nonegotiate</code>), set eksplisit <code>switchport mode access</code>, dan pindahkan <b>Native VLAN</b> ke ID khusus tak terpakai (mis. VLAN 999).</td></tr>\n<tr><td><b>L3/L4: DDoS (SYN Flood, UDP Amplification)</b></td><td>Membanjiri tabel state TCP half-open atau bandwidth link WAN dari ribuan botnet</td><td>Aktifkan <b>TCP SYN Cookies</b>, Rate Limiting, BGP Blackhole / Flowspec, uRPF (Unicast Reverse Path Forwarding), dan Cloud Scrubbing (Cloudflare/Akamai).</td></tr>\n<tr><td><b>L7: SQL Injection, XSS, CSRF (OWASP Top 10)</b></td><td>Menyisipkan query SQL/script berbahaya lewat input aplikasi web yang tidak divalidasi</td><td>Gunakan <b>Prepared Statements (Parameterized Queries)</b>, Content Security Policy (CSP), CSRF Token, dan pasang <b>WAF (Web Application Firewall)</b>.</td></tr>\n<tr><td><b>Social Engineering &amp; Ransomware</b></td><td>Phishing kredensial atau pembajakan sesi RDP/SMB untuk mengenkripsi server</td><td>Wajibkan <b>MFA (Multi-Factor Authentication)</b>, email filter <b>SPF + DKIM + DMARC</b>, EDR, dan <b>Backup 3-2-1</b> (3 salinan, 2 media berbeda, 1 offsite/immutable).</td></tr></tbody></table>\n<h3>Perbedaan Penempatan IDS vs IPS pada Arsitektur Jaringan</h3>\n<ul><li><b>IDS (Intrusion Detection System — Mode Pasif / Out-of-Band):</b> Terhubung ke port <b>SPAN (Port Mirroring)</b> atau <b>Network TAP</b>. Menerima salinan trafik untuk dianalisis (Snort / Suricata / Zeek) dan mengirimkan <i>Alert</i> ke SIEM (Wazuh / Splunk / Elastic) tanpa memperlambat atau memutus aliran paket utama.</li><li><b>IPS (Intrusion Prevention System — Mode Inline):</b> Dipasang langsung di jalur paket (<i>inline</i> di belakang/menyatu dengan NGFW). Mampu langsung melakukan <b>Drop / Reject</b> paket serangan berbahaya secara real-time sebelum mencapai server target.</li></ul>\n<h3>Siklus Respons Insiden (NIST SP 800-61)</h3>\n<p>Empat tahap penanganan insiden siber: <b>1. Preparation</b> (siapkan SOP, kontak, backup, logging NTP tersinkronisasi), <b>2. Detection &amp; Analysis</b> (identifikasi indikator kompromi/IoC di SIEM dan log tanpa mematikan paksa RAM jika butuh forensik), <b>3. Containment, Eradication &amp; Recovery</b> (isolasi VLAN/kabel host terinfeksi, hapus malware/backdoor, patch celah, restore dari backup bersih), <b>4. Post-Incident Activity</b> (evaluasi <i>lessons learned</i>).</p>\n<h3>Sumber &amp; Referensi Standar Industri</h3>\n<ul><li><a href=\"https://csrc.nist.gov/pubs/sp/800/61/r2/final\" target=\"_blank\" rel=\"noopener\">NIST SP 800-61 Rev. 2 — Computer Security Incident Handling Guide</a></li><li><a href=\"https://csrc.nist.gov/pubs/sp/800/94/final\" target=\"_blank\" rel=\"noopener\">NIST SP 800-94 — Guide to Intrusion Detection and Prevention Systems (IDPS)</a></li><li><a href=\"https://owasp.org/www-project-top-ten/\" target=\"_blank\" rel=\"noopener\">OWASP Top 10 — Standard Awareness Document for Web Application Security Risks</a></li></ul>\n",
-
   "firewall": "\n<h2>9. Firewall, ACL, DMZ, dan Kebijakan Akses Jaringan (Elemen 3)</h2>\n<p>Firewall adalah perangkat atau sistem perangkat lunak yang menegakkan kebijakan kontrol akses jaringan (<i>Network Access Control Policy</i>) di antara zona dengan tingkat kepercayaan berbeda: <b>Inside (LAN Terpercaya)</b>, <b>Outside (WAN/Internet Tidak Terpercaya)</b>, dan <b>DMZ (Demilitarized Zone / Semi-Terpercaya untuk Server Publik)</b>. Evaluasi aturan selalu dilakukan secara <b>Top-Down (baris demi baris dari atas ke bawah)</b> dengan prinsip <b>First-Match Wins</b> dan ditutup oleh <b>Implicit Deny All</b>.</p>\n<h3>Perbandingan Konfigurasi Firewall Lintas Platform (Cisco IOS, MikroTik RouterOS, &amp; Linux UFW)</h3>\n<h4>1. Cisco IOS Extended Named ACL</h4>\n<pre><code>! Blokir akses VLAN Siswa (192.168.20.0/24) ke Server TU (192.168.10.10), izinkan ke DNS &amp; HTTP/HTTPS\nip access-list extended POLICY_VLAN_SISWA\n permit udp 192.168.20.0 0.0.0.255 any eq 53\n permit tcp 192.168.20.0 0.0.0.255 any eq 80\n permit tcp 192.168.20.0 0.0.0.255 any eq 443\n deny   ip  192.168.20.0 0.0.0.255 192.168.10.0 0.0.0.255 log\n permit ip  192.168.20.0 0.0.0.255 any\n!\ninterface GigabitEthernet0/0.20\n ip access-group POLICY_VLAN_SISWA in</code></pre>\n<h4>2. MikroTik RouterOS Stateful Firewall Filter (Chain Input &amp; Forward)</h4>\n<p>Pada MikroTik RouterOS (berbasis Linux Netfilter), terdapat 3 chain utama: <b><code>input</code></b> (trafik yang ditujukan ke router itu sendiri), <b><code>forward</code></b> (trafik yang melintasi router, misal LAN ke Internet atau antar-VLAN), dan <b><code>output</code></b> (trafik yang berasal dari router):</p>\n<pre><code>/ip firewall filter\n# 1. Izinkan sesi yang sudah terbentuk (Stateful Inspection - FastTrack/Established/Related)\nadd chain=input connection-state=established,related action=accept comment=\"Allow Established Input\"\nadd chain=input connection-state=invalid action=drop\n# 2. Izinkan akses WinBox/SSH hanya dari subnet Admin (192.168.99.0/24)\nadd chain=input src-address=192.168.99.0/24 protocol=tcp dst-port=22,8291 action=accept\nadd chain=input in-interface=ether1-WAN action=drop comment=\"Drop all unsolicited WAN to Router\"\n\n# 3. Chain Forward: Isolasi VLAN Siswa dari VLAN Guru/TU\nadd chain=forward connection-state=established,related action=accept\nadd chain=forward src-address=192.168.20.0/24 dst-address=192.168.10.0/24 action=drop comment=\"Isolasi Siswa ke Guru\"</code></pre>\n<h4>3. Linux Server Host Firewall (UFW / nftables)</h4>\n<pre><code>sudo ufw default deny incoming\nsudo ufw default allow outgoing\nsudo ufw allow from 192.168.99.0/24 to any port 22 proto tcp comment 'SSH Admin Only'\nsudo ufw allow 80/tcp\nsudo ufw allow 443/tcp\nsudo ufw enable\nsudo ufw status numbered</code></pre>\n<div class=\"lesson-note\"><b>Aturan Emas Penempatan ACL Cisco:</b> Tempatkan <b>Extended ACL sedekat mungkin dengan SUMBER (inbound)</b> agar paket yang ditolak langsung dibuang sebelum memakan bandwidth backbone; tempatkan <b>Standard ACL sedekat mungkin dengan TUJUAN</b> karena Standard ACL hanya memeriksa IP sumber (bila dipasang dekat sumber akan memblokir trafik ke seluruh tujuan lain).</div>\n<h3>Sumber &amp; Referensi Standar Industri</h3>\n<ul><li><a href=\"https://csrc.nist.gov/pubs/sp/800/41/r1/final\" target=\"_blank\" rel=\"noopener\">NIST SP 800-41 Rev. 1 — Guidelines on Firewalls and Firewall Policy</a></li><li><a href=\"https://help.mikrotik.com/docs/spaces/ROS/pages/48660574/Filter\" target=\"_blank\" rel=\"noopener\">MikroTik RouterOS Official Documentation — Packet Flow &amp; Firewall Filter Chains</a></li></ul>\n",
-
   "kriptografi": "\n<h2>10. Kriptografi Modern, PKI, dan Protokol Komunikasi Aman (Elemen 3)</h2>\n<p>Kriptografi modern melindungi data saat dikirim di jaringan (<i>Data in Transit</i>) maupun saat disimpan di media penyimpanan (<i>Data at Rest</i>). Berdasarkan prinsip <b>Kerckhoffs's Principle</b> (dan <i>Shannon's Maxim</i>), keamanan sebuah sistem kriptografi tidak boleh bergantung pada kerahasiaan algoritmanya, melainkan <b>100% bergantung pada kerahasiaan dan panjang kuncinya (Key Management)</b>.</p>\n<h3>Tiga Pilar Algoritma Kriptografi &amp; Standar NIST FIPS</h3>\n<table><thead><tr><th>Kategori</th><th>Cara Kerja Kunci</th><th>Algoritma Standar Modern</th><th>Algoritma Usang (Dilarang)</th><th>Fungsi Utama</th></tr></thead><tbody>\n<tr><td><b>1. Enkripsi Simetris</b></td><td>1 kunci rahasia yang sama (<i>Shared Secret Key</i>) untuk Enkripsi &amp; Dekripsi</td><td><b>AES-128 / AES-256</b> (GCM/CBC, FIPS 197), <b>ChaCha20-Poly1305</b> (RFC 8439)</td><td>DES (56-bit), 3DES, RC4 (WEP)</td><td>Enkripsi payload data berkecepatan tinggi (TLS session, IPsec VPN, Wi-Fi WPA2/WPA3, Disk BitLocker/LUKS).</td></tr>\n<tr><td><b>2. Kriptografi Asimetris (Kunci Publik)</b></td><td>Sepasang kunci matematis: <b>Public Key</b> (disebarkan) &amp; <b>Private Key</b> (dirahasiakan)</td><td><b>RSA-2048 / RSA-4096</b>, <b>ECC / ECDHE / ECDSA</b> (Curve25519 / P-256), <b>Ed25519</b></td><td>RSA-512 / RSA-1024, DSA-1024</td><td>Pertukaran kunci aman (Key Exchange), autentikasi sertifikat X.509, dan Tanda Tangan Digital.</td></tr>\n<tr><td><b>3. Fungsi Hash Kriptografis</b></td><td>Satu arah (<i>One-Way</i>, tanpa kunci, tak dapat didekripsi balik) → menghasilkan <i>digest</i> ukuran tetap</td><td><b>SHA-256 / SHA-384 / SHA-512</b> (FIPS 180-4), <b>SHA-3</b> (FIPS 202), <b>Argon2id / bcrypt</b> (password)</td><td>MD5 (128-bit), SHA-1 (160-bit) — rentan <i>collision</i></td><td>Verifikasi integritas file/ISO, HMAC paket, dan penyimpanan hash password + <i>Salt</i> di database.</td></tr></tbody></table>\n<h3>Bagaimana Tanda Tangan Digital (Digital Signature) &amp; TLS 1.3 Bekerja?</h3>\n<ul><li><b>Alur Tanda Tangan Digital (Menjamin Integritas, Autentisitas &amp; Non-Repudiation):</b> (1) Pengirim menghitung hash pesan dengan <b>SHA-256</b>, (2) Pengirim menandatangani (mengenkripsi) nilai hash tersebut menggunakan <b>PRIVATE KEY PENGIRIM sendiri</b>, (3) Penerima mendekripsi tanda tangan menggunakan <b>PUBLIC KEY PENGIRIM</b> dan membandingkannya dengan hash SHA-256 pesan yang diterima. Jika identik, terbukti pesan asli dari pengirim dan tidak berubah satu bit pun!</li><li><b>Alur Hybrid Encryption pada HTTPS / TLS 1.3 (IETF RFC 8446):</b> Browser dan Web Server menggunakan kriptografi asimetris (<b>ECDHE</b> untuk <i>Perfect Forward Secrecy</i> + sertifikat <b>X.509 CA</b> untuk verifikasi identitas server) saat jabat tangan awal guna menyepakati kunci sesi sementara, lalu beralih ke enkripsi simetris <b>AES-256-GCM</b> atau <b>ChaCha20-Poly1305</b> agar transfer data halaman web berlangsung sangat cepat.</li></ul>\n<div class=\"lesson-note\"><b>Perbedaan Penting:</b> <b>Encoding</b> (ASCII, Base64, URL encoding) hanya mengubah format tampilan data tanpa kunci dan bisa langsung dibaca siapa saja; <b>Hashing</b> (SHA-256) bersifat satu arah untuk cek keutuhan data; <b>Enkripsi</b> (AES/RSA) bersifat dua arah menggunakan kunci rahasia untuk menjaga kerahasiaan.</div>\n<h3>Sumber &amp; Referensi Standar Industri</h3>\n<ul><li><a href=\"https://csrc.nist.gov/pubs/fips/197/final\" target=\"_blank\" rel=\"noopener\">NIST FIPS 197 — Advanced Encryption Standard (AES) Specification</a></li><li><a href=\"https://datatracker.ietf.org/doc/html/rfc8446\" target=\"_blank\" rel=\"noopener\">IETF RFC 8446 — The Transport Layer Security (TLS) Protocol Version 1.3</a></li><li><a href=\"https://datatracker.ietf.org/doc/html/rfc5280\" target=\"_blank\" rel=\"noopener\">IETF RFC 5280 — Internet X.509 Public Key Infrastructure Certificate and CRL Profile</a></li></ul>\n",
-
   "vlan": "\n<h2>11. VLAN (IEEE 802.1Q), Trunking, dan Inter-VLAN Routing (Elemen 4)</h2>\n<p><b>VLAN (Virtual Local Area Network)</b> mempartisi satu switch fisik Layer 2 menjadi beberapa <b>Broadcast Domain logis</b> yang terisolasi penuh. Berdasarkan standar <b>IEEE 802.1Q</b>, switch menyisipkan <b>Tag berukuran 4-byte (32-bit)</b> ke dalam header frame Ethernet ketika frame melewati <i>Trunk Port</i>. Tag 802.1Q terdiri atas: <b>TPID</b> (16-bit, bernilai tetap <code>0x8100</code>), <b>PCP</b> (3-bit Class of Service/QoS 802.1p), <b>DEI</b> (1-bit Drop Eligible), dan <b>VID (VLAN ID 12-bit)</b> yang menyediakan rentang VLAN <b>1 s.d. 4094</b> (0 dan 4095 dicadangkan; VLAN 1–1005 adalah <i>Normal Range</i>, 1006–4094 adalah <i>Extended Range</i>).</p>\n<h3>Perbandingan Konfigurasi VLAN &amp; Inter-VLAN Routing (Cisco IOS vs MikroTik RouterOS)</h3>\n<h4>1. Cisco IOS: Switch L2 (Access &amp; Trunk) + Router-on-a-Stick (802.1Q Sub-interface)</h4>\n<pre><code>! === PADA MANAGED SWITCH CISCO ===\nvlan 10\n name GURU\nvlan 20\n name SISWA\nvlan 99\n name MANAGEMENT_NATIVE\n!\ninterface range FastEthernet0/1 - 10\n switchport mode access\n switchport access vlan 10\n spanning-tree portfast\n!\ninterface GigabitEthernet0/1\n description TRUNK_KE_ROUTER\n switchport mode trunk\n switchport nonegotiate\n switchport trunk native vlan 99\n switchport trunk allowed vlan 10,20,99\n\n! === PADA ROUTER CISCO (ROUTER-ON-A-STICK) ===\ninterface GigabitEthernet0/0\n no ip address\n no shutdown\n!\ninterface GigabitEthernet0/0.10\n encapsulation dot1Q 10\n ip address 192.168.10.1 255.255.255.0\n!\ninterface GigabitEthernet0/0.20\n encapsulation dot1Q 20\n ip address 192.168.20.1 255.255.255.0</code></pre>\n<h4>2. MikroTik RouterOS v7: Bridge VLAN Filtering</h4>\n<pre><code>/interface bridge\nadd name=br-lan vlan-filtering=no\n/interface bridge port\nadd bridge=br-lan interface=ether2 pvid=10 comment=\"Access Port VLAN 10 Guru\"\nadd bridge=br-lan interface=ether3 pvid=20 comment=\"Access Port VLAN 20 Siswa\"\nadd bridge=br-lan interface=ether1 comment=\"Trunk Port ke Switch\"\n/interface bridge vlan\nadd bridge=br-lan tagged=br-lan,ether1 untagged=ether2 vlan-ids=10\nadd bridge=br-lan tagged=br-lan,ether1 untagged=ether3 vlan-ids=20\n/interface vlan\nadd interface=br-lan name=vlan10-guru vlan-id=10\nadd interface=br-lan name=vlan20-siswa vlan-id=20\n/ip address\nadd address=192.168.10.1/24 interface=vlan10-guru\nadd address=192.168.20.1/24 interface=vlan20-siswa\n# Aktifkan VLAN Filtering di akhir agar tidak terkunci\n/interface bridge set br-lan vlan-filtering=yes</code></pre>\n<div class=\"lesson-note\"><b>Router-on-a-Stick (RoaS) vs Layer 3 Switch (SVI):</b> Pada RoaS, trafik antar-VLAN harus bolak-balik melewati satu kabel trunk menuju router eksternal sehingga berpotensi menjadi bottleneck. Pada jaringan kampus/enterprise, inter-VLAN routing dilakukan langsung di ASIC hardware <b>Layer 3 Switch</b> menggunakan <b>SVI (<code>interface Vlan10</code> + perintah <code>ip routing</code>)</b> dengan kecepatan <i>wire-speed</i> jutaan paket per detik.</div>\n<h3>Sumber &amp; Referensi Standar Industri</h3>\n<ul><li><a href=\"https://standards.ieee.org/ieee/802.1Q/6844/\" target=\"_blank\" rel=\"noopener\">IEEE Std 802.1Q — Bridges and Bridged Networks (VLAN Tagging Standard)</a></li><li><a href=\"https://help.mikrotik.com/docs/spaces/ROS/pages/28606465/Bridge+VLAN+Table\" target=\"_blank\" rel=\"noopener\">MikroTik RouterOS Documentation — Bridge VLAN Table &amp; Hardware Offloading</a></li></ul>\n",
-
-  "routing": "\n<h2>12. Routing Statis dan Dinamis (RIPv2, OSPFv2/v3, BGP-4) (Elemen 4)</h2>\n<p>Routing adalah proses pengambilan keputusan di Layer 3 untuk meneruskan paket IP dari jaringan sumber menuju jaringan tujuan melintasi satu atau lebih router (<i>hop</i>). Ketika sebuah router menerima paket IP, mesin forwarding (FIB / Cisco Express Forwarding) memilih rute berdasarkan <b>3 aturan hierarkis yang tidak boleh tertukar</b>:</p>\n<ol><li><b>Longest Prefix Match (Paling Spesifik Menang Mutlak):</b> Rute dengan prefix terpanjang (misal <code>192.168.10.0/26</code>) SELALU menang melawan rute yang kurang spesifik (<code>192.168.10.0/24</code> atau default route <code>0.0.0.0/0</code>), terlepas dari protokol atau nilai Administrative Distance-nya!</li><li><b>Administrative Distance (AD Terkecil):</b> Jika seorang router mempelajari <b>prefix yang persis sama</b> (misal sama-sama <code>192.168.10.0/24</code>) dari dua sumber protokol berbeda, router hanya memasukkan sumber dengan AD terkecil ke tabel routing (Connected = 0, Static = 1, eBGP = 20, EIGRP = 90, OSPF = 110, IS-IS = 115, RIP = 120).</li><li><b>Metric Terkecil (di dalam satu protokol yang sama):</b> Jika prefix dan sumber protokolnya sama (misal dua jalur OSPF menuju <code>192.168.10.0/24</code>), router memilih jalur dengan <i>Metric</i> terkecil (Cost OSPF = \(\\text{Reference Bandwidth} / \\text{Interface Bandwidth}\), default \(10^8 / \\text{BW bps}\)). Jika metric kedua jalur sama persis, router melakukan <b>ECMP (Equal-Cost Multi-Path Load Balancing)</b>.</li></ol>\n<h3>Perbandingan Konfigurasi Routing Statis &amp; OSPF (Cisco IOS vs MikroTik RouterOS)</h3>\n<table><thead><tr><th>Skenario</th><th>Perintah Cisco IOS</th><th>Perintah MikroTik RouterOS v7</th></tr></thead><tbody>\n<tr><td><b>Static Route ke LAN Seberang</b></td><td><code>ip route 192.168.2.0 255.255.255.0 10.0.0.2</code></td><td><code>/ip route add dst-address=192.168.2.0/24 gateway=10.0.0.2</code></td></tr>\n<tr><td><b>Default Route (ke ISP)</b></td><td><code>ip route 0.0.0.0 0.0.0.0 203.0.113.1</code></td><td><code>/ip route add dst-address=0.0.0.0/0 gateway=203.0.113.1</code></td></tr>\n<tr><td><b>Floating Static (Backup Failover)</b></td><td><code>ip route 0.0.0.0 0.0.0.0 198.51.100.1 200</code></td><td><code>/ip route add dst-address=0.0.0.0/0 gateway=198.51.100.1 distance=200</code></td></tr>\n<tr><td><b>OSPFv2 Single-Area (Area 0)</b></td><td><code>router ospf 1</code><br><code> router-id 1.1.1.1</code><br><code> network 192.168.1.0 0.0.0.255 area 0</code><br><code> network 10.0.0.0 0.0.0.3 area 0</code></td><td><code>/routing ospf instance add name=ospf1 router-id=1.1.1.1</code><br><code>/routing ospf area add name=backbone area-id=0.0.0.0 instance=ospf1</code><br><code>/routing ospf interface-template add area=backbone networks=192.168.1.0/24,10.0.0.0/30</code></td></tr></tbody></table>\n<h3>Syarat Terbentuknya Neighbor Adjacency OSPF (FULL State)</h3>\n<p>Dua router OSPF tidak akan bertukar LSA (Link-State Advertisement) hingga menjadi tetangga (<i>Full Adjacency</i>). Jika status macet atau tidak muncul di <code>show ip ospf neighbor</code>, periksa 6 syarat wajib yang harus cocok di kedua ujung: (1) <b>Area ID</b> sama, (2) <b>Hello &amp; Dead Interval</b> sama (default broadcast 10s / 40s), (3) <b>Subnet &amp; Subnet Mask</b> sama, (4) <b>Autentikasi/Password</b> cocok, (5) <b>Area Stub Flag</b> sama, (6) <b>MTU Interface</b> sama dan <b>Router-ID</b> harus unik (tidak boleh kembar).</p>\n<h3>Sumber &amp; Referensi Standar Industri</h3>\n<ul><li><a href=\"https://datatracker.ietf.org/doc/html/rfc2328\" target=\"_blank\" rel=\"noopener\">IETF RFC 2328 — OSPF Version 2 Standard Specification</a></li><li><a href=\"https://datatracker.ietf.org/doc/html/rfc4271\" target=\"_blank\" rel=\"noopener\">IETF RFC 4271 — A Border Gateway Protocol 4 (BGP-4)</a></li><li><a href=\"https://datatracker.ietf.org/doc/html/rfc1812\" target=\"_blank\" rel=\"noopener\">IETF RFC 1812 — Requirements for IP Version 4 Routers</a></li></ul>\n",
-
+  "routing": "\n<h2>12. Routing Statis dan Dinamis (RIPv2, OSPFv2/v3, BGP-4) (Elemen 4)</h2>\n<p>Routing adalah proses pengambilan keputusan di Layer 3 untuk meneruskan paket IP dari jaringan sumber menuju jaringan tujuan melintasi satu atau lebih router (<i>hop</i>). Ketika sebuah router menerima paket IP, mesin forwarding (FIB / Cisco Express Forwarding) memilih rute berdasarkan <b>3 aturan hierarkis yang tidak boleh tertukar</b>:</p>\n<ol><li><b>Longest Prefix Match (Paling Spesifik Menang Mutlak):</b> Rute dengan prefix terpanjang (misal <code>192.168.10.0/26</code>) SELALU menang melawan rute yang kurang spesifik (<code>192.168.10.0/24</code> atau default route <code>0.0.0.0/0</code>), terlepas dari protokol atau nilai Administrative Distance-nya!</li><li><b>Administrative Distance (AD Terkecil):</b> Jika seorang router mempelajari <b>prefix yang persis sama</b> (misal sama-sama <code>192.168.10.0/24</code>) dari dua sumber protokol berbeda, router hanya memasukkan sumber dengan AD terkecil ke tabel routing (Connected = 0, Static = 1, eBGP = 20, EIGRP = 90, OSPF = 110, IS-IS = 115, RIP = 120).</li><li><b>Metric Terkecil (di dalam satu protokol yang sama):</b> Jika prefix dan sumber protokolnya sama (misal dua jalur OSPF menuju <code>192.168.10.0/24</code>), router memilih jalur dengan <i>Metric</i> terkecil (Cost OSPF = (Reference Bandwidth / Interface Bandwidth), default (10^8 / BW bps)). Jika metric kedua jalur sama persis, router melakukan <b>ECMP (Equal-Cost Multi-Path Load Balancing)</b>.</li></ol>\n<h3>Perbandingan Konfigurasi Routing Statis &amp; OSPF (Cisco IOS vs MikroTik RouterOS)</h3>\n<table><thead><tr><th>Skenario</th><th>Perintah Cisco IOS</th><th>Perintah MikroTik RouterOS v7</th></tr></thead><tbody>\n<tr><td><b>Static Route ke LAN Seberang</b></td><td><code>ip route 192.168.2.0 255.255.255.0 10.0.0.2</code></td><td><code>/ip route add dst-address=192.168.2.0/24 gateway=10.0.0.2</code></td></tr>\n<tr><td><b>Default Route (ke ISP)</b></td><td><code>ip route 0.0.0.0 0.0.0.0 203.0.113.1</code></td><td><code>/ip route add dst-address=0.0.0.0/0 gateway=203.0.113.1</code></td></tr>\n<tr><td><b>Floating Static (Backup Failover)</b></td><td><code>ip route 0.0.0.0 0.0.0.0 198.51.100.1 200</code></td><td><code>/ip route add dst-address=0.0.0.0/0 gateway=198.51.100.1 distance=200</code></td></tr>\n<tr><td><b>OSPFv2 Single-Area (Area 0)</b></td><td><code>router ospf 1</code><br><code> router-id 1.1.1.1</code><br><code> network 192.168.1.0 0.0.0.255 area 0</code><br><code> network 10.0.0.0 0.0.0.3 area 0</code></td><td><code>/routing ospf instance add name=ospf1 router-id=1.1.1.1</code><br><code>/routing ospf area add name=backbone area-id=0.0.0.0 instance=ospf1</code><br><code>/routing ospf interface-template add area=backbone networks=192.168.1.0/24,10.0.0.0/30</code></td></tr></tbody></table>\n<h3>Syarat Terbentuknya Neighbor Adjacency OSPF (FULL State)</h3>\n<p>Dua router OSPF tidak akan bertukar LSA (Link-State Advertisement) hingga menjadi tetangga (<i>Full Adjacency</i>). Jika status macet atau tidak muncul di <code>show ip ospf neighbor</code>, periksa 6 syarat wajib yang harus cocok di kedua ujung: (1) <b>Area ID</b> sama, (2) <b>Hello &amp; Dead Interval</b> sama (default broadcast 10s / 40s), (3) <b>Subnet &amp; Subnet Mask</b> sama, (4) <b>Autentikasi/Password</b> cocok, (5) <b>Area Stub Flag</b> sama, (6) <b>MTU Interface</b> sama dan <b>Router-ID</b> harus unik (tidak boleh kembar).</p>\n<h3>Sumber &amp; Referensi Standar Industri</h3>\n<ul><li><a href=\"https://datatracker.ietf.org/doc/html/rfc2328\" target=\"_blank\" rel=\"noopener\">IETF RFC 2328 — OSPF Version 2 Standard Specification</a></li><li><a href=\"https://datatracker.ietf.org/doc/html/rfc4271\" target=\"_blank\" rel=\"noopener\">IETF RFC 4271 — A Border Gateway Protocol 4 (BGP-4)</a></li><li><a href=\"https://datatracker.ietf.org/doc/html/rfc1812\" target=\"_blank\" rel=\"noopener\">IETF RFC 1812 — Requirements for IP Version 4 Routers</a></li></ul>\n",
   "nat": "\n<h2>13. NAT, PAT (Masquerade), Port Forwarding, dan Internet Gateway (Elemen 4)</h2>\n<p><b>NAT (Network Address Translation — IETF RFC 3022)</b> memungkinkan ratusan perangkat di jaringan lokal yang menggunakan alamat <b>IP Private (RFC 1918)</b> mengakses internet publik melalui satu atau beberapa alamat <b>IP Public</b> pada router gateway. Selain menghemat alamat IPv4 global, NAT menyembunyikan topologi internal LAN dari jaringan luar (<i>topology hiding</i>), meskipun fungsi pemfilteran keamanan tetap harus ditegakkan oleh Stateful Firewall.</p>\n<h3>Empat Terminologi Alamat NAT (Standar Cisco CCNA)</h3>\n<ul><li><b>Inside Local:</b> Alamat IP private asli milik host di dalam LAN sebelum diterjemahkan (misal <code>192.168.1.10</code>).</li><li><b>Inside Global:</b> Alamat IP public sah milik router gateway yang mewakili host internal di mata internet (misal <code>203.0.113.5</code>).</li><li><b>Outside Global:</b> Alamat IP public asli milik server tujuan di internet (misal <code>8.8.8.8</code>).</li><li><b>Outside Local:</b> Alamat IP host luar sebagaimana terlihat dari jaringan dalam (umumnya sama dengan Outside Global).</li></ul>\n<h3>Konfigurasi SRCNAT (Masquerade) &amp; DSTNAT (Port Forwarding) di MikroTik &amp; Cisco</h3>\n<h4>1. MikroTik RouterOS (SRCNAT Masquerade vs Src-Nat + DSTNAT Port Forwarding)</h4>\n<pre><code>/ip firewall nat\n# A. Outbound Internet Sharing (PAT / Masquerade untuk IP WAN Dinamis DHCP/PPPoE)\nadd chain=srcnat out-interface=ether1-WAN action=masquerade comment=\"PAT LAN ke Internet\"\n\n# (Tips Industri: Jika IP Public WAN bersifat STATIS, gunakan action=src-nat to-addresses=203.0.113.5\n#  karena lebih hemat CPU router dibanding masquerade saat link flap!)\n\n# B. Inbound Port Forwarding (DSTNAT): Buka akses Web Server lokal 192.168.1.100:80 dari Internet port 8080\nadd chain=dstnat in-interface=ether1-WAN protocol=tcp dst-port=8080 \\\n    action=dst-nat to-addresses=192.168.1.100 to-ports=80 comment=\"Port Forward Web Server\"</code></pre>\n<h4>2. Cisco IOS (PAT Overload &amp; Static Port Forwarding)</h4>\n<pre><code>interface GigabitEthernet0/0\n ip address 192.168.1.1 255.255.255.0\n ip nat inside\n!\ninterface GigabitEthernet0/1\n ip address 203.0.113.5 255.255.255.252\n ip nat outside\n!\n! PAT Overload untuk seluruh LAN\naccess-list 1 permit 192.168.1.0 0.0.0.255\nip nat inside source list 1 interface GigabitEthernet0/1 overload\n!\n! Static Port Forwarding TCP 8080 publik ke 192.168.1.100 port 80\nip nat inside source static tcp 192.168.1.100 80 203.0.113.5 8080 extendable</code></pre>\n<div class=\"lesson-note\"><b>Mengenal CGNAT (Carrier-Grade NAT — RFC 6598):</b> Banyak ISP FTTH rumahan memberikan IP WAN pada rentang <code>100.64.0.0/10</code> (atau IP private <code>10.x.x.x</code>) di port WAN ONT pelanggan karena kelangkaan IPv4. Jika router Anda berada di belakang CGNAT ISP, <i>Port Forwarding (DSTNAT)</i> dari internet publik tidak akan bisa ditembus secara langsung kecuali Anda berlangganan IP Public Static atau menggunakan tunnel (Cloudflare Tunnel / WireGuard VPS / Tailscale).</div>\n<h3>Sumber &amp; Referensi Standar Industri</h3>\n<ul><li><a href=\"https://datatracker.ietf.org/doc/html/rfc3022\" target=\"_blank\" rel=\"noopener\">IETF RFC 3022 — Traditional IP Network Address Translator (Traditional NAT &amp; NAPT/PAT)</a></li><li><a href=\"https://datatracker.ietf.org/doc/html/rfc6598\" target=\"_blank\" rel=\"noopener\">IETF RFC 6598 — IANA-Reserved IPv4 Prefix for Shared Address Space (Carrier-Grade NAT 100.64.0.0/10)</a></li></ul>\n",
-
   "linux": "\n<h2>14. Sistem Operasi Jaringan dan Administrasi Linux Server (Elemen 5)</h2>\n<p>Sebagian besar infrastruktur internet, cloud, container, dan router modern berjalan di atas kernel <b>Linux</b> (Debian, Ubuntu Server LTS, Rocky/AlmaLinux RHEL, hingga MikroTik RouterOS dan Juniper Junos yang berbasis UNIX/BSD/Linux). Administrator sistem jaringan wajib menguasai struktur direktori <b>Filesystem Hierarchy Standard (FHS 3.0)</b>, manajemen hak akses (POSIX Permissions &amp; sudo), konfigurasi jaringan (<code>iproute2</code> &amp; Netplan), manajemen daemon (<code>systemd</code>), serta audit log (<code>journalctl</code>).</p>\n<h3>Peta Direktori Kritis Linux (FHS) bagi Network &amp; System Engineer</h3>\n<table><thead><tr><th>Direktori</th><th>Fungsi Administrasi &amp; Contoh File Penting</th></tr></thead><tbody>\n<tr><td><code>/etc</code></td><td>Pusat seluruh file konfigurasi sistem &amp; layanan: <code>/etc/netplan/</code>, <code>/etc/network/interfaces</code>, <code>/etc/resolv.conf</code>, <code>/etc/hosts</code>, <code>/etc/ssh/sshd_config</code>, <code>/etc/bind/</code>, <code>/etc/apache2/</code>, <code>/etc/passwd</code>, <code>/etc/sudoers</code>.</td></tr>\n<tr><td><code>/var</code></td><td>Data variabel/dinamis: <code>/var/log/</code> (syslog, auth.log, apache2/error.log), <code>/var/www/html/</code> (dokumen web), <code>/var/lib/dhcp/dhcpd.leases</code> (database lease DHCP), <code>/var/cache/bind/</code>.</td></tr>\n<tr><td><code>/usr</code> &amp; <code>/bin</code>, <code>/sbin</code></td><td>Program biner aplikasi user (<code>/usr/bin</code>) dan utilitas administrasi sistem/jaringan (<code>/usr/sbin/ip</code>, <code>iptables</code>, <code>sshd</code>).</td></tr>\n<tr><td><code>/home</code> &amp; <code>/root</code></td><td>Direktori kerja akun user biasa (<code>/home/admin</code>) dan superuser root (<code>/root</code>).</td></tr>\n<tr><td><code>/proc</code> &amp; <code>/sys</code></td><td>Virtual filesystem kernel di RAM; misal mengaktifkan IP Forwarding Linux Router dengan <code>net.ipv4.ip_forward = 1</code> di <code>/etc/sysctl.conf</code> (memodifikasi <code>/proc/sys/net/ipv4/ip_forward</code>).</td></tr></tbody></table>\n<h3>Perhitungan Oktal Permission File Linux (<code>chmod</code> &amp; <code>chown</code>)</h3>\n<p>Setiap file memiliki 3 kelompok akses: <b>Owner (u)</b>, <b>Group (g)</b>, dan <b>Others (o)</b>. Tiap kelompok dihitung dari penjumlahan bit: <b>Read (r) = 4</b>, <b>Write (w) = 2</b>, <b>Execute (x) = 1</b>:</p>\n<ul><li><code>chmod 755 script.sh</code> → <code>rwxr-xr-x</code> (Owner bebas baca/tulis/eksekusi = 7; Group &amp; Others hanya baca/eksekusi = 5). Standar direktori web dan script eksekusi.</li><li><code>chmod 644 index.html</code> → <code>rw-r--r--</code> (Owner baca/tulis = 6; Group &amp; Others hanya baca = 4). Standar file konfigurasi dan halaman web statis.</li><li><code>chmod 600 ~/.ssh/id_ed25519</code> → <code>rw-------</code> (Hanya Owner yang boleh membaca/menulis; Group &amp; Others = 0). <b>Wajib untuk file Private Key SSH</b> (SSH akan menolak kunci privat jika permission-nya terlalu terbuka!).</li></ul>\n<h3>Hardening Dasar Server Linux Produksi (CIS Benchmark)</h3>\n<ol><li>Gunakan akun administrator non-root dengan <code>sudo</code>; matikan login root langsung via SSH (<code>PermitRootLogin no</code> di <code>/etc/ssh/sshd_config</code>).</li><li>Gunakan autentikasi <b>SSH Key-Based (Ed25519 / RSA-4096)</b> dan nonaktifkan login password teks biasa (<code>PasswordAuthentication no</code>) setelah kunci publik terpasang di <code>~/.ssh/authorized_keys</code>.</li><li>Aktifkan firewall host (<code>ufw</code> atau <code>nftables</code>) dan pasang <b>Fail2Ban</b> untuk memblokir otomatis IP yang melakukan brute-force SSH.</li><li>Pastikan sinkronisasi waktu NTP aktif (<code>timedatectl status</code>) dan pembaruan keamanan otomatis (<code>unattended-upgrades</code>) berjalan terjadwal.</li></ol>\n<h3>Sumber &amp; Referensi Standar Industri</h3>\n<ul><li><a href=\"https://refspecs.linuxfoundation.org/fhs.shtml\" target=\"_blank\" rel=\"noopener\">The Linux Foundation — Filesystem Hierarchy Standard (FHS 3.0) Specification</a></li><li><a href=\"https://ubuntu.com/server/docs\" target=\"_blank\" rel=\"noopener\">Canonical Ubuntu Server Official Documentation (Netplan, systemd, OpenSSH &amp; Security)</a></li><li><a href=\"https://www.debian.org/doc/manuals/debian-handbook/\" target=\"_blank\" rel=\"noopener\">The Debian Administrator's Handbook — Network Infrastructure &amp; System Services</a></li></ul>\n",
-
   "server": "\n<h2>15. Konfigurasi dan Troubleshooting Layanan Server Jaringan (Elemen 5)</h2>\n<p>Pada Elemen 5 Administrasi Sistem Jaringan, seorang administrator mengintegrasikan layanan-layanan inti infrastruktur di atas server Linux (Debian/Ubuntu Server) agar seluruh client di jaringan dapat memperoleh alamat IP otomatis, menerjemahkan nama domain, mengakses aplikasi web terenkripsi, berbagi berkas lintas OS, dan menjaga sinkronisasi waktu.</p>\n<h3>Ringkasan Protokol, Port Transport, Daemon &amp; File Konfigurasi Inti</h3>\n<table><thead><tr><th>Layanan</th><th>Standar RFC &amp; Port</th><th>Paket Daemon Linux</th><th>File Konfigurasi &amp; Alat Uji (Verifikasi)</th></tr></thead><tbody>\n<tr><td><b>DHCP Server</b></td><td>RFC 2131<br>UDP 67 (Server) / 68 (Client)</td><td><code>isc-dhcp-server</code> / <code>kea-dhcp4-server</code></td><td><code>/etc/dhcp/dhcpd.conf</code>, lease di <code>/var/lib/dhcp/dhcpd.leases</code>.<br>Uji: proses <b>DORA</b> (Discover, Offer, Request, Ack), <code>ipconfig /renew</code>, <code>dhclient -v</code>.</td></tr>\n<tr><td><b>DNS Server</b></td><td>RFC 1035<br>UDP &amp; TCP 53</td><td><code>bind9</code></td><td><code>/etc/bind/named.conf.local</code>, <code>named.conf.options</code>, file zona Forward (A, AAAA, CNAME, MX, NS, SOA) &amp; Reverse (PTR <code>in-addr.arpa</code>).<br>Uji: <code>named-checkconf</code>, <code>named-checkzone</code>, <code>dig</code>, <code>nslookup</code>.</td></tr>\n<tr><td><b>Web Server</b></td><td>RFC 9110 / 8446<br>TCP 80 (HTTP) / 443 (HTTPS)</td><td><code>apache2</code> / <code>nginx</code></td><td><code>/etc/apache2/sites-available/*.conf</code>, DocumentRoot <code>/var/www/</code>.<br>Uji: <code>apache2ctl configtest</code>, <code>a2ensite</code>, <code>curl -I http://domain</code>.</td></tr>\n<tr><td><b>File Server</b></td><td>SMB/CIFS (TCP 445)<br>FTP/FTPS (TCP 20, 21)<br>SFTP (TCP 22)</td><td><code>samba</code> (<code>smbd</code>)<br><code>vsftpd</code><br><code>openssh-server</code></td><td>Samba: <code>/etc/samba/smb.conf</code> (uji: <code>testparm</code>, <code>smbclient</code>).<br>FTP: <code>/etc/vsftpd.conf</code> (wajib <code>anonymous_enable=NO</code> &amp; <code>chroot_local_user=YES</code>).</td></tr>\n<tr><td><b>NTP Server</b></td><td>RFC 5905<br>UDP 123</td><td><code>chrony</code> / <code>ntp</code> / <code>systemd-timesyncd</code></td><td><code>/etc/chrony/chrony.conf</code> atau <code>/etc/ntp.conf</code> (pool <code>0.id.pool.ntp.org</code>).<br>Uji: <code>chronyc sources</code>, <code>ntpq -p</code>, <code>timedatectl status</code>.</td></tr>\n<tr><td><b>Remote SSH</b></td><td>RFC 4251<br>TCP 22</td><td><code>openssh-server</code> (<code>sshd</code>)</td><td><code>/etc/ssh/sshd_config</code>, kunci di <code>~/.ssh/authorized_keys</code>.<br>Uji: <code>sshd -t</code>, <code>ssh -v user@ip-server</code>.</td></tr></tbody></table>\n<h3>Metodologi Troubleshooting Layanan Server Secara Sistematis</h3>\n<p>Ketika seorang client melaporkan tidak dapat mengakses layanan server (misal <code>www.sekolah.sch.id</code> gagal dibuka), lakukan isolasi masalah dari bawah ke atas:</p>\n<ol><li><b>Cek Konektivitas L1–L3:</b> Pastikan server dan client memiliki IP yang benar (<code>ip addr</code>) dan dapat saling ping atau melewati router antar-VLAN (<code>ping 192.168.1.10</code>, <code>traceroute</code>).</li><li><b>Cek Status Daemon di Server:</b> Jalankan <code>systemctl status bind9 apache2</code>. Jika <i>failed</i>, baca baris error konfigurasi dengan <code>journalctl -xeu bind9</code> dan jalankan validator sintaks (<code>named-checkconf</code> atau <code>apache2ctl configtest</code>).</li><li><b>Cek Listening Socket &amp; Port:</b> Jalankan <code>sudo ss -tulpn | grep -E ':53|:80|:443'</code> untuk memastikan daemon benar-benar mendengarkan pada IP interface jaringan (bukan hanya <code>127.0.0.1</code>!).</li><li><b>Cek Firewall Host &amp; Jaringan:</b> Periksa <code>sudo ufw status</code> atau ACL router/switch di tengah jalur.</li><li><b>Cek Resolusi DNS dari Client:</b> Jalankan <code>nslookup www.sekolah.sch.id 192.168.1.10</code>. Jika akses via IP berhasil (<code>http://192.168.1.20</code>) tetapi via nama domain gagal, maka masalah 100% berada pada konfigurasi DNS client (<code>/etc/resolv.conf</code> atau DHCP option <code>domain-name-servers</code>) atau file zona BIND9 (lupa menaikkan <i>Serial Number</i> SOA sebelum <code>systemctl reload bind9</code>).</li></ol>\n<h3>Sumber &amp; Referensi Standar Industri</h3>\n<ul><li><a href=\"https://datatracker.ietf.org/doc/html/rfc2131\" target=\"_blank\" rel=\"noopener\">IETF RFC 2131 — Dynamic Host Configuration Protocol (DHCP DORA Specification)</a></li><li><a href=\"https://datatracker.ietf.org/doc/html/rfc1035\" target=\"_blank\" rel=\"noopener\">IETF RFC 1035 — Domain Names - Implementation and Specification (DNS Zone &amp; Resource Records)</a></li><li><a href=\"https://bind9.readthedocs.io/\" target=\"_blank\" rel=\"noopener\">ISC BIND 9 Official Administrator Reference Manual</a></li><li><a href=\"https://httpd.apache.org/docs/2.4/\" target=\"_blank\" rel=\"noopener\">Apache HTTP Server Version 2.4 Official Documentation (Virtual Hosts &amp; SSL/TLS)</a></li></ul>\n"
 };
 
@@ -333,35 +381,35 @@ function showEnrichment(id, opts) {
     currentPage = 'enrich_' + id;
     try { localStorage.setItem('tjkt_last_page', 'enrich_' + id); } catch (e) {}
     const el = document.getElementById('content');
-    el.innerHTML = '<div class="page-loader"><div class="spinner"></div></div>';
     closeSidebar();
     updateBottomNav('enrich_' + id);
-    window.scrollTo(0, 0);
+    scrollPageTo(0);
     if (document.scrollingElement) document.scrollingElement.scrollTop = 0;
-    setTimeout(() => {
-        if (!lessonEnrichment[id]) {
-            el.innerHTML = card('<h2>Materi pengayaan tidak ditemukan.</h2>');
-            return;
-        }
-        el.innerHTML = `
-          <div class="lesson-toolbar clay-card" aria-label="Navigasi pengayaan">
-            <div class="lesson-toolbar-main"><span class="lesson-toolbar-label"><i class="fas fa-book-reader"></i> Materi Pengayaan</span><span class="lesson-toolbar-hint">${title}</span></div>
-            <div class="lesson-toolbar-actions">
-              <button class="clay-btn" onclick="showPage('${id}')"><i class="fas fa-arrow-left"></i> Kembali ke Materi</button>
-              ${assessments[id] ? `<button class="clay-btn" onclick="showAssessment('${id}')"><i class="fas fa-tasks"></i> Asesmen</button>` : ''}
-            </div>
-          </div>
-          <article class="lesson-enrichment clay-card" data-font-size="16">
-            <div class="lesson-enrichment-heading"><span class="lesson-kicker">MATERI PENGAYAAN • BUKU AJAR TJKT</span><h1>${title} — Pendalaman Konsep dan Praktik</h1><p>Pelajari konsep, diagram visual, contoh penerapan, prosedur kerja, dan referensi standar industri berikut secara bertahap.</p></div>
-            ${renderEnrichVisualStrip(id)}
-            <div class="lesson-enrichment-body">${lessonEnrichment[id]}</div>
-          </article>
-          ${lessonTools(id, 'enrich')}`;
-        prepContent(el);
-        initComponents();
-        updateSidebarActive('enrich_' + id);
-        decorateContent('enrich_' + id);
-    }, 80);
+
+    if (!lessonEnrichment[id]) {
+        el.innerHTML = card('<h2>Materi pengayaan tidak ditemukan.</h2>');
+        notifyPage();
+        return;
+    }
+    el.innerHTML = `
+      <div class="lesson-toolbar clay-card" aria-label="Navigasi pengayaan">
+        <div class="lesson-toolbar-main"><span class="lesson-toolbar-label"><i class="fas fa-book-reader"></i> Materi Pengayaan</span><span class="lesson-toolbar-hint">${title}</span></div>
+        <div class="lesson-toolbar-actions">
+          <button class="clay-btn" onclick="showPage('${id}')"><i class="fas fa-arrow-left"></i> Kembali ke Materi</button>
+          ${assessments[id] ? `<button class="clay-btn" onclick="showAssessment('${id}')"><i class="fas fa-tasks"></i> Asesmen</button>` : ''}
+        </div>
+      </div>
+      <article class="lesson-enrichment clay-card" data-font-size="16">
+        <div class="lesson-enrichment-heading"><span class="lesson-kicker">MATERI PENGAYAAN • BUKU AJAR TJKT</span><h1>${title} — Pendalaman Konsep dan Praktik</h1><p>Pelajari konsep, diagram visual, contoh penerapan, prosedur kerja, dan referensi standar industri berikut secara bertahap.</p></div>
+        ${renderEnrichVisualStrip(id)}
+        <div class="lesson-enrichment-body">${lessonEnrichment[id]}</div>
+      </article>
+      ${lessonTools(id, 'enrich')}`;
+    prepContent(el);
+    initComponents();
+    updateSidebarActive('enrich_' + id);
+    decorateContent('enrich_' + id);
+    notifyPage();
 }
 
 // Halaman hub "Materi Pengayaan" — daftar 15 topik, tiap kartu membuka view pengayaan
@@ -414,26 +462,25 @@ function showPage(id, opts) {
     currentPage = id;
     try { localStorage.setItem('tjkt_last_page', id); } catch (e) {}
     const el = document.getElementById('content');
-    el.innerHTML = '<div class="page-loader"><div class="spinner"></div></div>';
     closeSidebar();
     updateBottomNav(id);
 
     // Scroll ke atas (window adalah scroller utama)
-    window.scrollTo(0, 0);
+    scrollPageTo(0);
     if (document.scrollingElement) document.scrollingElement.scrollTop = 0;
 
-    setTimeout(() => {
-        if (pages[id]) {
-            const tools = id.startsWith('fo-tp') ? '' : lessonTools(id);
-            el.innerHTML = pages[id]() + tools;
-            prepContent(el);
-            initComponents();
-            updateSidebarActive(id);
-            decorateContent(id);
-        } else {
-            el.innerHTML = card('<h2>Halaman tidak ditemukan.</h2>');
-        }
-    }, 80);
+    if (pages[id]) {
+        const tools = id.startsWith('fo-tp') ? '' : lessonTools(id);
+        el.innerHTML = pages[id]() + tools;
+        prepContent(el);
+        initComponents();
+        updateSidebarActive(id);
+        decorateContent(id);
+        notifyPage();
+    } else {
+        el.innerHTML = card('<h2>Halaman tidak ditemukan.</h2>');
+        notifyPage();
+    }
 }
 
 // ============================================================
@@ -466,7 +513,7 @@ function showAssessment(topic, opts) {
     closeSidebar();
     updateBottomNav('quiz_' + topic);
     updateSidebarActive('quiz_' + topic);
-    window.scrollTo(0, 0);
+    scrollPageTo(0);
     const allQ = assessments[topic];
     if (!allQ) return;
     const singles = shuffle(allQ.filter(q => q.type !== 'multi')).slice(0, 15);
@@ -714,16 +761,18 @@ function decorateContent(id) {
         root.insertAdjacentHTML('afterbegin', `<nav class="crumb-bar" aria-label="Breadcrumb">${parts}</nav>`);
     }
 
-    // 2) Daftar isi otomatis (dari sub-judul h3)
+    // 2) Daftar isi otomatis (dari sub-judul h2/h3) + estimasi waktu baca
     if (meta.toc && !root.querySelector('.toc-card')) {
         const heads = [...root.querySelectorAll('h2, h3')].filter(h => h.textContent.trim().length > 1);
         if (heads.length >= 3) {
+            const words = (root.textContent || '').trim().split(/\s+/).filter(Boolean).length;
+            const mins = Math.max(2, Math.round(words / 210));
             const items = heads.map((h, i) => {
                 if (!h.id) h.id = 'sec-' + id + '-' + i;
                 const txt = h.textContent.trim();
-                return `<li><a href="#${h.id}" onclick="event.preventDefault();document.getElementById('${h.id}').scrollIntoView({behavior:'smooth',block:'start'});">${txt}</a></li>`;
+                return `<li><a href="#${h.id}" onclick="event.preventDefault();scrollToAnchor('${h.id}');">${txt}</a></li>`;
             }).join('');
-            const html = `<details class="toc-card"><summary><i class="fas fa-list-ul"></i> Daftar Isi <span>${heads.length} bagian</span></summary><ol>${items}</ol></details>`;
+            const html = `<details class="toc-card"><summary><i class="fas fa-list-ul"></i> Daftar Isi <span class="toc-meta-pills"><span>${heads.length} bagian</span><span class="toc-read-time"><i class="far fa-clock"></i> ~${mins} mnt</span></span></summary><ol>${items}</ol></details>`;
             const anchor = root.querySelector('.card');
             if (anchor) anchor.insertAdjacentHTML('beforebegin', html);
             else root.insertAdjacentHTML('afterbegin', html);
@@ -773,8 +822,9 @@ function updateReadBar() {
     document.querySelector('.topbar')?.classList.toggle('scrolled', y > 12);
     if (!b) return;
     const h = document.documentElement.scrollHeight - window.innerHeight;
-    b.style.width = h > 60 ? Math.min(100, (y / h) * 100) + '%' : '0%';
-    b.classList.toggle('show', y > 60);
+    const ratio = h > 60 ? Math.min(1, Math.max(0, y / h)) : 0;
+    b.style.transform = `scaleX(${ratio.toFixed(4)})`;
+    b.classList.toggle('show', y > 40 && h > 60);
 }
 initReadBar();
 
@@ -891,18 +941,133 @@ function buildSearchIndex() {
     return out;
 }
 
+let _cmdkActive = 0;
+
 function openQuickSearch() {
-    const sb = document.getElementById('sidebar');
-    const ov = document.getElementById('overlay');
-    if (window.innerWidth < 860 && sb && !sb.classList.contains('open')) {
-        sb.classList.add('open');
-        if (ov) ov.classList.add('active');
+    const modal = document.getElementById('cmdk-modal');
+    if (!modal) {
+        const sb = document.getElementById('sidebar');
+        const ov = document.getElementById('overlay');
+        if (window.innerWidth < 860 && sb && !sb.classList.contains('open')) {
+            sb.classList.add('open');
+            if (ov) ov.classList.add('active');
+        }
+        const inp = document.getElementById('search-input');
+        if (inp) setTimeout(() => { inp.focus(); inp.select(); }, 80);
+        return;
     }
-    const inp = document.getElementById('search-input');
-    if (inp) {
-        setTimeout(() => { inp.focus(); inp.select(); }, 80);
+    closeSearch();
+    closeSidebar();
+    modal.classList.remove('hidden');
+    setModalScrollLock(true);
+    const dialog = modal.querySelector('.cmdk-dialog');
+    const inp = document.getElementById('cmdk-input');
+    if (inp) { inp.value = ''; }
+    cmdkSearch('');
+    const m = window.__tjktMotion;
+    if (m && typeof m.animateCmdkOpen === 'function') m.animateCmdkOpen(dialog);
+    setTimeout(() => { if (inp) inp.focus(); }, 30);
+}
+window.openQuickSearch = openQuickSearch;
+
+function closeQuickSearch() {
+    const modal = document.getElementById('cmdk-modal');
+    if (!modal || modal.classList.contains('hidden')) return;
+    modal.classList.add('hidden');
+    setModalScrollLock(false);
+}
+window.closeQuickSearch = closeQuickSearch;
+
+function cmdkSetActive(idx) {
+    const list = document.getElementById('cmdk-list');
+    if (!list) return;
+    const items = [...list.querySelectorAll('.cmdk-item')];
+    if (!items.length) { _cmdkActive = 0; return; }
+    _cmdkActive = ((idx % items.length) + items.length) % items.length;
+    items.forEach((el, i) => {
+        const on = i === _cmdkActive;
+        el.classList.toggle('is-active', on);
+        el.setAttribute('aria-selected', on ? 'true' : 'false');
+        if (on) el.scrollIntoView({ block: 'nearest' });
+    });
+}
+
+function cmdkSearch(val) {
+    const list = document.getElementById('cmdk-list');
+    if (!list) return;
+    const q = (val || '').trim().toLowerCase();
+    if (!_searchCache) _searchCache = buildSearchIndex();
+
+    let html = '';
+    if (!q) {
+        const quick = [
+            { label: 'Beranda Portal Mapel', page: 'home', icon: 'fa-home', group: 'Akses Cepat' },
+            { label: 'Peta Materi Konsentrasi TKJ (E1–E5)', page: 'tkj', icon: 'fa-network-wired', group: 'Akses Cepat' },
+            { label: 'Modul Praktik Fiber Optik (7 TP)', page: 'fiberOptik', icon: 'fa-bolt', group: 'Akses Cepat' },
+            { label: 'Kalkulator Subnet IPv4, CIDR & VLSM', page: 'ip', icon: 'fa-calculator', group: 'Akses Cepat' },
+            { label: 'Glosarium Perangkat Bergambar (59)', page: 'glosariumPerangkat', icon: 'fa-server', group: 'Akses Cepat' },
+            { label: 'Progress & Rekap Nilai Asesmen', page: 'progress', icon: 'fa-chart-bar', group: 'Akses Cepat' }
+        ];
+        html = `<div class="cmdk-group-title">Akses Cepat &amp; Lab Populer</div>` +
+            quick.map((item, i) =>
+                `<button type="button" class="cmdk-item${i === 0 ? ' is-active' : ''}" role="option" aria-selected="${i === 0}" data-page="${item.page}" onclick="cmdkRun(this)">
+                    <span class="cmdk-item-ic"><i class="fas ${item.icon}"></i></span>
+                    <span class="cmdk-item-label">${item.label}</span>
+                    <span class="cmdk-item-tag">${item.group}</span>
+                    <i class="fas fa-arrow-right cmdk-item-go"></i>
+                </button>`
+            ).join('');
+    } else {
+        const matches = _searchCache.filter(x =>
+            x.label.toLowerCase().includes(q) ||
+            (x.term && x.term.toLowerCase().includes(q)) ||
+            (x.group && x.group.toLowerCase().includes(q))
+        );
+        if (!matches.length) {
+            html = `<div class="cmdk-empty"><i class="fas fa-search"></i><p>Tidak ditemukan hasil untuk "<strong>${q.replace(/</g, '&lt;')}</strong>"</p><small>Coba kata kunci seperti VLAN, OSPF, OTDR, Splicer, Firewall, atau Subnet.</small></div>`;
+        } else {
+            const groups = {};
+            matches.forEach(m => { (groups[m.group || 'Halaman'] = groups[m.group || 'Halaman'] || []).push(m); });
+            let first = true;
+            for (const [g, items] of Object.entries(groups)) {
+                html += `<div class="cmdk-group-title">${g} <span>${items.length}</span></div>`;
+                html += items.slice(0, 5).map(m => {
+                    const attrs = m.page ? `data-page="${m.page}"` : m.foTp ? `data-fotp="${m.foTp}"` : m.enrich ? `data-enrich="${m.enrich}"` : m.foEnrich ? `data-foenrich="${m.foEnrich}"` : `data-assess="${m.assess}"`;
+                    const isFirst = first; first = false;
+                    return `<button type="button" class="cmdk-item${isFirst ? ' is-active' : ''}" role="option" aria-selected="${isFirst}" ${attrs} onclick="cmdkRun(this)">
+                        <span class="cmdk-item-ic"><i class="fas ${m.icon}"></i></span>
+                        <span class="cmdk-item-label">${m.label}</span>
+                        <i class="fas fa-arrow-right cmdk-item-go"></i>
+                    </button>`;
+                }).join('');
+            }
+        }
+    }
+    _cmdkActive = 0;
+    list.innerHTML = html;
+    const m = window.__tjktMotion;
+    if (m && typeof m.animateCmdkList === 'function') m.animateCmdkList(list);
+}
+window.cmdkSearch = cmdkSearch;
+
+function cmdkRun(el) {
+    if (!el) return;
+    runSearch(el);
+    closeQuickSearch();
+}
+window.cmdkRun = cmdkRun;
+
+function cmdkKey(e) {
+    if (e.key === 'Escape') { e.preventDefault(); closeQuickSearch(); return; }
+    if (e.key === 'ArrowDown') { e.preventDefault(); cmdkSetActive(_cmdkActive + 1); return; }
+    if (e.key === 'ArrowUp') { e.preventDefault(); cmdkSetActive(_cmdkActive - 1); return; }
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        const active = document.querySelector('#cmdk-list .cmdk-item.is-active') || document.querySelector('#cmdk-list .cmdk-item');
+        if (active) cmdkRun(active);
     }
 }
+window.cmdkKey = cmdkKey;
 
 function closeSearch() {
     const res = document.getElementById('search-results');
@@ -1022,6 +1187,11 @@ function initMotion() {
 
 // Count-up angka (dari 0 ke nilai)
 function countUp(el) {
+    // Versi GSAP (lebih halus) dipakai bila pustaka animasi sudah siap
+    const libm = window.__tjktMotion;
+    if (libm && typeof libm.countUp === 'function') {
+        try { if (libm.countUp(el)) return; } catch (e) { /* lanjut ke animasi asli */ }
+    }
     const raw = el.getAttribute('data-count');
     const target = parseFloat(raw);
     if (isNaN(target)) return;
@@ -1105,7 +1275,7 @@ function openLightbox(src, title, caption, badges = '') {
                 <div class="tjkt-lb-meta"><span class="tjkt-lb-title" id="tjkt-lb-title"></span><span id="tjkt-lb-badges"></span></div>
                 <button type="button" class="tjkt-lb-close" id="tjkt-lb-close" aria-label="Tutup pratinjau"><i class="fas fa-times"></i></button>
             </div>
-            <div class="tjkt-lb-stage"><img id="tjkt-lb-img" src="" alt=""></div>
+            <div class="tjkt-lb-stage" data-lenis-prevent><img id="tjkt-lb-img" src="" alt=""></div>
             <div class="tjkt-lb-caption" id="tjkt-lb-caption"></div>
         </div>`;
         document.body.appendChild(lb);
@@ -1125,11 +1295,17 @@ function openLightbox(src, title, caption, badges = '') {
         cap.style.display = caption ? '' : 'none';
     }
     lb.classList.add('open');
+    setModalScrollLock(true);
+    const m = window.__tjktMotion;
+    if (m && typeof m.animateLightboxOpen === 'function') m.animateLightboxOpen(lb.querySelector('.tjkt-lb-dialog'));
 }
 
 function closeLightbox() {
     const lb = document.getElementById('tjkt-lightbox');
-    if (lb) lb.classList.remove('open');
+    if (lb && lb.classList.contains('open')) {
+        lb.classList.remove('open');
+        setModalScrollLock(false);
+    }
 }
 
 function initLightbox() {
@@ -1168,8 +1344,38 @@ function callout(type, icon, title, body) {
 }
 function codeBlock(lang, code) {
     const escaped = code.replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    return `<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">${lang}</span></div><div class="code-body">${escaped}</div></div>`;
+    return `<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">${lang}</span><button type="button" class="code-copy-btn" onclick="copyCodeBlock(this)" title="Salin perintah"><i class="far fa-copy"></i><span>Salin</span></button></div><div class="code-body">${escaped}</div></div>`;
 }
+function copyCodeBlock(btn) {
+    const body = btn && btn.closest('.code-block')?.querySelector('.code-body');
+    if (!body) return;
+    const text = body.textContent || '';
+    const done = () => {
+        btn.classList.add('copied');
+        btn.innerHTML = '<i class="fas fa-check"></i><span>Tersalin</span>';
+        clearTimeout(btn._cpTimer);
+        btn._cpTimer = setTimeout(() => {
+            btn.classList.remove('copied');
+            btn.innerHTML = '<i class="far fa-copy"></i><span>Salin</span>';
+        }, 1800);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(() => {
+            const ta = document.createElement('textarea');
+            ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+            document.body.appendChild(ta); ta.select();
+            try { document.execCommand('copy'); done(); } catch (e) {}
+            ta.remove();
+        });
+    } else {
+        const ta = document.createElement('textarea');
+        ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); done(); } catch (e) {}
+        ta.remove();
+    }
+}
+window.copyCodeBlock = copyCodeBlock;
 function tbl(headers, rows) {
     return `<div class="table-wrap"><table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
 }
@@ -1361,6 +1567,8 @@ function toast(msg, ms = 2600) {
     if (!el) { el = document.createElement('div'); el.id = 'app-toast'; el.className = 'toast'; document.body.appendChild(el); }
     el.textContent = msg;
     el.classList.add('show');
+    const m = window.__tjktMotion;
+    if (m && typeof m.animateToast === 'function') m.animateToast(el);
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => el.classList.remove('show'), ms);
 }
@@ -1378,6 +1586,8 @@ function toggleTheme() {
     const cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
     const next = cur === 'dark' ? 'light' : 'dark';
     applyTheme(next, true);
+    const m = window.__tjktMotion;
+    if (m && typeof m.animateThemeToggle === 'function') m.animateThemeToggle(document.getElementById('theme-btn'));
     toast(next === 'dark' ? 'Mode gelap aktif 🌙' : 'Mode terang aktif ☀️');
 }
 
@@ -2205,9 +2415,9 @@ function home() {
             <p>Akses materi Fase F, simulasi interaktif, dan glosarium perangkat.</p>
         </div>
         <div class="portal-stats-mini">
-            <div class="psm-item"><strong>2</strong><span>Mapel</span></div>
-            <div class="psm-item"><strong>${totalTopics}</strong><span>Topik</span></div>
-            <div class="psm-item"><strong>${totalQ}</strong><span>Soal</span></div>
+            <div class="psm-item"><strong data-count="2">2</strong><span>Mapel</span></div>
+            <div class="psm-item"><strong data-count="${totalTopics}">${totalTopics}</strong><span>Topik</span></div>
+            <div class="psm-item"><strong data-count="${totalQ}">${totalQ}</strong><span>Soal</span></div>
         </div>
     </div>
 
@@ -2224,6 +2434,7 @@ function home() {
                 <span><i class="fas fa-book"></i> ${TKJ_ORDER.length} Topik (E1–E5)</span>
                 <span><i class="fas fa-check-circle"></i> ${tkjDone}/${TKJ_ORDER.length} (${tkjPct}%)</span>
             </div>
+            <div class="pc-prog-bar" aria-label="Progres Konsentrasi TKJ ${tkjPct}%"><span class="pc-prog-fill" style="width:${tkjPct}%"></span></div>
             <div class="pc-menus">
                 <button type="button" class="pc-menu-chip" onclick="event.stopPropagation();showPage('tkj')"><i class="fas fa-th-large"></i> Peta E1–E5</button>
                 <button type="button" class="pc-menu-chip" onclick="event.stopPropagation();showPage('intro')"><i class="fas fa-graduation-cap"></i> Capaian</button>
@@ -2247,6 +2458,7 @@ function home() {
                 <span><i class="fas fa-tools"></i> ${FO_TP.length} TP Praktik + Teori</span>
                 <span><i class="fas fa-check-circle"></i> ${foDoneCount}/${FO_TP.length} (${foPct}%)</span>
             </div>
+            <div class="pc-prog-bar" aria-label="Progres Fiber Optik ${foPct}%"><span class="pc-prog-fill fo" style="width:${foPct}%"></span></div>
             <div class="pc-menus">
                 <button type="button" class="pc-menu-chip" onclick="event.stopPropagation();showPage('fiberOptik')"><i class="fas fa-bolt"></i> Beranda FO</button>
                 <button type="button" class="pc-menu-chip" onclick="event.stopPropagation();showPage('fiber')"><i class="fas fa-wave-square"></i> Teori Dasar</button>
@@ -3890,47 +4102,47 @@ function showFoEnrichment(tpId, opts) {
     currentPage = 'fo_enrich_' + tpId;
     try { localStorage.setItem('tjkt_last_page', 'fo_enrich_' + tpId); } catch (e) {}
     const el = document.getElementById('content');
-    el.innerHTML = '<div class="page-loader"><div class="spinner"></div></div>';
     closeSidebar();
     updateBottomNav('fo_enrich_' + tpId);
-    window.scrollTo(0, 0);
+    scrollPageTo(0);
     if (document.scrollingElement) document.scrollingElement.scrollTop = 0;
-    setTimeout(() => {
-        if (!FO_ENRICHMENT[tpId]) {
-            el.innerHTML = card('<h2>Materi pengayaan tidak ditemukan.</h2>');
-            return;
-        }
-        el.innerHTML = `
-          <div class="lesson-toolbar clay-card" aria-label="Navigasi pengayaan">
-            <div class="lesson-toolbar-main"><span class="lesson-toolbar-label"><i class="fas fa-book-reader"></i> Materi Pengayaan Fiber Optik</span><span class="lesson-toolbar-hint">${title}</span></div>
-            <div class="lesson-toolbar-actions">
-              <button class="clay-btn" onclick="showPage('fo-${tpId}')"><i class="fas fa-arrow-left"></i> Kembali ke Materi TP</button>
-              <button class="clay-btn" onclick="showAssessment('fo_${tpId}')"><i class="fas fa-tasks"></i> Asesmen TP</button>
-            </div>
-          </div>
-          <article class="lesson-enrichment clay-card" data-font-size="16">
-            <div class="lesson-enrichment-heading"><span class="lesson-kicker">PENGAYAAN PRAKTIK • FIBER OPTIK FASE F</span><h1>${title} — Standar &amp; SOP</h1><p>Ringkasan standar ITU-T, keselamatan kerja, diagram teknis, rumus, dan studi kasus.</p></div>
-            ${(() => {
-                const tpObj = FO_TP.find(x => x.id === tpId);
-                if (!tpObj || !tpObj.figs || !tpObj.figs.length) return '';
-                return `<div class="enrich-visual-box">
-                    <div class="enrich-visual-title"><i class="fas fa-images"></i> Galeri Figur Teknis &amp; Diagram Standar (${tpObj.code})</div>
-                    <div class="enrich-visual-grid">
-                        ${tpObj.figs.slice(0, 4).map(fg => {
-                            const fn = fg.f.includes('.') ? fg.f : fg.f + '.jpg';
-                            return `<figure class="enrich-visual-card"><img src="assets/fo/${fn}" alt="${fg.a || fg.t}" loading="lazy"><figcaption>${fg.t}</figcaption></figure>`;
-                        }).join('')}
-                    </div>
-                </div>`;
-            })()}
-            <div class="lesson-enrichment-body">${FO_ENRICHMENT[tpId]}</div>
-          </article>
-          ${foLessonTools(tpId, 'enrich')}`;
-        prepContent(el);
-        initComponents();
-        updateSidebarActive('fo_enrich_' + tpId);
-        decorateContent('fo_enrich_' + tpId);
-    }, 80);
+
+    if (!FO_ENRICHMENT[tpId]) {
+        el.innerHTML = card('<h2>Materi pengayaan tidak ditemukan.</h2>');
+        notifyPage();
+        return;
+    }
+    el.innerHTML = `
+      <div class="lesson-toolbar clay-card" aria-label="Navigasi pengayaan">
+        <div class="lesson-toolbar-main"><span class="lesson-toolbar-label"><i class="fas fa-book-reader"></i> Materi Pengayaan Fiber Optik</span><span class="lesson-toolbar-hint">${title}</span></div>
+        <div class="lesson-toolbar-actions">
+          <button class="clay-btn" onclick="showPage('fo-${tpId}')"><i class="fas fa-arrow-left"></i> Kembali ke Materi TP</button>
+          <button class="clay-btn" onclick="showAssessment('fo_${tpId}')"><i class="fas fa-tasks"></i> Asesmen TP</button>
+        </div>
+      </div>
+      <article class="lesson-enrichment clay-card" data-font-size="16">
+        <div class="lesson-enrichment-heading"><span class="lesson-kicker">PENGAYAAN PRAKTIK • FIBER OPTIK FASE F</span><h1>${title} — Standar &amp; SOP</h1><p>Ringkasan standar ITU-T, keselamatan kerja, diagram teknis, rumus, dan studi kasus.</p></div>
+        ${(() => {
+            const tpObj = FO_TP.find(x => x.id === tpId);
+            if (!tpObj || !tpObj.figs || !tpObj.figs.length) return '';
+            return `<div class="enrich-visual-box">
+                <div class="enrich-visual-title"><i class="fas fa-images"></i> Galeri Figur Teknis &amp; Diagram Standar (${tpObj.code})</div>
+                <div class="enrich-visual-grid">
+                    ${tpObj.figs.slice(0, 4).map(fg => {
+                        const fn = fg.f.includes('.') ? fg.f : fg.f + '.jpg';
+                        return `<figure class="enrich-visual-card"><img src="assets/fo/${fn}" alt="${fg.a || fg.t}" loading="lazy"><figcaption>${fg.t}</figcaption></figure>`;
+                    }).join('')}
+                </div>
+            </div>`;
+        })()}
+        <div class="lesson-enrichment-body">${FO_ENRICHMENT[tpId]}</div>
+      </article>
+      ${foLessonTools(tpId, 'enrich')}`;
+    prepContent(el);
+    initComponents();
+    updateSidebarActive('fo_enrich_' + tpId);
+    decorateContent('fo_enrich_' + tpId);
+    notifyPage();
 }
 
 function foPengayaanPage() {
@@ -6541,7 +6753,7 @@ const assessments = {
     fo_tp22: [
         {q:"Instrumen optik yang berfungsi mengukur daya radiasi cahaya yang keluar dari ujung serat dalam satuan dBm atau milliwatt adalah...",opts:["Optical Power Meter (OPM)","Optical Light Source (OLS)","Visual Fault Locator (VFL)","Fusion Splicer"],ans:0,exp:"OPM (Optical Power Meter) adalah alat ukur daya optik absolut (dBm) yang mengukur intensitas cahaya yang diterima detektor fotodioda."},
         {q:"Instrumen yang menghasilkan cahaya laser stabil pada panjang gelombang tertentu (1310/1550 nm) sebagai sumber pengujian transmisi kabel disebut...",opts:["Optical Light Source (OLS)","Optical Power Meter (OPM)","Cleaver","LAN Tester"],ans:0,exp:"OLS (Optical Light Source) menghasilkan sumber daya cahaya konstan (CW) yang dipasangkan bersama OPM untuk mengukur insertion loss."},
-        {q:"Nilai daya optik sebesar 1 milliwatt (1 mW) jika dikonversikan ke dalam satuan logaritmik decibel-milliwatt (dBm) bernilai...",opts:["0 dBm","+10 dBm","-10 dBm","1 dBm"],ans:0,exp:"Rumus: $P_{\\text{dBm}} = 10 \\cdot \\log_{10}(P_{\\text{mW}} / 1\\text{ mW})$. Untuk 1 mW: $10 \\cdot \\log_{10}(1) = 0\\text{ dBm}$."},
+        {q:"Nilai daya optik sebesar 1 milliwatt (1 mW) jika dikonversikan ke dalam satuan logaritmik decibel-milliwatt (dBm) bernilai...",opts:["0 dBm","+10 dBm","-10 dBm","1 dBm"],ans:0,exp:"Rumus: P<sub>dBm</sub> = 10 · log₁₀(P<sub>mW</sub> / 1 mW). Untuk 1 mW: 10 · log₁₀(1) = 0 dBm."},
         {q:"Jika daya sumber masuk sebesar +3 dBm dan daya yang terukur di ujung penerima sebesar -18 dBm, maka total redaman kabel (Insertion Loss) adalah...",opts:["21 dB","-15 dB","-21 dB","15 dB"],ans:0,exp:"Loss (dB) = Pin (dBm) − Pout (dBm) = (+3 dBm) − (-18 dBm) = 3 + 18 = 21 dB."},
         {q:"Proses kalibrasi titik nol (Loopback Reference / Zeroing) pada OPM sebelum menguji kabel jaringan bertujuan untuk...",opts:["Mengeliminasi redaman patchcord referensi sehingga hasil ukur murni mencerminkan redaman kabel jaringan yang diuji","Menghapus memori kartu SD","Mengisi baterai OPM secara otomatis","Membuat kabel menjadi dingin"],ans:0,exp:"Kalibrasi referensi nol (Zeroing / REF) mencatat daya keluaran sumber melalui jumper referensi, sehingga loss jumper referensi tidak ikut terhitung dalam pengukuran kabel uji."},
         {q:"Redaman spesifik kabel Single Mode Fiber standar (G.652) pada panjang gelombang 1310 nm dan 1550 nm rata-rata sebesar...",opts:["± 0.35 dB/km pada 1310 nm dan ± 0.22 dB/km pada 1550 nm","± 3.5 dB/km pada 1310 nm dan ± 5.0 dB/km pada 1550 nm","10 dB/km pada seluruh panjang gelombang","0 dB/km tanpa redaman"],ans:0,exp:"Panjang gelombang 1550 nm memiliki atenuasi Rayleigh lebih rendah (~0.22 dB/km) dibanding 1310 nm (~0.35 dB/km), menjadikannya ideal untuk jarak jauh."},
@@ -6568,7 +6780,7 @@ const assessments = {
         {q:"Area buta (Dead Zone) pada awal pengukuran OTDR di mana instrumen tidak dapat mendeteksi event akibat saturasi pantulan konektor pertama diatasi dengan menggunakan...",opts:["Launch Cable (Kabel Peluncur / Dummy Fiber gulungan 500m - 1000m)","Penguat daya listrik amplifier","Konektor RJ-45","Mengganti kabel dengan kawat tembaga"],ans:0,exp:"Launch Cable (serat kompensasi 500-1000m) menggeser konektor pertama yang diuji keluar dari area blind/dead zone instrumen OTDR."},
         {q:"Pengaturan Lebar Pulsa (Pulse Width) yang KECIL (misal 5 ns atau 10 ns) pada OTDR memberikan keuntungan...",opts:["Resolusi jarak sangat tinggi dan dead zone sempit sehingga mampu membedakan event-event yang berjarak berdekatan","Jangkauan pengukuran menembus jarak ratusan kilometer","Menghemat baterai hingga 1 bulan","Menaikkan daya laser menjadi sangat panas"],ans:0,exp:"Lebar pulsa pendek menghasilkan resolusi spasial tinggi (dead zone sempit), ideal untuk mendeteksi event jarak dekat dalam gedung/lokasi ODC-ODP."},
         {q:"Sebaliknya, pengaturan Lebar Pulsa (Pulse Width) yang BESAR (misal 1 µs atau 10 µs) pada OTDR digunakan untuk...",opts:["Menjangkau link kabel yang sangat panjang dan menembus redaman besar pada optical splitter","Melihat ujung konektor mikro","Mengukur kabel patchcord 1 meter","Mempercepat waktu booting alat"],ans:0,exp:"Pulsa lebar membawa energi foton lebih besar sehingga mampu menembus atenuasi kabel jarak jauh dan redaman besar splitter PLC 1:16/1:32."},
-        {q:"Parameter Indeks Bias (Index of Refraction - IOR) pada OTDR harus disetel tepat sesuai spesifikasi kabel (misal 1.4677) karena IOR menentukan...",opts:["Keakuratan perhitungan jarak fisik lokasi event pada kabel","Warna grafik pada monitor","Kekuatan baterai OTDR","Bahasa menu antarmuka"],ans:0,exp:"Jarak dihitung dari waktu tempuh cahaya: $d = (c \\times t) / (2 \\times n)$. Galat pada indeks bias $n$ akan membuat pembacaan jarak kilometer meleset."},
+        {q:"Parameter Indeks Bias (Index of Refraction - IOR) pada OTDR harus disetel tepat sesuai spesifikasi kabel (misal 1.4677) karena IOR menentukan...",opts:["Keakuratan perhitungan jarak fisik lokasi event pada kabel","Warna grafik pada monitor","Kekuatan baterai OTDR","Bahasa menu antarmuka"],ans:0,exp:"Jarak dihitung dari waktu tempuh cahaya: d = (c × t) / (2 × n). Galat pada indeks bias $n$ akan membuat pembacaan jarak kilometer meleset."},
         {q:"Fenomena 'Gainer' pada trace OTDR di mana titik sambungan tampak seolah-olah menaikkan daya (tangga naik) disebabkan oleh...",opts:["Perbedaan koefisien hamburan balik (backscatter coefficient) atau ukuran mode field diameter dua serat yang disambung","Ada baterai tambahan di titik sambungan","Serat optik menyerap energi matahari","Kabel optik korsleting"],ans:0,exp:"Gainer adalah ilusi optik saat menyambung serat dengan koefisien hamburan lebih tinggi ke serat yang lebih rendah. Wajib dikoreksi dengan pengukuran dua arah (bi-directional OTDR)."},
         {q:"Cara membedakan event tekukan kabel (Macro-bending) dari event sambungan rusak pada grafik OTDR adalah...",opts:["Menguji link pada dua panjang gelombang berbeda (1310 nm dan 1550 nm); macro-bending akan menunjukkan lonjakan redaman yang jauh lebih besar pada 1550 nm","Melihat warna grafik layar","Mendengarkan suara bip speaker OTDR","Mengetuk kabel dengan obeng"],ans:0,exp:"Panjang gelombang 1550 nm memiliki medan mode lebih longgar sehingga jauh lebih sensitif terhadap kebocoran tekukan (bending) dibanding 1310 nm."},
         {q:"Ujung kabel putus total (Fiber Cut) pada layar OTDR ditandai dengan...",opts:["Lonjakan pantulan refleksi Fresnel yang tinggi diikuti jatuhnya grafik seketika ke garis dasar derau (noise floor)","Grafik garis lurus naik ke atas tanpa henti","Layar OTDR mati mendadak","Garis grafik membentuk lingkaran spiral"],ans:0,exp:"Ujung patahan kaca ke udara memicu refleksi Fresnel tinggi, lalu sinyal habis dan grafik jatuh ke level noise floor dasar."},
@@ -6693,7 +6905,8 @@ function renderQuestion() {
         <span style="color:var(--slate-500);font-size:0.85rem">✅ ${quizState.score} benar</span>
         <button class="btn-primary" id="btn-next" onclick="nextQuestion()" style="display:none"><i class="fas fa-arrow-right"></i> ${quizState.current+1 < n ? 'Lanjut' : 'Lihat Hasil'}</button>
     </div>`;
-    window.scrollTo(0,0);
+    scrollPageTo(0);
+    notifyPage();
 }
 
 function selectAnswer(idx) {
@@ -6843,7 +7056,8 @@ function showResult() {
             }).join('')}
         </div>
     </div>`;
-    window.scrollTo(0,0);
+    scrollPageTo(0);
+    notifyPage();
 }
 
 // ── UTILS ─────────────────────────────────────────────────
@@ -6871,6 +7085,36 @@ applyTheme(document.documentElement.getAttribute('data-theme') || 'light');
 updateNetStatus();
 document.getElementById('install-btn')?.addEventListener('click', installApp);
 
+// ── SPLASH RESUME HYDRATION ───────────────────────────────
+function hydrateSplashResume() {
+    const btn = document.getElementById('btn-splash-resume');
+    const lbl = document.getElementById('splash-resume-label');
+    if (!btn || !lbl) return;
+    let last = '';
+    try { last = localStorage.getItem('tjkt_last_page') || ''; } catch (e) {}
+    if (!last || last === 'home' || last === 'intro' || last === 'tkj' || last === 'fiberOptik') {
+        btn.classList.add('hidden');
+        return;
+    }
+    let name = '';
+    if (last.startsWith('fo-')) {
+        const t = FO_TP.find(x => 'fo-' + x.id === last);
+        name = t ? t.code : 'Fiber Optik';
+    } else if (last.startsWith('enrich_')) {
+        name = lessonTitles[last.slice(7)] || 'Pengayaan';
+    } else if (last.startsWith('fo_enrich_')) {
+        const t = FO_TP.find(x => x.id === last.slice(10));
+        name = t ? ('Pengayaan ' + t.code) : 'Pengayaan FO';
+    } else if (pages[last]) {
+        name = lessonTitles[last] || last;
+    }
+    if (!name) { btn.classList.add('hidden'); return; }
+    btn.dataset.target = last;
+    lbl.textContent = 'Lanjut: ' + name;
+    btn.classList.remove('hidden');
+}
+hydrateSplashResume();
+
 // Dukung tautan langsung: index.html?page=intro atau #/topologi atau #/fo-tp/tp11
 window.addEventListener('load', () => {
     const qp = new URLSearchParams(location.search).get('page');
@@ -6881,7 +7125,31 @@ window.addEventListener('load', () => {
     renderRoute(r, 0);
 });
 
-// Esc menutup lightbox / sidebar / hasil pencarian
+// Shortcut keyboard modern: Ctrl+K / Cmd+K (Command Palette), '/' (cari cepat), Esc (tutup)
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') { closeLightbox(); closeSidebar(); closeSearch(); }
+    const tag = (e.target && e.target.tagName || '').toLowerCase();
+    const typing = tag === 'input' || tag === 'textarea' || tag === 'select' || (e.target && e.target.isContentEditable);
+
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        const splash = document.getElementById('splash');
+        if (splash && splash.style.display !== 'none' && getComputedStyle(splash).display !== 'none') return;
+        e.preventDefault();
+        const modal = document.getElementById('cmdk-modal');
+        if (modal && !modal.classList.contains('hidden')) closeQuickSearch();
+        else openQuickSearch();
+        return;
+    }
+    if (e.key === '/' && !typing && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        const splash = document.getElementById('splash');
+        if (splash && splash.style.display !== 'none' && getComputedStyle(splash).display !== 'none') return;
+        e.preventDefault();
+        openQuickSearch();
+        return;
+    }
+    if (e.key === 'Escape') {
+        closeQuickSearch();
+        closeLightbox();
+        closeSidebar();
+        closeSearch();
+    }
 });
